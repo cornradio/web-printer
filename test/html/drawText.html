@@ -1,0 +1,315 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>LPAPIWeb Test</title>
+        <script type="text/javascript" src="./lib/dtpweb.js"></script>
+        <script type="text/javascript" src="./drawText.js"></script>
+        <style>
+            body {
+                margin: auto;
+                text-align: center;
+                background: #cef9fd;
+            }
+            .label-operate-group {
+                margin: 10px;
+            }
+            .label-operate-item-title {
+                display: inline-block;
+                width: 150px;
+                text-align: right;
+            }
+            .label-operate-item-value {
+                display: inline-block;
+                height: 25px;
+                width: 230px;
+            }
+            .text-test-param-group {
+                margin: 10px 0 0 0;
+            }
+            .text-test-param-item {
+                display: inline-block;
+                width: 250px;
+            }
+            .text-test-param-item-title {
+                display: inline-block;
+                width: 140px;
+                text-align: right;
+            }
+            .text-test-param-item-value {
+                width: 90px;
+                text-align: left;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title">打印机</label>
+            <select class="label-operate-item-value" id="select-printlist" onchange="onPrintSelected()"></select>
+        </div>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title" for="select-gaptype">纸张类型：</label>
+            <select class="label-operate-item-value" id="select-gaptype" onchange="onGapTypeSelected()">
+                <option value="255">随打印机</option>
+                <option value="0">连续纸</option>
+                <option value="1">定位孔</option>
+                <option value="2">间隙纸</option>
+            </select>
+        </div>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title" for="select-orientation">打印方向：</label>
+            <select class="label-operate-item-value" id="select-orientation">
+                <option value="0">横向打印</option>
+                <option value="90">右转90度</option>
+                <option value="180">旋转180度</option>
+                <option value="270">左转90度</option>
+            </select>
+        </div>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title" for="select-print-preview">打印或预览：</label>
+            <select class="label-operate-item-value" id="select-print-preview">
+                <option value="0">获取白色底色预览图片</option>
+                <option value="1">获取透明底色预览图片</option>
+                <option value="2">打印</option>
+            </select>
+        </div>
+        <div>
+            <fieldset>
+                <legend>文本打印测试</legend>
+                <div class="text-test-param-group">
+                    <label class="text-test-param-item-title" for="text-text-content" style="vertical-align: top"
+                        >打印数据:</label
+                    >
+                    <textarea
+                        name="text-test-content"
+                        id="text-test-content"
+                        cols="40"
+                        rows="3"
+                        style="display: inline-block"
+                    >
+德佟电子科技（上海）有限公司</textarea
+                    >
+                    <!-- <textarea id="text-text-param-content" value="德佟电子科技（上海）有限公司" style="width: 300px" /> -->
+                </div>
+                <!-- 标签大小 -->
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-label-width">标签宽度:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-label-width" value="60" />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-label-height">标签高度:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-label-height" value="40" />
+                    </div>
+                </div>
+                <!-- 对其方式 -->
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-align-hor">AlignHor:</label>
+                        <select class="text-test-param-item-value" id="text-test-align-hor">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-align-ver">AlignVer:</label>
+                        <select class="text-test-param-item-value" id="text-test-align-ver">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- 旋转角度 -->
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-rotation">Orientation:</label>
+                        <select class="text-test-param-item-value" id="text-test-rotation">
+                            <option value="0">0</option>
+                            <option value="90">90</option>
+                            <option value="180">180</option>
+                            <option value="270">270</option>
+                        </select>
+                    </div>
+                    <div class="text-test-param-item"></div>
+                </div>
+                <!-- 坐标位置 -->
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-pos-x">X:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-pos-x" value="0" />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-pos-y">Y:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-pos-y" value="0" />
+                    </div>
+                </div>
+                <!-- 打印内容的宽高 -->
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-pos-width">TextWidth:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-pos-width" value="60" />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-pos-height">TextHeight:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-pos-height" value="40" />
+                    </div>
+                </div>
+                <!-- 字体大小 -->
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-font-height">FontHeight:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-font-height" value="3" />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-font-style">FontStyle:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-font-style" value="0" />
+                    </div>
+                </div>
+                <!-- 字间距/行间距 -->
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-char-space">CharSpace:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-char-space" value="0" />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-line-space">LineSpace:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-line-space" value="0" />
+                    </div>
+                </div>
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-font-name">FontName:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-font-name" value="黑体" />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-auto-return">AutoReturn:</label>
+                        <select class="text-test-param-item-value" id="text-test-auto-return">
+                            <option value="0">None</option>
+                            <option value="1" selected="true">Char</option>
+                            <option value="2">Word</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- 缩进 -->
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-leading-indent-mm">IndentMM:</label>
+                        <input
+                            class="text-test-param-item-value"
+                            type="text"
+                            id="text-test-leading-indent-mm"
+                            value="0"
+                        />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-leading-indent-chars"
+                            >IndentChars:</label
+                        >
+                        <input
+                            class="text-test-param-item-value"
+                            type="text"
+                            id="text-test-leading-indent-chars"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-leading-indent">LeadingIndent:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-leading-indent" value="0" />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-region-corners">RegionCorners:</label>
+                        <input class="text-test-param-item-value" type="text" id="text-test-region-corners" value="" />
+                    </div>
+                </div>
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-region-left-up-corner"
+                            >RegionLeftUpCorner:</label
+                        >
+                        <input
+                            class="text-test-param-item-value"
+                            type="text"
+                            id="text-test-region-left-up-corner"
+                            value=""
+                        />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-region-right-up-corner"
+                            >RegionRightUpCorner:</label
+                        >
+                        <input
+                            class="text-test-param-item-value"
+                            type="text"
+                            id="text-test-region-right-up-corner"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-region-left-bottom-corner"
+                            >RegionLeftBottomCorner:</label
+                        >
+                        <input
+                            class="text-test-param-item-value"
+                            type="text"
+                            id="text-test-region-left-bottom-corner"
+                            value=""
+                        />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-region-right-bottom-corner"
+                            >RegionRightBottomCorner:</label
+                        >
+                        <input
+                            class="text-test-param-item-value"
+                            type="text"
+                            id="text-test-region-right-bottom-corner"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <div class="text-test-param-group">
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-region-left-borders"
+                            >RegionLeftBorders:</label
+                        >
+                        <input
+                            class="text-test-param-item-value"
+                            type="text"
+                            id="text-test-region-left-borders"
+                            value=""
+                        />
+                    </div>
+                    <div class="text-test-param-item">
+                        <label class="text-test-param-item-title" for="text-test-region-right-borders"
+                            >RegionRightBorders:</label
+                        >
+                        <input
+                            class="text-test-param-item-value"
+                            type="text"
+                            id="text-test-region-right-borders"
+                            value=""
+                        />
+                    </div>
+                </div>
+                <input type="button" value="打印" onclick="printText()" style="width: 300px; margin: 20px 0 0 0" />
+            </fieldset>
+            <fieldset>
+                <legend>辅助图片信息</legend>
+                <div id="preview-list" style="margin: 0 0 40px 0"></div>
+            </fieldset>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,60 @@
+{
+    "name": "dtpweb",
+    "version": "2.7.251217",
+    "main": "lib/dtpweb.umd.js",
+    "module": "lib/dtpweb.esm.js",
+    "browser": {
+        "http": "./helpers/null.js"
+    },
+    "types": "lib/dtpweb.d.ts",
+    "typings": "lib/dtpweb.d.ts",
+    "moduleName": "dtpweb",
+    "scripts": {
+        "lint": "eslint 'src/**/*.{js,ts}'",
+        "clean": "npx rimraf -rf ./lib tsconfig.tsbuildinfo ./node_modules",
+        "dev": "npx rimraf -rf ./lib && set NODE_ENV=development && rollup -c",
+        "build": "npx rimraf -rf ./lib && set NODE_ENV=production && rollup -c"
+    },
+    "description": "interface of DothanTech print service",
+    "directories": {
+        "lib": "lib",
+        "test": "__tests__"
+    },
+    "files": [
+        "lib",
+        "test",
+        "printerHelper",
+        "helpers"
+    ],
+    "keywords": [
+        "dtpweb",
+        "printer",
+        "print",
+        "lpapi",
+        "detong",
+        "dothantech"
+    ],
+    "author": "hu",
+    "license": "MIT",
+    "homepage": "https://thanmore.net",
+    "devDependencies": {
+        "@babel/core": "^7.21.0",
+        "@babel/preset-env": "^7.20.2",
+        "@babel/preset-typescript": "^7.16.7",
+        "@rollup/plugin-babel": "^6.0.3",
+        "@rollup/plugin-commonjs": "^25.0.0",
+        "@rollup/plugin-node-resolve": "^15.1.0",
+        "@rollup/plugin-terser": "^0.4.3",
+        "@types/node": "^18.0.0",
+        "eslint": "^8.11.0",
+        "lodash.merge": "^4.6.2",
+        "npm-run-all": "^4.1.5",
+        "prettier": "^2.6.0",
+        "rimraf": "^6.0.1",
+        "rollup": "^2.51.2",
+        "rollup-plugin-delete": "^2.1.0",
+        "rollup-plugin-typescript2": "^0.34.0",
+        "tslib": "^2.3.1",
+        "typescript": "^5.3.3"
+    }
+}

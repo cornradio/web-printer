@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片编辑与打印 V2</title>
+    <script type="text/javascript" src="./browser-polyfill.min.js"></script>
+    <script type="text/javascript" src="./lib/dtpweb.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --panel-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Layout */
+        .app-header {
+            height: 60px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+        }
+
+        .info-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .info-btn:hover {
+            background: var(--bg-color);
+            border-color: var(--text-muted);
+        }
+
+        .info-btn.active {
+            background: #f1f5f9;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .info-tooltip {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 280px;
+            background: white;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .info-tooltip.show {
+            display: flex;
+        }
+
+        .info-section {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .info-link {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .info-link:hover {
+            text-decoration: underline;
+        }
+
+        .header-link {
+            font-size: 13px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .header-link:hover {
+            text-decoration: underline;
+            opacity: 0.8;
+        }
+
+        .app-main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-area {
+            flex: 1;
+            background: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: auto;
+            padding: 40px;
+            background-image: 
+                linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+                linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+                linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        /* Components */
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-field {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: white;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-danger {
+            color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #fef2f2;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Paper Preview */
+        .paper-container {
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transform-origin: center center;
+        }
+
+        #previewCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .image-overlay, .text-overlay {
+            position: absolute;
+            border: 1px dashed transparent;
+            cursor: move;
+            user-select: none;
+            box-sizing: content-box;
+        }
+
+        .image-overlay:hover, .text-overlay:hover {
+            border-color: #cbd5e1;
+        }
+
+        .image-overlay.selected, .text-overlay.selected {
+            border-color: var(--primary-color);
+            z-index: 10;
+        }
+
+        .image-overlay canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .text-content {
+            white-space: pre-wrap;
+            line-height: 1.2;
+            padding: 2px;
+            word-break: break-all;
+        }
+
+        .delete-handle {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .selected .delete-handle {
+            display: flex;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            bottom: -6px;
+            right: -6px;
+            cursor: nwse-resize;
+            border-radius: 50%;
+        }
+
+        /* Drop Area */
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+
+        .drop-zone-text {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Status Toast */
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            background: #1e293b;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(100px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1000;
+        }
+
+        .status-bar.show {
+            transform: translateY(0);
+        }
+
+        /* Crop Overlay */
+        #cropModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 40px;
+        }
+
+        .crop-container {
+            position: relative;
+            max-width: 100%;
+            max-height: calc(100% - 100px);
+            background: #000;
+        }
+
+        #cropCanvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .crop-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Better Sliders */
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary-color);
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .slider-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>图片打印编辑工具 V2</h1>
+        <div class="header-links">
+            <div id="printerStatus" style="font-size: 12px; color: var(--text-muted);">正在初始化...</div>
+            <div class="info-btn" id="infoBtn" title="项目信息">
+                <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </div>
+            <div class="info-tooltip" id="infoTooltip">
+                <div class="info-section">
+                    <span class="info-title">🖨️ 适配机型</span>
+                    <p>德佟 P1 标签打印机</p>
+                </div>
+                <div class="info-section">
+                    <span class="info-title">🔗 官方资源</span>
+                    <a href="https://weida.dothantech.com/#/editor" target="_blank" class="info-link">德佟云设计编辑器</a><br>
+                    <a href="https://www.dothantech.com/xiazaizhongxin/" target="_blank" class="info-link">官方驱动下载中心</a>
+                </div>
+                <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                    <span class="info-title">👨‍💻 关于作者</span>
+                    <p>Web 软件作者: <b>cornradio</b></p>
+                    <a href="https://github.com/cornradio" target="_blank" class="info-link">GitHub: cornradio</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <aside class="sidebar">
+            <!-- 1. Paper Settings -->
+            <div class="section">
+                <div class="section-title">📄 纸张设置</div>
+                <div class="control-group">
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label>宽度 (mm)</label>
+                            <input type="number" id="paperWidth" value="40" min="10" max="100">
+                        </div>
+                        <div class="input-field">
+                            <label>高度 (mm)</label>
+                            <input type="number" id="paperHeight" value="30" min="10" max="150">
+                        </div>
+                    </div>
+                    <button class="btn btn-full" id="applyPaperSize">应用纸张设置</button>
+                </div>
+            </div>
+
+            <!-- 2. Image Import -->
+            <div class="section">
+                <div class="section-title">🖼️ 导入图片</div>
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-text">点击或拖放图片至此</div>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+
+            <!-- 3. Edit Controls -->
+            <div class="section" id="editControls" style="display: none;">
+                <div class="section-title">✏️ 图片编辑</div>
+                <div class="control-group">
+                    <div class="input-row">
+                        <button class="btn btn-full" id="startCropBtn">✂️ 裁剪</button>
+                        <button class="btn btn-full" id="rotateBtn">🔄 旋转 90°</button>
+                    </div>
+                    <button class="btn btn-full" id="fitToPaperBtn">📐 等比例铺满</button>
+                    <button class="btn btn-full" id="resetImageBtn">🔄 重置图片</button>
+                </div>
+            </div>
+
+            <!-- 4. Text Content -->
+            <div class="section">
+                <div class="section-title">📝 文字内容</div>
+                <div class="control-group">
+                    <textarea id="textInput" placeholder="输入文字（支持多行）..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; resize: vertical; font-size: 14px; outline: none;"></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                        <span style="font-size: 11px; color: var(--text-muted);">选中后按 ↑/↓ 调字号, Enter 修改</span>
+                        <button class="btn" id="addTextBtn">添加</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Text Style Controls (Contextual) -->
+            <div class="section" id="textStyleControls" style="display: none;">
+                <div class="section-title">🎨 文字样式</div>
+                <div class="control-group">
+                    <div>
+                        <label>字体名称</label>
+                        <select id="fontFamilySelect">
+                            <option value="微软雅黑">微软雅黑</option>
+                            <option value="宋体">宋体</option>
+                            <option value="黑体">黑体</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-full" id="boldToggleBtn"><b>B</b> 加粗切换</button>
+                </div>
+            </div>
+
+            <!-- 6. Dithering & Effects -->
+            <div class="section">
+                <div class="section-title">✨ 打印效果</div>
+                <div class="control-group">
+                    <div id="ditherModeControl">
+                        <label>算法模式</label>
+                        <select id="ditherMode">
+                            <option value="atkinson">Atkinson 抖动 (推荐)</option>
+                            <option value="threshold">黑白阈值 (Threshold)</option>
+                            <option value="floyd-steinberg">Floyd-Steinberg 抖动</option>
+                            <option value="bayer">Bayer 有序抖动 (点阵感)</option>
+                        </select>
+                    </div>
+
+                    <div id="exposureControl">
+                        <div class="slider-header">
+                            <label>曝光度 (Exposure)</label>
+                            <span class="slider-value" id="exposureValue">0</span>
+                        </div>
+                        <input type="range" id="exposureRange" min="-100" max="500" value="0">
+                    </div>
+
+                    <div id="thresholdControl">
+                        <div class="slider-header">
+                            <label>阈值</label>
+                            <span class="slider-value" id="thresholdValue">128</span>
+                        </div>
+                        <input type="range" id="thresholdRange" min="0" max="255" value="128">
+                    </div>
+
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input type="checkbox" id="invertColors" style="width: 16px; height: 16px;">
+                        <label for="invertColors" style="margin: 0;">反转颜色</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Template Management -->
+            <div class="section">
+                <div class="section-title">💾 模板存档</div>
+                <div class="control-group">
+                    <div class="input-row">
+                        <input type="text" id="tplNameInput" placeholder="输入模板名称..." style="flex: 1;">
+                        <button class="btn" id="saveTplBtn">保存</button>
+                    </div>
+                    <select id="tplSelect">
+                        <option value="">-- 选择已保存模板 --</option>
+                    </select>
+                    <div class="input-row">
+                        <button class="btn btn-full" id="loadTplBtn">加载选中</button>
+                        <button class="btn btn-danger" id="deleteTplBtn">删除</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Print -->
+            <div class="section">
+                <div class="section-title">🖨️ 打印输出</div>
+                <div class="control-group">
+                    <label>选择打印机</label>
+                    <select id="printerSelect">
+                        <option value="">正在获取打印机...</option>
+                    </select>
+                    <button class="btn btn-primary btn-full" id="printBtn" disabled>开始打印</button>
+                </div>
+            </div>
+        </aside>
+
+        <section class="preview-area" id="previewArea">
+            <div class="paper-container" id="paperContainer">
+                <canvas id="previewCanvas"></canvas>
+                <div class="image-overlay" id="imageOverlay" style="display: none;">
+                    <canvas id="imageCanvas"></canvas>
+                    <div class="resize-handle" id="resizeHandle"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Crop Modal -->
+    <div id="cropModal">
+        <div class="crop-container" id="cropContainer">
+            <canvas id="cropCanvas"></canvas>
+        </div>
+        <div class="crop-controls">
+            <button class="btn btn-danger" id="cancelCrop">取消</button>
+            <button class="btn btn-primary" id="confirmCrop">完成裁剪</button>
+        </div>
+    </div>
+
+    <div class="status-bar" id="statusBar">提示消息</div>
+
+    <script>
+        // --- Configuration & Constants ---
+        const MM_TO_PX = 8; // 8 pixels per mm for preview (approx 203 DPI scale)
+        const api = dtpweb.getInstance();
+        
+        // --- State ---
+        let state = {
+            paper: { 
+                width: parseInt(localStorage.getItem('dtp_paper_width')) || 40, 
+                height: parseInt(localStorage.getItem('dtp_paper_height')) || 30 
+            },
+            items: [], // Array of { type: 'image'|'text', id, ...props }
+            selectedId: null,
+            lastMousePos: { x: 0, y: 0 },
+            isDragging: false,
+            isResizing: false,
+            crop: {
+                active: false,
+                targetId: null,
+                rect: { x: 0, y: 0, w: 0, h: 0 },
+                isDragging: false,
+                handle: null
+            }
+        };
+
+        // --- Initialization ---
+        window.onload = () => {
+            initApp();
+            setupEventListeners();
+        };
+
+        function initApp() {
+            // Restore UI values from state
+            document.getElementById('paperWidth').value = state.paper.width;
+            document.getElementById('paperHeight').value = state.paper.height;
+
+            updatePaperUI();
+            
+            api.checkPlugin((resp) => {
+                if (resp.statusCode === 0) {
+                    document.getElementById('printerStatus').innerText = '打印助手已就绪';
+                    refreshPrinters();
+                    loadSystemFonts();
+                    refreshTplList();
+                } else {
+                    document.getElementById('printerStatus').innerText = '未检测到打印助手';
+                    showStatus('请确保打印助手已启动', 'error');
+                }
+            });
+        }
+
+        function loadSystemFonts() {
+            try {
+                const fonts = api.getFontNames();
+                const select = document.getElementById('fontFamilySelect');
+                if (fonts && fonts.length > 0) {
+                    select.innerHTML = '';
+                    fonts.forEach(font => {
+                        const opt = document.createElement('option');
+                        opt.value = font;
+                        opt.text = font;
+                        if (font === '微软雅黑') opt.selected = true;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                console.log("Failed to load system fonts", e);
+            }
+        }
+
+        // --- UI Updates ---
+        function updatePaperUI() {
+            const container = document.getElementById('paperContainer');
+            const canvas = document.getElementById('previewCanvas');
+            
+            const wPx = state.paper.width * MM_TO_PX;
+            const hPx = state.paper.height * MM_TO_PX;
+            
+            container.style.width = wPx + 'px';
+            container.style.height = hPx + 'px';
+            canvas.width = wPx;
+            canvas.height = hPx;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, wPx, hPx);
+            
+            updateScale();
+        }
+
+        function updateScale() {
+            const area = document.getElementById('previewArea');
+            const container = document.getElementById('paperContainer');
+            
+            const availableW = area.clientWidth - 80;
+            const availableH = area.clientHeight - 80;
+            
+            const scaleW = availableW / (state.paper.width * MM_TO_PX);
+            const scaleH = availableH / (state.paper.height * MM_TO_PX);
+            const scale = Math.min(scaleW, scaleH, 2); // Max 2x zoom
+            
+            container.style.transform = `scale(${scale})`;
+        }
+
+        function showStatus(msg) {
+            const bar = document.getElementById('statusBar');
+            bar.innerText = msg;
+            bar.classList.add('show');
+            setTimeout(() => bar.classList.remove('show'), 3000);
+        }
+
+        // --- Image Loading ---
+        function handleFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                showStatus('请选择有效的图片文件');
+                return;
+            }
+            
+            showStatus('正在加载图片...');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const id = 'img-' + Date.now();
+                    const aspect = img.width / img.height;
+                    
+                    // Default size: 50% of paper, centered
+                    let w = state.paper.width * 0.5;
+                    let h = w / aspect;
+                    
+                    state.items.push({
+                        type: 'image',
+                        id: id,
+                        originalImg: img,
+                        workingImg: img,
+                        x: (state.paper.width - w) / 2,
+                        y: (state.paper.height - h) / 2,
+                        w: w,
+                        h: h,
+                        ditherMode: 'atkinson',
+                        threshold: 128,
+                        exposure: 0,
+                        invert: false
+                    });
+                    
+                    state.selectedId = id;
+                    renderAll();
+                    document.getElementById('editControls').style.display = 'block';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetImagePos() {
+            const img = state.workingImg;
+            const aspect = img.width / img.height;
+            
+            // Default size: 80% of paper, centered
+            let w = state.paper.width * 0.8;
+            let h = w / aspect;
+            
+            if (h > state.paper.height * 0.8) {
+                h = state.paper.height * 0.8;
+                w = h * aspect;
+            }
+            
+            state.imagePos = {
+                x: (state.paper.width - w) / 2,
+                y: (state.paper.height - h) / 2,
+                w: w,
+                h: h
+            };
+        }
+
+        // --- Rendering Logic ---
+        function renderAll() {
+            // Clear existing overlays
+            document.querySelectorAll('.image-overlay, .text-overlay').forEach(el => el.remove());
+            const container = document.getElementById('paperContainer');
+
+            state.items.forEach(item => {
+                if (item.type === 'image') {
+                    renderImageItem(item, container);
+                } else if (item.type === 'text') {
+                    renderTextItem(item, container);
+                }
+            });
+
+            updateControlPanel();
+        }
+
+        function renderImageItem(item, container) {
+            const div = document.createElement('div');
+            div.className = 'image-overlay';
+            div.id = item.id;
+            if (state.selectedId === item.id) div.classList.add('selected');
+            
+            const wPx = item.w * MM_TO_PX;
+            const hPx = item.h * MM_TO_PX;
+            
+            div.style.width = wPx + 'px';
+            div.style.height = hPx + 'px';
+            div.style.left = (item.x * MM_TO_PX) + 'px';
+            div.style.top = (item.y * MM_TO_PX) + 'px';
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = wPx;
+            canvas.height = hPx;
+            div.appendChild(canvas);
+            
+            const handle = document.createElement('div');
+            handle.className = 'resize-handle';
+            handle.id = 'resize-' + item.id;
+            div.appendChild(handle);
+
+            const del = document.createElement('div');
+            del.className = 'delete-handle';
+            del.innerText = '×';
+            del.onmousedown = (e) => { 
+                deleteItem(item.id); 
+                e.stopPropagation(); 
+            };
+            div.appendChild(del);
+
+            div.onmousedown = (e) => {
+                state.selectedId = item.id;
+                state.isResizing = e.target.id.startsWith('resize-');
+                state.isDragging = !state.isResizing;
+                state.lastMousePos = { x: e.clientX, y: e.clientY };
+                renderAll();
+                e.stopPropagation();
+            };
+
+            container.appendChild(div);
+
+            // Process image
+            const ctx = canvas.getContext('2d');
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = wPx; tempCanvas.height = hPx;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
+            
+            const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
+            applyDitheringToItem(imageData, item);
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function renderTextItem(item, container) {
+            const div = document.createElement('div');
+            div.className = 'text-overlay';
+            div.id = item.id;
+            if (state.selectedId === item.id) div.classList.add('selected');
+            
+            div.style.left = (item.x * MM_TO_PX) + 'px';
+            div.style.top = (item.y * MM_TO_PX) + 'px';
+            div.style.fontSize = (item.size * MM_TO_PX) + 'px';
+            div.style.fontFamily = item.fontFamily;
+            div.style.fontWeight = item.isBold ? 'bold' : 'normal';
+            
+            div.innerHTML = `<div class="text-content">${item.text}</div>`;
+            
+            const del = document.createElement('div');
+            del.className = 'delete-handle';
+            del.innerText = '×';
+            del.onmousedown = (e) => { 
+                deleteItem(item.id); 
+                e.stopPropagation(); 
+            };
+            div.appendChild(del);
+
+            div.onmousedown = (e) => {
+                state.selectedId = item.id;
+                state.isDragging = true;
+                state.lastMousePos = { x: e.clientX, y: e.clientY };
+                renderAll();
+                e.stopPropagation();
+            };
+
+            container.appendChild(div);
+        }
+
+        function updateControlPanel() {
+            const item = state.items.find(i => i.id === state.selectedId);
+            const imgControls = document.getElementById('editControls');
+            const ditherControls = document.getElementById('ditherModeControl').parentElement.parentElement;
+            const textStyleControls = document.getElementById('textStyleControls');
+
+            if (item && item.type === 'image') {
+                imgControls.style.display = 'block';
+                ditherControls.style.display = 'block';
+                textStyleControls.style.display = 'none';
+                // Sync values
+                document.getElementById('ditherMode').value = item.ditherMode;
+                document.getElementById('exposureRange').value = item.exposure;
+                document.getElementById('exposureValue').innerText = item.exposure;
+                document.getElementById('thresholdRange').value = item.threshold;
+                document.getElementById('thresholdValue').innerText = item.threshold;
+                document.getElementById('invertColors').checked = item.invert;
+                document.getElementById('thresholdControl').style.display = 
+                    item.ditherMode === 'threshold' ? 'block' : 'none';
+            } else if (item && item.type === 'text') {
+                imgControls.style.display = 'none';
+                ditherControls.style.display = 'none';
+                textStyleControls.style.display = 'block';
+                // Sync text styles
+                document.getElementById('fontFamilySelect').value = item.fontFamily;
+                const boldBtn = document.getElementById('boldToggleBtn');
+                if (item.isBold) boldBtn.classList.add('btn-primary');
+                else boldBtn.classList.remove('btn-primary');
+            } else {
+                imgControls.style.display = 'none';
+                textStyleControls.style.display = 'none';
+                if (!item) ditherControls.style.display = 'none';
+            }
+        }
+
+        function deleteItem(id) {
+            state.items = state.items.filter(i => i.id !== id);
+            if (state.selectedId === id) state.selectedId = null;
+            renderAll();
+        }
+
+        function applyDitheringToItem(imageData, item) {
+            const data = imageData.data;
+            const w = imageData.width;
+            const h = imageData.height;
+            const exposureFactor = (item.exposure + 100) / 100;
+
+            const getGray = (i) => {
+                let r = Math.min(255, data[i] * exposureFactor);
+                let g = Math.min(255, data[i+1] * exposureFactor);
+                let b = Math.min(255, data[i+2] * exposureFactor);
+                let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                return item.invert ? 255 - gray : gray;
+            };
+
+            if (item.ditherMode === 'threshold') {
+                for (let i = 0; i < data.length; i += 4) {
+                    const v = getGray(i) >= item.threshold ? 255 : 0;
+                    data[i] = data[i+1] = data[i+2] = v;
+                }
+            } else if (item.ditherMode === 'floyd-steinberg') {
+                const gray = new Float32Array(w * h);
+                for (let i = 0; i < data.length; i += 4) gray[i/4] = getGray(i);
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        const idx = y * w + x;
+                        const oldPixel = gray[idx];
+                        const newPixel = oldPixel >= 128 ? 255 : 0;
+                        const error = oldPixel - newPixel;
+                        gray[idx] = newPixel;
+                        if (x + 1 < w) gray[idx + 1] += error * 7/16;
+                        if (y + 1 < h) {
+                            if (x > 0) gray[idx + w - 1] += error * 3/16;
+                            gray[idx + w] += error * 5/16;
+                            if (x + 1 < w) gray[idx + w + 1] += error * 1/16;
+                        }
+                    }
+                }
+                for (let i = 0; i < gray.length; i++) data[i*4] = data[i*4+1] = data[i*4+2] = gray[i];
+            } else if (item.ditherMode === 'atkinson') {
+                const gray = new Float32Array(w * h);
+                for (let i = 0; i < data.length; i += 4) gray[i/4] = getGray(i);
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        const idx = y * w + x;
+                        const oldP = gray[idx];
+                        const newP = oldP >= 128 ? 255 : 0;
+                        const err = (oldP - newP) / 8;
+                        gray[idx] = newP;
+                        if (x + 1 < w) gray[idx + 1] += err;
+                        if (x + 2 < w) gray[idx + 2] += err;
+                        if (y + 1 < h) {
+                            if (x > 0) gray[idx + w - 1] += err;
+                            gray[idx + w] += err;
+                            if (x + 1 < w) gray[idx + w + 1] += err;
+                        }
+                        if (y + 2 < h) gray[idx + 2 * w] += err;
+                    }
+                }
+                for (let i = 0; i < gray.length; i++) data[i*4] = data[i*4+1] = data[i*4+2] = gray[i];
+            } else if (item.ditherMode === 'bayer') {
+                const bayer = [
+                    [0, 32, 8, 40, 2, 34, 10, 42],
+                    [48, 16, 56, 24, 50, 18, 58, 26],
+                    [12, 44, 4, 36, 14, 46, 6, 38],
+                    [60, 28, 52, 20, 62, 30, 54, 22],
+                    [3, 35, 11, 43, 1, 33, 9, 41],
+                    [51, 19, 59, 27, 49, 17, 57, 25],
+                    [15, 47, 7, 39, 13, 45, 5, 37],
+                    [63, 31, 55, 23, 61, 29, 53, 21]
+                ];
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        const i = (y * w + x) * 4;
+                        const g = getGray(i);
+                        const v = (g / 4) > bayer[y % 8][x % 8] ? 255 : 0;
+                        data[i] = data[i+1] = data[i+2] = v;
+                    }
+                }
+            }
+        }
+
+        // --- Cropping Logic ---
+        function startCrop(item) {
+            const modal = document.getElementById('cropModal');
+            const canvas = document.getElementById('cropCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = item.workingImg.width;
+            canvas.height = item.workingImg.height;
+            ctx.drawImage(item.workingImg, 0, 0);
+            
+            // Initial crop rect: locked to paper aspect ratio, 80% size
+            const paperAspect = state.paper.width / state.paper.height;
+            const imgAspect = item.workingImg.width / item.workingImg.height;
+            
+            let w, h;
+            if (imgAspect > paperAspect) {
+                h = item.workingImg.height * 0.8;
+                w = h * paperAspect;
+            } else {
+                w = item.workingImg.width * 0.8;
+                h = w / paperAspect;
+            }
+            
+            state.crop.targetId = item.id;
+            state.crop.rect = {
+                x: (item.workingImg.width - w) / 2,
+                y: (item.workingImg.height - h) / 2,
+                w: w,
+                h: h
+            };
+            
+            state.crop.active = true;
+            modal.style.display = 'flex';
+            drawCropOverlay();
+        }
+
+        function drawCropOverlay() {
+            const canvas = document.getElementById('cropCanvas');
+            const ctx = canvas.getContext('2d');
+            const item = state.items.find(i => i.id === state.crop.targetId);
+            const r = state.crop.rect;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(item.workingImg, 0, 0);
+            
+            // Dim background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.beginPath();
+            ctx.rect(0, 0, canvas.width, canvas.height);
+            // Counter-clockwise hole
+            ctx.moveTo(r.x, r.y);
+            ctx.lineTo(r.x, r.y + r.h);
+            ctx.lineTo(r.x + r.w, r.y + r.h);
+            ctx.lineTo(r.x + r.w, r.y);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Stroke border
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2 * (canvas.width / canvas.clientWidth); // Consistent screen width
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(r.x, r.y, r.w, r.h);
+            ctx.setLineDash([]);
+            
+            // Draw handles
+            const handleSize = 10 * (canvas.width / canvas.clientWidth);
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(r.x - handleSize/2, r.y - handleSize/2, handleSize, handleSize); // TL
+            ctx.fillRect(r.x + r.w - handleSize/2, r.y - handleSize/2, handleSize, handleSize); // TR
+            ctx.fillRect(r.x - handleSize/2, r.y + r.h - handleSize/2, handleSize, handleSize); // BL
+            ctx.fillRect(r.x + r.w - handleSize/2, r.y + r.h - handleSize/2, handleSize, handleSize); // BR
+        }
+
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            // Paper size
+            document.getElementById('applyPaperSize').onclick = () => {
+                const w = parseInt(document.getElementById('paperWidth').value);
+                const h = parseInt(document.getElementById('paperHeight').value);
+                
+                state.paper.width = w;
+                state.paper.height = h;
+                
+                // Save to localStorage
+                localStorage.setItem('dtp_paper_width', w);
+                localStorage.setItem('dtp_paper_height', h);
+                
+                updatePaperUI();
+                if (state.workingImg) {
+                    resetImagePos();
+                    renderWorkingImage();
+                }
+                showStatus('纸张尺寸已保存并应用');
+            };
+
+            // File input
+            document.getElementById('dropZone').onclick = () => document.getElementById('fileInput').click();
+            document.getElementById('fileInput').onchange = (e) => handleFile(e.target.files[0]);
+            
+            // Drag & Drop
+            const dz = document.getElementById('dropZone');
+            dz.ondragover = (e) => { e.preventDefault(); dz.classList.add('drag-over'); };
+            dz.ondragleave = () => dz.classList.remove('drag-over');
+            dz.ondrop = (e) => {
+                e.preventDefault();
+                dz.classList.remove('drag-over');
+                if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+            };
+
+            // Global Drag & Drop for the whole page
+            window.ondragover = (e) => e.preventDefault();
+            window.ondrop = (e) => {
+                e.preventDefault();
+                if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+            };
+
+            // Paste support
+            document.addEventListener('paste', (e) => {
+                const data = e.clipboardData || window.clipboardData;
+                if (!data || !data.items) return;
+                
+                const items = data.items;
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.type.indexOf('image') !== -1) {
+                        const blob = item.getAsFile();
+                        if (blob) {
+                            handleFile(blob);
+                            e.preventDefault(); // Prevent default only if we found an image
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Edit controls
+            document.getElementById('startCropBtn').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                startCrop(item);
+            };
+            document.getElementById('rotateBtn').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = item.workingImg.height;
+                canvas.height = item.workingImg.width;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(Math.PI / 2);
+                ctx.drawImage(item.workingImg, -item.workingImg.width / 2, -item.workingImg.height / 2);
+                
+                const newImg = new Image();
+                newImg.onload = () => {
+                    item.workingImg = newImg;
+                    // Swap w and h
+                    const oldW = item.w;
+                    item.w = item.h;
+                    item.h = oldW;
+                    renderAll();
+                };
+                newImg.src = canvas.toDataURL();
+            };
+            document.getElementById('fitToPaperBtn').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                
+                const aspect = item.workingImg.width / item.workingImg.height;
+                const paperAspect = state.paper.width / state.paper.height;
+                
+                if (aspect > paperAspect) {
+                    item.w = state.paper.width;
+                    item.h = state.paper.width / aspect;
+                } else {
+                    item.h = state.paper.height;
+                    item.w = state.paper.height * aspect;
+                }
+                item.x = (state.paper.width - item.w) / 2;
+                item.y = (state.paper.height - item.h) / 2;
+                renderAll();
+            };
+            document.getElementById('resetImageBtn').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                
+                item.workingImg = item.originalImg;
+                const aspect = item.workingImg.width / item.workingImg.height;
+                item.w = state.paper.width * 0.5;
+                item.h = item.w / aspect;
+                renderAll();
+            };
+
+            document.getElementById('ditherMode').onchange = (e) => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                item.ditherMode = e.target.value;
+                renderAll();
+            };
+            
+            document.getElementById('thresholdRange').oninput = (e) => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                item.threshold = parseInt(e.target.value);
+                document.getElementById('thresholdValue').innerText = item.threshold;
+                renderAll();
+            };
+            document.getElementById('exposureRange').oninput = (e) => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                item.exposure = parseInt(e.target.value);
+                document.getElementById('exposureValue').innerText = item.exposure;
+                renderAll();
+            };
+            document.getElementById('invertColors').onchange = (e) => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                item.invert = e.target.checked;
+                renderAll();
+            };
+
+            // Printer refresh
+            refreshPrinters();
+
+            // Template Management
+            document.getElementById('saveTplBtn').onclick = saveCurrentAsTpl;
+            document.getElementById('loadTplBtn').onclick = loadSelectedTpl;
+            document.getElementById('deleteTplBtn').onclick = deleteSelectedTpl;
+
+            // Project Info Toggle
+            document.getElementById('infoBtn').onclick = (e) => {
+                const tooltip = document.getElementById('infoTooltip');
+                const btn = document.getElementById('infoBtn');
+                tooltip.classList.toggle('show');
+                btn.classList.toggle('active');
+                e.stopPropagation();
+            };
+
+            // Close tooltip when clicking elsewhere
+            window.addEventListener('click', () => {
+                const tooltip = document.getElementById('infoTooltip');
+                const btn = document.getElementById('infoBtn');
+                if (tooltip.classList.contains('show')) {
+                    tooltip.classList.remove('show');
+                    btn.classList.remove('active');
+                }
+            });
+
+            document.getElementById('infoTooltip').onclick = (e) => e.stopPropagation();
+
+            // Text Style Listeners
+            document.getElementById('fontFamilySelect').onchange = (e) => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (item && item.type === 'text') {
+                    item.fontFamily = e.target.value;
+                    renderAll();
+                }
+            };
+
+            document.getElementById('boldToggleBtn').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (item && item.type === 'text') {
+                    item.isBold = !item.isBold;
+                    renderAll();
+                }
+            };
+
+            // Add Text
+            document.getElementById('addTextBtn').onclick = () => {
+                const text = document.getElementById('textInput').value.trim();
+                if (!text) {
+                    showStatus('请输入文字内容');
+                    return;
+                }
+                const fontSize = 4; // Default font size
+                const id = 'text-' + Date.now();
+                state.items.push({
+                    type: 'text',
+                    id: id,
+                    text: text,
+                    x: 5,
+                    y: 5,
+                    size: fontSize,
+                    fontFamily: document.getElementById('fontFamilySelect').value || '微软雅黑',
+                    isBold: false
+                });
+                state.selectedId = id;
+                renderAll();
+                document.getElementById('textInput').value = '';
+            };
+
+            // Keyboard support for font size and editing
+            window.addEventListener('keydown', (e) => {
+                if (!state.selectedId) return;
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'text') return;
+
+                if (e.key === 'ArrowUp') {
+                    item.size += 0.5;
+                    renderAll();
+                    e.preventDefault();
+                } else if (e.key === 'ArrowDown') {
+                    item.size = Math.max(1, item.size - 0.5);
+                    renderAll();
+                    e.preventDefault();
+                } else if (e.key === 'Enter') {
+                    const newText = prompt('编辑文字内容:', item.text);
+                    if (newText !== null) {
+                        item.text = newText;
+                        renderAll();
+                    }
+                    e.preventDefault();
+                }
+            });
+
+            // Print button
+            document.getElementById('printBtn').onclick = doPrint;
+
+            // Overlay dragging
+            const overlay = document.getElementById('imageOverlay');
+            overlay.onmousedown = (e) => {
+                state.selectedId = 'image';
+                if (e.target.id === 'resizeHandle') {
+                    state.isResizing = true;
+                } else {
+                    state.isDragging = true;
+                }
+                state.lastMousePos = { x: e.clientX, y: e.clientY };
+                renderWorkingImage(); // Show selection
+                e.preventDefault();
+                e.stopPropagation();
+            };
+
+            window.onmousemove = (e) => {
+                if (!state.isDragging && !state.isResizing && !state.crop.isDragging) return;
+                
+                const dx = e.clientX - state.lastMousePos.x;
+                const dy = e.clientY - state.lastMousePos.y;
+                
+                const container = document.getElementById('paperContainer');
+                const scale = container.getBoundingClientRect().width / (state.paper.width * MM_TO_PX);
+                
+                if (state.isDragging) {
+                    const item = state.items.find(i => i.id === state.selectedId);
+                    if (item) {
+                        item.x += dx / (MM_TO_PX * scale);
+                        item.y += dy / (MM_TO_PX * scale);
+                        renderAll();
+                    }
+                } else if (state.isResizing) {
+                    const item = state.items.find(i => i.id === state.selectedId);
+                    if (item && item.type === 'image') {
+                        item.w += dx / (MM_TO_PX * scale);
+                        item.h += dy / (MM_TO_PX * scale);
+                        renderAll();
+                    }
+                } else if (state.crop.isDragging) {
+                    handleCropDrag(e);
+                }
+                state.lastMousePos = { x: e.clientX, y: e.clientY };
+            };
+
+            window.onmouseup = () => {
+                state.isDragging = false;
+                state.isResizing = false;
+                state.crop.isDragging = false;
+                state.crop.handle = null;
+            };
+
+            // Crop Modal Events
+            document.getElementById('cropCanvas').onmousedown = (e) => {
+                const rect = e.target.getBoundingClientRect();
+                const scale = e.target.width / rect.width;
+                const x = (e.clientX - rect.left) * scale;
+                const y = (e.clientY - rect.top) * scale;
+                
+                const r = state.crop.rect;
+                const hSize = 20 * scale; // Area to catch handle
+
+                // Check handles
+                if (Math.abs(x - r.x) < hSize && Math.abs(y - r.y) < hSize) state.crop.handle = 'tl';
+                else if (Math.abs(x - (r.x + r.w)) < hSize && Math.abs(y - r.y) < hSize) state.crop.handle = 'tr';
+                else if (Math.abs(x - r.x) < hSize && Math.abs(y - (r.y + r.h)) < hSize) state.crop.handle = 'bl';
+                else if (Math.abs(x - (r.x + r.w)) < hSize && Math.abs(y - (r.y + r.h)) < hSize) state.crop.handle = 'br';
+                else if (x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h) state.crop.handle = 'move';
+                
+                if (state.crop.handle) {
+                    state.crop.isDragging = true;
+                    state.lastMousePos = { x: e.clientX, y: e.clientY };
+                }
+            };
+
+            document.getElementById('cancelCrop').onclick = () => {
+                document.getElementById('cropModal').style.display = 'none';
+                state.crop.active = false;
+            };
+
+            document.getElementById('confirmCrop').onclick = () => {
+                const item = state.items.find(i => i.id === state.crop.targetId);
+                const canvas = document.createElement('canvas');
+                const r = state.crop.rect;
+                canvas.width = r.w;
+                canvas.height = r.h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(item.workingImg, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+                
+                const newImg = new Image();
+                newImg.onload = () => {
+                    item.workingImg = newImg;
+                    // Auto-fit to paper or maintain scale? Let's auto-center it.
+                    const aspect = newImg.width / newImg.height;
+                    item.w = state.paper.width * 0.5;
+                    item.h = item.w / aspect;
+                    item.x = (state.paper.width - item.w) / 2;
+                    item.y = (state.paper.height - item.h) / 2;
+                    
+                    renderAll();
+                    document.getElementById('cropModal').style.display = 'none';
+                };
+                newImg.src = canvas.toDataURL();
+            };
+        }
+
+        function handleCropDrag(e) {
+            const canvas = document.getElementById('cropCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const scale = canvas.width / rect.width;
+            
+            const mx = (e.clientX - rect.left) * scale;
+            const my = (e.clientY - rect.top) * scale;
+            
+            const r = state.crop.rect;
+            const h = state.crop.handle;
+            const paperAspect = state.paper.width / state.paper.height;
+            
+            if (h === 'move') {
+                const dx = (e.clientX - state.lastMousePos.x) * scale;
+                const dy = (e.clientY - state.lastMousePos.y) * scale;
+                r.x = Math.max(0, Math.min(canvas.width - r.w, r.x + dx));
+                r.y = Math.max(0, Math.min(canvas.height - r.h, r.y + dy));
+            } else {
+                let newW, newH;
+                const anchorX = (h === 'tl' || h === 'bl') ? r.x + r.w : r.x;
+                const anchorY = (h === 'tl' || h === 'tr') ? r.y + r.h : r.y;
+
+                if (h === 'br' || h === 'tr') {
+                    newW = mx - anchorX;
+                } else {
+                    newW = anchorX - mx;
+                }
+
+                newH = newW / paperAspect;
+
+                // Bounds check and clamp
+                if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) < 0) {
+                    newW = anchorX;
+                    newH = newW / paperAspect;
+                }
+                if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) > canvas.width) {
+                    newW = canvas.width - anchorX;
+                    newH = newW / paperAspect;
+                }
+                if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) < 0) {
+                    newH = anchorY;
+                    newW = newH * paperAspect;
+                }
+                if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) > canvas.height) {
+                    newH = canvas.height - anchorY;
+                    newW = newH * paperAspect;
+                }
+
+                // Update rect
+                r.w = Math.max(20, newW);
+                r.h = Math.max(20, newH);
+                r.x = (h === 'tl' || h === 'bl') ? anchorX - r.w : anchorX;
+                r.y = (h === 'tl' || h === 'tr') ? anchorY - r.h : anchorY;
+            }
+            
+            state.lastMousePos = { x: e.clientX, y: e.clientY };
+            drawCropOverlay();
+        }
+
+        // --- Printer Management ---
+        async function refreshPrinters() {
+            const list = api.getPrinters({ onlyLocal: false });
+            const select = document.getElementById('printerSelect');
+            select.innerHTML = '';
+            
+            if (list.length === 0) {
+                select.innerHTML = '<option value="">无可用打印机</option>';
+                document.getElementById('printBtn').disabled = true;
+                return;
+            }
+
+            list.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.name + (p.ip ? '@' + p.ip : '');
+                opt.text = (p.deviceName || p.name) + (p.ip ? ` (${p.ip})` : '');
+                select.appendChild(opt);
+            });
+            
+            state.printers = list;
+            document.getElementById('printBtn').disabled = false;
+        }
+
+        function getSelectedPrinterInfo() {
+            const val = document.getElementById('printerSelect').value;
+            if (!val) return null;
+            const [name, ip] = val.split('@');
+            return { name, ip };
+        }
+
+        // --- Template Logic ---
+        function refreshTplList() {
+            const select = document.getElementById('tplSelect');
+            select.innerHTML = '<option value="">-- 选择已保存模板 --</option>';
+            
+            const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
+            Object.keys(tpls).forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.text = name;
+                select.appendChild(opt);
+            });
+        }
+
+        async function saveCurrentAsTpl() {
+            const name = document.getElementById('tplNameInput').value.trim();
+            if (!name) {
+                showStatus('请输入模板名称');
+                return;
+            }
+
+            showStatus('正在保存模板...');
+            
+            // Serialize items (handle images to Base64)
+            const serializedItems = await Promise.all(state.items.map(async item => {
+                const base = { ...item };
+                if (item.type === 'image') {
+                    // Store images as data URLs
+                    const canvas = document.createElement('canvas');
+                    canvas.width = item.workingImg.width;
+                    canvas.height = item.workingImg.height;
+                    canvas.getContext('2d').drawImage(item.workingImg, 0, 0);
+                    base.imgData = canvas.toDataURL();
+                    // Don't store actual Image objects
+                    delete base.originalImg;
+                    delete base.workingImg;
+                }
+                return base;
+            }));
+
+            const tplData = {
+                paper: state.paper,
+                items: serializedItems
+            };
+
+            const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
+            tpls[name] = tplData;
+            localStorage.setItem('dtp_templates', JSON.stringify(tpls));
+            
+            document.getElementById('tplNameInput').value = '';
+            refreshTplList();
+            showStatus('模板 "' + name + '" 已保存');
+        }
+
+        function loadSelectedTpl() {
+            const name = document.getElementById('tplSelect').value;
+            if (!name) return;
+
+            showStatus('正在加载模板...');
+            const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
+            const tpl = tpls[name];
+
+            if (!tpl) return;
+
+            // Restore paper
+            state.paper = tpl.paper;
+            document.getElementById('paperWidth').value = state.paper.width;
+            document.getElementById('paperHeight').value = state.paper.height;
+            updatePaperUI();
+
+            // Restore items
+            const loadPromises = tpl.items.map(item => {
+                return new Promise((resolve) => {
+                    if (item.type === 'image') {
+                        const img = new Image();
+                        img.onload = () => {
+                            item.originalImg = img;
+                            item.workingImg = img;
+                            resolve(item);
+                        };
+                        img.src = item.imgData;
+                        delete item.imgData; // Clean up
+                    } else {
+                        resolve(item);
+                    }
+                });
+            });
+
+            Promise.all(loadPromises).then(items => {
+                state.items = items;
+                state.selectedId = null;
+                renderAll();
+                showStatus('模板已成功加载');
+            });
+        }
+
+        function deleteSelectedTpl() {
+            const name = document.getElementById('tplSelect').value;
+            if (!name) return;
+
+            if (confirm('确定要删除模板 "' + name + '" 吗？')) {
+                const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
+                delete tpls[name];
+                localStorage.setItem('dtp_templates', JSON.stringify(tpls));
+                refreshTplList();
+                showStatus('模板已删除');
+            }
+        }
+
+        // --- Printing ---
+        function doPrint() {
+            if (state.items.length === 0) return;
+            const printer = getSelectedPrinterInfo();
+            if (!printer) return;
+
+            showStatus('正在发送打印任务...');
+
+            api.openPrinter(printer, (success) => {
+                if (!success) {
+                    showStatus('无法连接打印机', 'error');
+                    return;
+                }
+
+                api.startJob({
+                    width: state.paper.width,
+                    height: state.paper.height,
+                    jobName: "MultiObjectPrint"
+                });
+
+                // Print all items in order
+                state.items.forEach(item => {
+                    if (item.type === 'image') {
+                        const canvas = document.createElement('canvas');
+                        const wPx = item.w * MM_TO_PX;
+                        const hPx = item.h * MM_TO_PX;
+                        canvas.width = wPx; canvas.height = hPx;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(item.workingImg, 0, 0, wPx, hPx);
+                        
+                        const imageData = ctx.getImageData(0, 0, wPx, hPx);
+                        applyDitheringToItem(imageData, item);
+                        ctx.putImageData(imageData, 0, 0);
+                        
+                        api.drawImageD({
+                            data: canvas.toDataURL('image/png'),
+                            x: item.x,
+                            y: item.y,
+                            drawWidth: item.w,
+                            drawHeight: item.h,
+                            threshold: 257 
+                        });
+                    } else if (item.type === 'text') {
+                        api.drawText({
+                            text: item.text,
+                            x: item.x,
+                            y: item.y,
+                            fontHeight: item.size,
+                            fontName: item.fontFamily,
+                            fontStyle: item.isBold ? 1 : 0, // 1 is Bold, 0 is Regular
+                            lineSpace: "1_2" // Better for multiline
+                        });
+                    }
+                });
+
+                api.commitJob((result) => {
+                    api.closePrinter();
+                    if (result) showStatus('打印已提交');
+                    else showStatus('打印失败', 'error');
+                });
+            });
+        }
+    </script>
+</body>
+</html>
+
+

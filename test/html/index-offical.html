@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>LPAPIWeb Test</title>
+        <script type="text/javascript" src="./browser-polyfill.min.js"></script>
+        <script type="text/javascript" src="./lib/dtpweb.js"></script>
+        <script type="text/javascript" src="./index.js"></script>
+        <style>
+            body {
+                margin: auto;
+                text-align: center;
+                background: #cef9fd;
+            }
+
+            input {
+                min-width: 100px;
+                height: 28px;
+                margin: 5px;
+            }
+
+            .label-operate-group {
+                margin: 10px 10px 0 10px;
+                /* background-color: aliceblue; */
+            }
+            .label-operate-item {
+                display: inline-block;
+                width: 200px;
+                margin: 0;
+            }
+            .label-operate-item-title {
+                display: inline-block;
+                width: 150px;
+                text-align: right;
+            }
+            .label-operate-item-value {
+                width: 200px;
+                height: 30px;
+            }
+            #preview-list {
+                min-height: 200px;
+            }
+            .display-none {
+                display: none;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title">打印机：</label>
+            <select title="打印机列表：" class="label-operate-item-value" id="select-printlist"></select>
+        </div>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title" for="select-gaptype">纸张类型：</label>
+            <select class="label-operate-item-value" id="select-gaptype">
+                <option value="255">随打印机</option>
+                <option value="0">连续纸</option>
+                <option value="1">定位孔</option>
+                <option value="2">间隙纸</option>
+            </select>
+        </div>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title" for="select-printspeed">打印速度：</label>
+            <select class="label-operate-item-value" id="select-printspeed">
+                <option value="255">随打印机</option>
+                <option value="0">1(特慢)</option>
+                <option value="1">2(慢)</option>
+                <option value="2">3(正常)</option>
+                <option value="3">4(快)</option>
+                <option value="4">5(特快)</option>
+            </select>
+        </div>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title" for="select-printdarkness">打印浓度：</label>
+            <select class="label-operate-item-value" id="select-printdarkness">
+                <option value="255">随打印机</option>
+                <option value="5">6(正常)</option>
+                <option value="6">7</option>
+                <option value="7">8</option>
+                <option value="8">9</option>
+                <option value="9">10(较浓)</option>
+                <option value="10">11</option>
+                <option value="11">12</option>
+                <option value="12">13</option>
+                <option value="13">14</option>
+                <option value="14">15(特浓)</option>
+            </select>
+        </div>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title" for="select-orientation">打印方向：</label>
+            <select class="label-operate-item-value" id="select-orientation">
+                <option value="0">横向打印</option>
+                <option value="1">右转90度</option>
+                <option value="2">旋转180度</option>
+                <option value="3">左转90度</option>
+            </select>
+        </div>
+        <div class="label-operate-group">
+            <label class="label-operate-item-title" for="select-gaptype">打印或预览：</label>
+            <select title="打印模式：" class="label-operate-item-value" id="select-print-preview">
+                <option value="0">打印</option>
+                <option value="1" selected="true">获取白色底色预览图片</option>
+                <option value="2">获取透明底色预览图片</option>
+                <option value="3">生成打印数据</option>
+            </select>
+        </div>
+        <div class="label-operate-group display-none" id="group-printer-dpi">
+            <label class="label-operate-item-title" for="select-printer-dpi">打印机精度：</label>
+            <select class="label-operate-item-value" id="select-printer-dpi">
+                <option value="203">200点打印机</option>
+                <option value="300">300点打印机</option>
+            </select>
+        </div>
+        <div class="label-operate-group display-none" id="group-printer-width">
+            <label class="label-operate-item-title" for="input-printer-width">打印头宽度：</label>
+            <input
+                class="label-operate-item-value"
+                type="number"
+                id="input-printer-width"
+                value="384"
+                placeholder="请输入打印头宽度"
+            />
+        </div>
+        <div>
+            <fieldset>
+                <legend>打印机操作测试</legend>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" type="button" id="test-open-printer" value="打开打印机" />
+                    <input class="label-operate-item" type="button" id="test-close-printer" value="关闭打印机" />
+                    <input
+                        class="label-operate-item"
+                        id="test-is-printer-opened"
+                        type="button"
+                        value="打印机是否已打开"
+                    />
+                </div>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" id="test-get-printer-name" type="button" value="获取打印机名称" />
+                    <input class="label-operate-item" id="test-get-printer-dpi" type="button" value="获取打印机DPI" />
+                    <input class="label-operate-item" type="button" id="test-show-property" value="显示打印机属性" />
+                    <span class="label-operate-item"></span>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>任务绘制测试</legend>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" type="button" id="test-draw-text" value="绘制文本" />
+                    <!-- <input
+                        class="label-operate-item"
+                        type="button"
+                        id="test-draw-ticket"
+                        value="小票打印"
+                        style="display: none"
+                    /> -->
+                </div>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" type="button" id="test-alignment" value="对齐测试" />
+                    <input class="label-operate-item" type="button" id="test-rotation" value="旋转测试" />
+                </div>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" type="button" id="test-draw-barcode" value="绘制一维码" />
+                    <input class="label-operate-item" type="button" id="test-draw-qrcode" value="绘制二维码" />
+                </div>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" type="button" id="test-draw-pdf417" value="绘制PDF417" />
+                    <input class="label-operate-item" type="button" id="test-draw-dtmx" value="绘制DataMatrix" />
+                </div>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" id="test-draw-image-url" type="button" value="绘制图片URL" />
+                    <input class="label-operate-item" id="test-draw-image-data" type="button" value="绘制Base64图片" />
+                </div>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" type="button" id="test-draw-rect" value="绘制矩形" />
+                    <input class="label-operate-item" type="button" id="test-draw-ellipse" value="绘制椭圆" />
+                </div>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" type="button" id="test-draw-circle" value="绘制圆形" />
+                    <input class="label-operate-item" type="button" id="test-draw-line" value="绘制直线" />
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>直接打印测试</legend>
+                <div class="label-operate-group">
+                    <input class="label-operate-item" type="button" id="test-table-print" value="表格打印测试" />
+                    <input class="label-operate-item" type="button" id="test-json-print" value="JSON打印测试" />
+                    <input class="label-operate-item" type="button" id="test-wdfx-print" value="WDFX打印测试" />
+                    <input class="label-operate-item" type="button" id="test-print-image-data" value="打印BASE64图片" />
+                    <input class="label-operate-item" type="button" id="test-print-raw-data" value="RawData打印测试" />
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>辅助图片信息</legend>
+                <div id="preview-list"></div>
+            </fieldset>
+        </div>
+        <div class="display-none">
+            <input id="filePicker" type="file" />
+        </div>
+    </body>
+</html>

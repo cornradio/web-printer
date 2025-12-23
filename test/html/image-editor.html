@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片编辑和打印</title>
+    <script type="text/javascript" src="./browser-polyfill.min.js"></script>
+    <script type="text/javascript" src="./lib/dtpweb.js"></script>
+    <style>
+        :root {
+            --bg-dark: oklch(0.1 0.025 259);
+            --bg: oklch(0.15 0.025 259);
+            --bg-light: oklch(0.2 0.025 259);
+            --text: oklch(0.96 0.05 259);
+            --text-muted: oklch(0.76 0.05 259);
+            --highlight: oklch(0.5 0.05 259);
+            --border: oklch(0.4 0.025 259);
+            --border-muted: oklch(0.3 0.025 259);
+            --primary: oklch(0.76 0.1 259);
+            --secondary: oklch(0.76 0.1 79);
+            --danger: oklch(0.7 0.05 30);
+            --warning: oklch(0.7 0.05 100);
+            --success: oklch(0.7 0.05 160);
+            --info: oklch(0.7 0.05 260);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: var(--bg-dark);
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--bg-light);
+            color: var(--text);
+            padding: 12px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .crop-handle{
+            background: transparent !important;
+        }
+
+        .left-panel {
+            width: 260px;
+            min-width: 200px;
+            max-width: 600px;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            background: var(--bg);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .resizer {
+            position: absolute;
+            top: 0;
+            right: -4px;
+            width: 8px;
+            height: 100%;
+            cursor: col-resize;
+            background: transparent;
+            z-index: 10;
+            user-select: none;
+        }
+
+        .resizer:hover {
+            background: var(--primary);
+            opacity: 0.3;
+        }
+
+        .resizer.active {
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-dark);
+            background-image: 
+                linear-gradient(45deg, var(--bg) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--bg) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--bg) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--bg) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            position: relative;
+            overflow: auto;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .paper-container {
+            position: relative;
+            background: white;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            transform-origin: center center;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        .section {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-muted);
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .drop-area {
+            border: 2px dashed var(--primary);
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+            background: var(--bg-light);
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            color: var(--text-muted);
+        }
+
+        .drop-area:hover {
+            background: var(--highlight);
+            border-color: var(--primary);
+        }
+
+        .drop-area.dragover {
+            background: var(--success);
+            border-color: var(--success);
+            opacity: 0.3;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .control-item {
+            flex: 1;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid var(--border-muted);
+            border-radius: 4px;
+            font-size: 13px;
+            background: var(--bg-light);
+            color: var(--text);
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .slider-group {
+            margin-bottom: 10px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 5px;
+            border-radius: 3px;
+            background: var(--border-muted);
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        #thresholdR.slider {
+            background: linear-gradient(to right, #000, #f00);
+        }
+
+        #thresholdG.slider {
+            background: linear-gradient(to right, #000, #0f0);
+        }
+
+        #thresholdB.slider {
+            background: linear-gradient(to right, #000, #00f);
+        }
+
+        #thresholdR.slider::-webkit-slider-thumb {
+            background: #f00;
+        }
+
+        #thresholdG.slider::-webkit-slider-thumb {
+            background: #0f0;
+        }
+
+        #thresholdB.slider::-webkit-slider-thumb {
+            background: #00f;
+        }
+
+        #thresholdR.slider::-moz-range-thumb {
+            background: #f00;
+            border: none;
+        }
+
+        #thresholdG.slider::-moz-range-thumb {
+            background: #0f0;
+            border: none;
+        }
+
+        #thresholdB.slider::-moz-range-thumb {
+            background: #00f;
+            border: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-value {
+            min-width: 45px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            background: var(--primary);
+            color: var(--bg-dark);
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn.active {
+            background: var(--accent);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: var(--border-muted);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid var(--border-muted);
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 10px;
+            background: var(--bg-light);
+            color: var(--text);
+        }
+
+        .select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: var(--success);
+            color: var(--bg-dark);
+        }
+
+        .status.error {
+            background: var(--danger);
+            color: var(--bg-dark);
+        }
+
+        .status.info {
+            background: var(--info);
+            color: var(--bg-dark);
+        }
+
+        .canvas-wrapper {
+            position: absolute;
+            border: 2px solid var(--primary);
+            background: transparent;
+            cursor: move;
+        }
+
+        .canvas-wrapper canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: nwse-resize;
+            bottom: -7px;
+            right: -7px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .empty-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .btn-micro {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: 1px solid var(--border-muted);
+            border-radius: 3px;
+            background: var(--bg-light);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-micro:hover {
+            background: var(--highlight);
+            border-color: var(--primary);
+        }
+
+        .threshold-control {
+            margin-bottom: 8px;
+        }
+
+
+        .crop-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+        }
+
+        .crop-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crop-container {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .crop-canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            border: 2px solid var(--primary);
+        }
+
+        .crop-canvas {
+            display: block;
+            max-width: 80vw;
+            max-height: 80vh;
+        }
+
+        .crop-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border: 2px solid white;
+            cursor: move;
+        }
+
+        .crop-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
+        .crop-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
+        .crop-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+        .crop-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+        .crop-handle.n { top: -6px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .crop-handle.s { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .crop-handle.w { top: 50%; left: -6px; transform: translateY(-50%); cursor: w-resize; }
+        .crop-handle.e { top: 50%; right: -6px; transform: translateY(-50%); cursor: e-resize; }
+
+        .crop-controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>图片编辑和打印工具</h2>
+            <p style="font-size: 12px; margin-top: 5px;">拖放图片 | 拖动调整位置 | 拖拽角点调整大小</p>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel" id="leftPanel">
+                <div class="resizer" id="resizer"></div>
+                <div class="section">
+                    <div class="section-title">打印纸大小 (mm)</div>
+                    <div class="control-row">
+                        <div class="control-item">
+                            <label class="control-label">宽度</label>
+                            <input type="number" id="paperWidth" class="control-input" value="40" step="1" min="1">
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label">高度</label>
+                            <input type="number" id="paperHeight" class="control-input" value="30" step="1" min="1">
+                        </div>
+                    </div>
+                    <button id="applyPaperSize" class="btn" style="margin-top: 10px;">应用尺寸</button>
+                </div>
+
+                <div class="section">
+                    <div class="drop-area" id="dropArea">
+                        <div style="font-size: 16px; margin-bottom: 5px;">📁 拖放图片</div>
+                        <div style="font-size: 11px; color: #666;">或点击选择，或粘贴图片</div>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">图片操作</div>
+                    <button id="cropBtn" class="btn" style="margin-top: 0; margin-bottom: 10px;">裁剪图片</button>
+                    <button id="fitToPaperBtn" class="btn" style="margin-top: 0; margin-bottom: 10px;">等比例铺满</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">图片效果</div>
+                    <div style="margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                            <label class="control-label" style="margin: 0;">黑白阈值</label>
+                            <button id="toggleAdvanced" class="btn" style="width: auto; padding: 4px 8px; font-size: 11px; margin: 0;">高级</button>
+                        </div>
+                        <div id="basicThreshold" class="threshold-control">
+                            <div class="slider-container">
+                                <button class="btn-micro" id="thresholdDec">−</button>
+                                <input type="range" id="threshold" class="slider" min="0" max="255" value="192" step="0.1">
+                                <button class="btn-micro" id="thresholdInc">+</button>
+                                <span class="slider-value" id="thresholdValue">192.0</span>
+                            </div>
+                        </div>
+                        <div id="advancedThreshold" class="threshold-control" style="display: none;">
+                            <div class="slider-group" style="margin-bottom: 8px;">
+                                <label class="control-label" style="font-size: 11px;">红色阈值</label>
+                                <div class="slider-container">
+                                    <button class="btn-micro" id="thresholdRDec">−</button>
+                                    <input type="range" id="thresholdR" class="slider" min="0" max="255" value="192" step="0.1">
+                                    <button class="btn-micro" id="thresholdRInc">+</button>
+                                    <span class="slider-value" id="thresholdRValue">192.0</span>
+                                </div>
+                            </div>
+                            <div class="slider-group" style="margin-bottom: 8px;">
+                                <label class="control-label" style="font-size: 11px;">绿色阈值</label>
+                                <div class="slider-container">
+                                    <button class="btn-micro" id="thresholdGDec">−</button>
+                                    <input type="range" id="thresholdG" class="slider" min="0" max="255" value="192" step="0.1">
+                                    <button class="btn-micro" id="thresholdGInc">+</button>
+                                    <span class="slider-value" id="thresholdGValue">192.0</span>
+                                </div>
+                            </div>
+                            <div class="slider-group">
+                                <label class="control-label" style="font-size: 11px;">蓝色阈值</label>
+                                <div class="slider-container">
+                                    <button class="btn-micro" id="thresholdBDec">−</button>
+                                    <input type="range" id="thresholdB" class="slider" min="0" max="255" value="192" step="0.1">
+                                    <button class="btn-micro" id="thresholdBInc">+</button>
+                                    <span class="slider-value" id="thresholdBValue">192.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="halftone" class="checkbox">
+                        <label class="control-label" for="halftone" style="margin: 0;">半色调效果</label>
+                    </div>
+                    <div class="checkbox-group" style="margin-top: 8px;">
+                        <input type="checkbox" id="outline" class="checkbox">
+                        <label class="control-label" for="outline" style="margin: 0;">增强描边</label>
+                    </div>
+                    <div class="checkbox-group" style="margin-top: 8px;">
+                        <input type="checkbox" id="invert" class="checkbox">
+                        <label class="control-label" for="invert" style="margin: 0;">反色效果</label>
+                    </div>
+                </div>
+
+
+                <div class="section">
+                    <div class="section-title">打印设置</div>
+                    <select id="printerSelect" class="select">
+                        <option value="">正在检测...</option>
+                    </select>
+                    <button id="printBtn" class="btn" disabled>打印</button>
+                    <div id="status" class="status"></div>
+                </div>
+            </div>
+
+            <div class="right-panel" id="previewPanel">
+                <div class="paper-container" id="paperContainer" style="display: none;">
+                    <canvas id="previewCanvas"></canvas>
+                </div>
+                <div class="empty-hint" id="emptyHint">
+                    请先设置打印纸大小，然后拖放图片
+                </div>
+            </div>
+        </div>
+
+        <!-- 裁剪覆盖层 -->
+        <div class="crop-overlay" id="cropOverlay">
+            <div class="crop-container">
+                <div class="crop-canvas-wrapper" id="cropCanvasWrapper">
+                    <canvas id="cropCanvas" class="crop-canvas"></canvas>
+                    <div class="crop-handle nw"></div>
+                    <div class="crop-handle ne"></div>
+                    <div class="crop-handle sw"></div>
+                    <div class="crop-handle se"></div>
+                    <div class="crop-handle n"></div>
+                    <div class="crop-handle s"></div>
+                    <div class="crop-handle w"></div>
+                    <div class="crop-handle e"></div>
+                </div>
+                <div class="crop-controls">
+                    <button class="btn" id="cropConfirm" style="width: auto; margin: 0;">确认裁剪</button>
+                    <button class="btn" id="cropCancel" style="width: auto; margin: 0; background: var(--danger);">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var api = dtpweb.getInstance();
+        var originalImage = null;
+        var imageDataUrl = null;
+        var previewCanvas = null;
+        var previewCtx = null;
+        var canvasWrapper = null;
+        var resizeHandle = null;
+        var paperContainer = null;
+        
+        var paperWidth = 40;
+        var paperHeight = 30;
+        var imageX = 0;
+        var imageY = 0;
+        var imageWidth = 50;
+        var imageHeight = 50;
+        var imageRotation = 0; // 图片旋转角度
+        var threshold = 192.0;
+        var thresholdR = 192.0;
+        var thresholdG = 192.0;
+        var thresholdB = 192.0;
+        var useRGBThreshold = false; // 是否使用RGB独立阈值
+        var halftoneEnabled = false;
+        var outlineEnabled = false; // 增强描边
+        var invertEnabled = false; // 反色效果
+        
+        var isDragging = false;
+        var isResizing = false;
+        var dragStartX = 0;
+        var dragStartY = 0;
+        var startX = 0;
+        var startY = 0;
+        var startWidth = 0;
+        var startHeight = 0;
+        
+        const MM_TO_PX = 72 / 25.4;
+
+        window.onload = function() {
+            api.checkPlugin(function(resp) {
+                console.log("打印助手检测:", resp);
+                if (resp.statusCode === 0) {
+                    updatePrinterList();
+                } else {
+                    showStatus("未检测到打印助手", "error");
+                    document.getElementById('printerSelect').innerHTML = '<option value="">未检测到打印助手</option>';
+                    api = undefined;
+                }
+            });
+
+            setupEvents();
+            
+            // 初始化打印纸大小
+            applyPaperSize();
+        };
+
+        function setupEvents() {
+            var dropArea = document.getElementById('dropArea');
+            var fileInput = document.getElementById('fileInput');
+            var previewPanel = document.getElementById('previewPanel');
+
+            dropArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files.length > 0) {
+                    loadImage(e.target.files[0]);
+                }
+            });
+
+            dropArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropArea.classList.add('dragover');
+            });
+
+            dropArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropArea.classList.remove('dragover');
+            });
+
+            dropArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropArea.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    var file = e.dataTransfer.files[0];
+                    if (file.type && file.type.startsWith('image/')) {
+                        loadImage(file);
+                    } else {
+                        showStatus('请拖放图片文件', 'error');
+                    }
+                }
+            });
+
+            previewPanel.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            previewPanel.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    var file = e.dataTransfer.files[0];
+                    if (file.type && file.type.startsWith('image/')) {
+                        loadImage(file);
+                    } else {
+                        showStatus('请拖放图片文件', 'error');
+                    }
+                }
+            });
+
+            document.addEventListener('paste', function(e) {
+                var items = e.clipboardData.items;
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        var file = items[i].getAsFile();
+                        if (file) {
+                            loadImage(file);
+                        }
+                        break;
+                    }
+                }
+            });
+
+            // 阈值微调按钮
+            document.getElementById('thresholdDec').addEventListener('click', function() {
+                adjustThreshold(-0.1);
+            });
+            document.getElementById('thresholdInc').addEventListener('click', function() {
+                adjustThreshold(0.1);
+            });
+
+            // 阈值滑块
+            document.getElementById('threshold').addEventListener('input', function(e) {
+                threshold = parseFloat(e.target.value);
+                document.getElementById('thresholdValue').textContent = threshold.toFixed(1);
+                updateImagePreview();
+            });
+
+            // RGB阈值滑块和微调按钮
+            document.getElementById('thresholdR').addEventListener('input', function(e) {
+                thresholdR = parseFloat(e.target.value);
+                document.getElementById('thresholdRValue').textContent = thresholdR.toFixed(1);
+                updateImagePreview();
+            });
+            document.getElementById('thresholdRDec').addEventListener('click', function() {
+                adjustRGBThreshold('R', -0.1);
+            });
+            document.getElementById('thresholdRInc').addEventListener('click', function() {
+                adjustRGBThreshold('R', 0.1);
+            });
+
+            document.getElementById('thresholdG').addEventListener('input', function(e) {
+                thresholdG = parseFloat(e.target.value);
+                document.getElementById('thresholdGValue').textContent = thresholdG.toFixed(1);
+                updateImagePreview();
+            });
+            document.getElementById('thresholdGDec').addEventListener('click', function() {
+                adjustRGBThreshold('G', -0.1);
+            });
+            document.getElementById('thresholdGInc').addEventListener('click', function() {
+                adjustRGBThreshold('G', 0.1);
+            });
+
+            document.getElementById('thresholdB').addEventListener('input', function(e) {
+                thresholdB = parseFloat(e.target.value);
+                document.getElementById('thresholdBValue').textContent = thresholdB.toFixed(1);
+                updateImagePreview();
+            });
+            document.getElementById('thresholdBDec').addEventListener('click', function() {
+                adjustRGBThreshold('B', -0.1);
+            });
+            document.getElementById('thresholdBInc').addEventListener('click', function() {
+                adjustRGBThreshold('B', 0.1);
+            });
+
+            // 高级菜单切换
+            document.getElementById('toggleAdvanced').addEventListener('click', function() {
+                var basic = document.getElementById('basicThreshold');
+                var advanced = document.getElementById('advancedThreshold');
+                if (advanced.style.display === 'none') {
+                    basic.style.display = 'none';
+                    advanced.style.display = 'block';
+                    useRGBThreshold = true;
+                    this.textContent = '简单';
+                } else {
+                    basic.style.display = 'block';
+                    advanced.style.display = 'none';
+                    useRGBThreshold = false;
+                    this.textContent = '高级';
+                }
+                updateImagePreview();
+            });
+
+            document.getElementById('halftone').addEventListener('change', function(e) {
+                halftoneEnabled = e.target.checked;
+                updateImagePreview();
+            });
+
+            document.getElementById('outline').addEventListener('change', function(e) {
+                outlineEnabled = e.target.checked;
+                updateImagePreview();
+            });
+
+            document.getElementById('invert').addEventListener('change', function(e) {
+                invertEnabled = e.target.checked;
+                updateImagePreview();
+            });
+
+            document.getElementById('printBtn').addEventListener('click', printImage);
+
+            // 裁剪按钮
+            document.getElementById('cropBtn').addEventListener('click', startCrop);
+            document.getElementById('cropConfirm').addEventListener('click', confirmCrop);
+            document.getElementById('cropCancel').addEventListener('click', cancelCrop);
+            
+            // 等比例铺满按钮
+            document.getElementById('fitToPaperBtn').addEventListener('click', fitImageToPaper);
+            
+            document.getElementById('applyPaperSize').addEventListener('click', function() {
+                paperWidth = parseFloat(document.getElementById('paperWidth').value) || 40;
+                paperHeight = parseFloat(document.getElementById('paperHeight').value) || 30;
+                applyPaperSize();
+            });
+
+            // 侧边栏调整大小
+            var resizer = document.getElementById('resizer');
+            var leftPanel = document.getElementById('leftPanel');
+            var isResizing = false;
+            var startX = 0;
+            var startWidth = 0;
+
+            resizer.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                startX = e.clientX;
+                startWidth = leftPanel.offsetWidth;
+                resizer.classList.add('active');
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isResizing) return;
+                var width = startWidth + (e.clientX - startX);
+                width = Math.max(200, Math.min(600, width));
+                leftPanel.style.width = width + 'px';
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isResizing) {
+                    isResizing = false;
+                    resizer.classList.remove('active');
+                }
+            });
+        }
+
+        function applyPaperSize() {
+            if (!paperContainer) {
+                paperContainer = document.getElementById('paperContainer');
+            }
+            
+            var emptyHint = document.getElementById('emptyHint');
+            if (emptyHint) {
+                emptyHint.style.display = 'none';
+            }
+            
+            paperContainer.style.display = 'block';
+            
+            var paperWidthPx = paperWidth * MM_TO_PX;
+            var paperHeightPx = paperHeight * MM_TO_PX;
+            
+            // 计算缩放比例，确保预览区域能完整显示
+            var panel = document.getElementById('previewPanel');
+            var panelWidth = panel.clientWidth - 40;
+            var panelHeight = panel.clientHeight - 40;
+            
+            var scaleX = panelWidth / paperWidthPx;
+            var scaleY = panelHeight / paperHeightPx;
+            var scale = Math.min(scaleX, scaleY, 3); // 最大3倍缩放，避免太大
+            
+            paperContainer.style.width = (paperWidthPx * scale) + 'px';
+            paperContainer.style.height = (paperHeightPx * scale) + 'px';
+            paperContainer.style.transform = 'scale(' + scale + ')';
+            paperContainer.style.transformOrigin = 'center center';
+            
+            previewCanvas = document.getElementById('previewCanvas');
+            previewCanvas.width = paperWidthPx;
+            previewCanvas.height = paperHeightPx;
+            previewCtx = previewCanvas.getContext('2d');
+            
+            // 清除画布
+            previewCtx.fillStyle = 'white';
+            previewCtx.fillRect(0, 0, paperWidthPx, paperHeightPx);
+            
+            // 如果已有图片，重新绘制
+            if (originalImage) {
+                createImagePreview();
+            }
+            
+            showStatus('打印纸大小已设置为 ' + paperWidth + 'x' + paperHeight + 'mm', 'success');
+        }
+
+        function loadImage(file) {
+            if (!file || !file.type || !file.type.startsWith('image/')) {
+                showStatus('请选择图片文件', 'error');
+                return;
+            }
+
+            // 检查是否已设置打印纸大小
+            if (!paperContainer || paperContainer.style.display === 'none') {
+                showStatus('请先设置打印纸大小', 'error');
+                return;
+            }
+
+            showStatus('正在加载图片...', 'info');
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    imageDataUrl = e.target.result;
+                    
+                    // 根据打印纸大小计算初始图片大小（保持比例，最大不超过打印纸）
+                    var aspectRatio = img.width / img.height;
+                    var maxWidth = paperWidth * 0.8;
+                    var maxHeight = paperHeight * 0.8;
+                    
+                    if (aspectRatio > 1) {
+                        imageWidth = Math.min(maxWidth, paperWidth);
+                        imageHeight = imageWidth / aspectRatio;
+                        if (imageHeight > maxHeight) {
+                            imageHeight = maxHeight;
+                            imageWidth = imageHeight * aspectRatio;
+                        }
+                    } else {
+                        imageHeight = Math.min(maxHeight, paperHeight);
+                        imageWidth = imageHeight * aspectRatio;
+                        if (imageWidth > maxWidth) {
+                            imageWidth = maxWidth;
+                            imageHeight = imageWidth / aspectRatio;
+                        }
+                    }
+                    
+                    // 居中放置
+                    imageX = (paperWidth - imageWidth) / 2;
+                    imageY = (paperHeight - imageHeight) / 2;
+                    imageRotation = 0; // 重置旋转角度
+                    
+                    createImagePreview();
+                    updatePreviewCanvas();
+                    showStatus('图片加载成功', 'success');
+                };
+                img.onerror = function() {
+                    showStatus('图片加载失败', 'error');
+                };
+                img.src = e.target.result;
+            };
+            reader.onerror = function() {
+                showStatus('文件读取失败', 'error');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function createImagePreview() {
+            if (!previewCanvas || !previewCtx) {
+                return;
+            }
+            
+            // 清除画布
+            previewCtx.fillStyle = 'white';
+            previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+            
+            // 移除旧的图片元素
+            if (canvasWrapper) {
+                canvasWrapper.remove();
+            }
+
+            // 创建图片容器
+            canvasWrapper = document.createElement('div');
+            canvasWrapper.className = 'canvas-wrapper';
+            
+            var imageCanvas = document.createElement('canvas');
+            var imageCtx = imageCanvas.getContext('2d');
+            
+            // 获取缩放比例
+            var scale = parseFloat(paperContainer.style.transform.match(/scale\(([^)]+)\)/)?.[1] || '1');
+            
+            // canvas的实际像素尺寸（考虑缩放）
+            var imageWidthPx = imageWidth * MM_TO_PX;
+            var imageHeightPx = imageHeight * MM_TO_PX;
+            
+            // 设置容器的显示尺寸（已缩放）
+            var displayWidth = imageWidthPx * scale;
+            var displayHeight = imageHeightPx * scale;
+            canvasWrapper.style.width = displayWidth + 'px';
+            canvasWrapper.style.height = displayHeight + 'px';
+            canvasWrapper.style.left = (imageX * MM_TO_PX * scale) + 'px';
+            canvasWrapper.style.top = (imageY * MM_TO_PX * scale) + 'px';
+            
+            // canvas的实际像素尺寸应该等于显示尺寸，这样图片才能正确显示
+            imageCanvas.width = displayWidth;
+            imageCanvas.height = displayHeight;
+            
+            resizeHandle = document.createElement('div');
+            resizeHandle.className = 'resize-handle';
+            
+            canvasWrapper.appendChild(imageCanvas);
+            canvasWrapper.appendChild(resizeHandle);
+            paperContainer.appendChild(canvasWrapper);
+
+            setupDragEvents();
+            updatePreview(imageCanvas, imageCtx);
+            updatePreviewCanvas();
+        }
+
+        function setupDragEvents() {
+            var imageCanvas = canvasWrapper.querySelector('canvas');
+            if (!imageCanvas) return;
+            
+            imageCanvas.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                isDragging = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startX = imageX;
+                startY = imageY;
+                imageCanvas.style.cursor = 'grabbing';
+                e.preventDefault();
+            });
+
+            resizeHandle.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                isResizing = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startWidth = imageWidth;
+                startHeight = imageHeight;
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    // 考虑缩放比例
+                    var rect = paperContainer.getBoundingClientRect();
+                    var scale = parseFloat(paperContainer.style.transform.match(/scale\(([^)]+)\)/)?.[1] || '1');
+                    var deltaX = (e.clientX - dragStartX) / MM_TO_PX / scale;
+                    var deltaY = (e.clientY - dragStartY) / MM_TO_PX / scale;
+                    imageX = Math.max(0, Math.min(paperWidth - imageWidth, startX + deltaX));
+                    imageY = Math.max(0, Math.min(paperHeight - imageHeight, startY + deltaY));
+                    updateCanvasPosition();
+                    updatePreviewCanvas();
+                } else if (isResizing) {
+                    var scale = parseFloat(paperContainer.style.transform.match(/scale\(([^)]+)\)/)?.[1] || '1');
+                    var deltaX = (e.clientX - dragStartX) / MM_TO_PX / scale;
+                    var deltaY = (e.clientY - dragStartY) / MM_TO_PX / scale;
+                    var newWidth = Math.max(5, Math.min(paperWidth - imageX, startWidth + deltaX));
+                    var newHeight = Math.max(5, Math.min(paperHeight - imageY, startHeight + deltaY));
+                    imageWidth = newWidth;
+                    imageHeight = newHeight;
+                    updateCanvasSize();
+                    updatePreviewCanvas();
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isDragging || isResizing) {
+                    isDragging = false;
+                    isResizing = false;
+                    var imageCanvas = canvasWrapper ? canvasWrapper.querySelector('canvas') : null;
+                    if (imageCanvas) {
+                        imageCanvas.style.cursor = 'move';
+                    }
+                }
+            });
+        }
+
+        function updateCanvasPosition() {
+            if (!canvasWrapper || !paperContainer) return;
+            var scale = parseFloat(paperContainer.style.transform.match(/scale\(([^)]+)\)/)?.[1] || '1');
+            var x = imageX * MM_TO_PX * scale;
+            var y = imageY * MM_TO_PX * scale;
+            canvasWrapper.style.left = x + 'px';
+            canvasWrapper.style.top = y + 'px';
+        }
+
+        function updateCanvasSize() {
+            if (!canvasWrapper || !paperContainer) return;
+            var scale = parseFloat(paperContainer.style.transform.match(/scale\(([^)]+)\)/)?.[1] || '1');
+            var imageWidthPx = imageWidth * MM_TO_PX;
+            var imageHeightPx = imageHeight * MM_TO_PX;
+            
+            // 计算显示尺寸
+            var displayWidth = imageWidthPx * scale;
+            var displayHeight = imageHeightPx * scale;
+            
+            // 更新容器显示尺寸
+            canvasWrapper.style.width = displayWidth + 'px';
+            canvasWrapper.style.height = displayHeight + 'px';
+            
+            var imageCanvas = canvasWrapper.querySelector('canvas');
+            if (imageCanvas) {
+                // canvas的实际像素尺寸应该等于显示尺寸
+                imageCanvas.width = displayWidth;
+                imageCanvas.height = displayHeight;
+                // 重新绘制
+                updatePreview(imageCanvas, imageCanvas.getContext('2d'));
+            }
+        }
+
+        // 添加文字功能
+        function addText() {
+            var textInput = document.getElementById('textInput');
+            var fontSizeInput = document.getElementById('fontSize');
+            var text = textInput.value.trim();
+            var fontSize = parseFloat(fontSizeInput.value) || 5;
+            
+            if (!text) {
+                showStatus('请输入文字', 'error');
+                return;
+            }
+            
+            // 默认位置：居中
+            var textX = paperWidth / 2;
+            var textY = paperHeight / 2;
+            
+            // 添加到文字列表
+            var textItem = {
+                text: text,
+                x: textX,
+                y: textY,
+                fontSize: fontSize,
+                id: Date.now() + Math.random() // 唯一ID
+            };
+            textItems.push(textItem);
+            
+            // 清空输入框
+            textInput.value = '';
+            
+            // 创建文字框
+            createTextWrapper(textItems.length - 1);
+            showStatus('文字已添加，可拖动调整位置', 'success');
+        }
+        
+        // 创建文字框
+        function createTextWrapper(index) {
+            if (!paperContainer || index < 0 || index >= textItems.length) return;
+            
+            var textItem = textItems[index];
+            var scale = parseFloat(paperContainer.style.transform.match(/scale\(([^)]+)\)/)?.[1] || '1');
+            
+            // 创建文字框元素
+            var wrapper = document.createElement('div');
+            wrapper.className = 'text-wrapper';
+            wrapper.dataset.textIndex = index;
+            wrapper.style.left = (textItem.x * MM_TO_PX * scale) + 'px';
+            wrapper.style.top = (textItem.y * MM_TO_PX * scale) + 'px';
+            wrapper.style.fontSize = (textItem.fontSize * MM_TO_PX * scale) + 'px';
+            
+            var textContent = document.createElement('div');
+            textContent.className = 'text-content';
+            textContent.textContent = textItem.text;
+            wrapper.appendChild(textContent);
+            
+            // 绑定拖动事件
+            wrapper.addEventListener('mousedown', function(e) {
+                if (e.target === wrapper || e.target === textContent) {
+                    isDraggingText = true;
+                    draggingTextIndex = index;
+                    textDragStartX = e.clientX;
+                    textDragStartY = e.clientY;
+                    textStartX = textItem.x;
+                    textStartY = textItem.y;
+                    wrapper.style.cursor = 'grabbing';
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+            
+            paperContainer.appendChild(wrapper);
+            textWrappers[index] = wrapper;
+        }
+        
+        // 更新所有文字框位置
+        function updateTextWrappers() {
+            if (!paperContainer) return;
+            
+            var scale = parseFloat(paperContainer.style.transform.match(/scale\(([^)]+)\)/)?.[1] || '1');
+            
+            for (var i = 0; i < textItems.length; i++) {
+                var textItem = textItems[i];
+                var wrapper = textWrappers[i];
+                
+                if (!wrapper) {
+                    createTextWrapper(i);
+                    wrapper = textWrappers[i];
+                }
+                
+                if (wrapper) {
+                    wrapper.style.left = (textItem.x * MM_TO_PX * scale) + 'px';
+                    wrapper.style.top = (textItem.y * MM_TO_PX * scale) + 'px';
+                    wrapper.style.fontSize = (textItem.fontSize * MM_TO_PX * scale) + 'px';
+                }
+            }
+        }
+
+        function adjustThreshold(delta) {
+            threshold = Math.max(0, Math.min(255, threshold + delta));
+            document.getElementById('threshold').value = threshold;
+            document.getElementById('thresholdValue').textContent = threshold.toFixed(1);
+            updateImagePreview();
+        }
+
+        function adjustRGBThreshold(channel, delta) {
+            var thresholdVar = channel === 'R' ? 'thresholdR' : (channel === 'G' ? 'thresholdG' : 'thresholdB');
+            var valueVar = channel === 'R' ? thresholdR : (channel === 'G' ? thresholdG : thresholdB);
+            var newValue = Math.max(0, Math.min(255, valueVar + delta));
+            
+            if (channel === 'R') {
+                thresholdR = newValue;
+                document.getElementById('thresholdR').value = thresholdR;
+                document.getElementById('thresholdRValue').textContent = thresholdR.toFixed(1);
+            } else if (channel === 'G') {
+                thresholdG = newValue;
+                document.getElementById('thresholdG').value = thresholdG;
+                document.getElementById('thresholdGValue').textContent = thresholdG.toFixed(1);
+            } else {
+                thresholdB = newValue;
+                document.getElementById('thresholdB').value = thresholdB;
+                document.getElementById('thresholdBValue').textContent = thresholdB.toFixed(1);
+            }
+            
+            updateImagePreview();
+        }
+
+        function updateImagePreview() {
+            if (canvasWrapper) {
+                var imageCanvas = canvasWrapper.querySelector('canvas');
+                if (imageCanvas) {
+                    updatePreview(imageCanvas, imageCanvas.getContext('2d'));
+                }
+            }
+        }
+
+        function updatePreview(canvas, ctx) {
+            if (!originalImage || !canvas || !ctx) return;
+
+            var canvasWidth = canvas.width;
+            var canvasHeight = canvas.height;
+
+            // 清除画布
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            // 计算图片应该绘制的尺寸（基于毫米尺寸）
+            var scale = parseFloat(paperContainer.style.transform.match(/scale\(([^)]+)\)/)?.[1] || '1');
+            var targetWidthPx = imageWidth * MM_TO_PX * scale;
+            var targetHeightPx = imageHeight * MM_TO_PX * scale;
+            
+            // 创建临时canvas处理旋转
+            var tempCanvas = document.createElement('canvas');
+            var tempCtx = tempCanvas.getContext('2d');
+            
+            // 根据旋转角度确定临时canvas尺寸
+            if (imageRotation === 90 || imageRotation === 270) {
+                tempCanvas.width = targetHeightPx;
+                tempCanvas.height = targetWidthPx;
+            } else {
+                tempCanvas.width = targetWidthPx;
+                tempCanvas.height = targetHeightPx;
+            }
+            
+            // 在临时canvas上绘制并旋转图片
+            tempCtx.save();
+            tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+            tempCtx.rotate(imageRotation * Math.PI / 180);
+            tempCtx.drawImage(originalImage, -targetWidthPx / 2, -targetHeightPx / 2, targetWidthPx, targetHeightPx);
+            tempCtx.restore();
+            
+            // 将临时canvas绘制到目标canvas
+            ctx.drawImage(tempCanvas, 0, 0, canvasWidth, canvasHeight);
+            
+            // 获取图像数据
+            var imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+            // 应用效果
+            // 1. 先应用描边增强（在阈值处理之前）
+            if (outlineEnabled) {
+                imageData = applyOutline(imageData, ctx);
+            }
+            
+            // 2. 反色效果
+            if (invertEnabled) {
+                var data = imageData.data;
+                for (var i = 0; i < data.length; i += 4) {
+                    data[i] = 255 - data[i];
+                    data[i + 1] = 255 - data[i + 1];
+                    data[i + 2] = 255 - data[i + 2];
+                }
+            }
+            
+            // 3. 然后应用半色调或阈值处理
+            if (halftoneEnabled) {
+                imageData = applyHalftone(imageData, ctx);
+            } else {
+                var data = imageData.data;
+                if (useRGBThreshold) {
+                    // RGB独立阈值处理
+                    for (var i = 0; i < data.length; i += 4) {
+                        var r = data[i] >= thresholdR ? 255 : 0;
+                        var g = data[i + 1] >= thresholdG ? 255 : 0;
+                        var b = data[i + 2] >= thresholdB ? 255 : 0;
+                        // 转换为灰度
+                        var gray = (r + g + b) / 3;
+                        data[i] = gray;
+                        data[i + 1] = gray;
+                        data[i + 2] = gray;
+                    }
+                } else {
+                    // 统一阈值处理
+                    for (var i = 0; i < data.length; i += 4) {
+                        var gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                        var value = gray >= threshold ? 255 : 0;
+                        data[i] = value;
+                        data[i + 1] = value;
+                        data[i + 2] = value;
+                    }
+                }
+            }
+
+            // 将处理后的图像数据绘制回canvas
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        // 点阵半色调算法（圆形点阵）
+        function applyHalftone(imageData, ctx) {
+            var width = imageData.width;
+            var height = imageData.height;
+            var data = imageData.data;
+            
+            // 创建输出图像数据
+            var output = ctx.createImageData(width, height);
+            var outputData = output.data;
+            
+            // 点阵参数
+            var cellSize = 8; // 点阵单元大小（像素）
+            var maxRadius = cellSize / 2 - 1; // 最大圆点半径
+            
+            // 先转换为灰度
+            var grayData = new Array(width * height);
+            for (var i = 0; i < data.length; i += 4) {
+                var gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                grayData[i / 4] = gray;
+            }
+            
+            // 使用当前阈值
+            var currentThreshold = useRGBThreshold ? 
+                (thresholdR + thresholdG + thresholdB) / 3 : threshold;
+            
+            // 点阵处理
+            for (var y = 0; y < height; y += cellSize) {
+                for (var x = 0; x < width; x += cellSize) {
+                    // 计算当前单元格的平均灰度值
+                    var sumGray = 0;
+                    var count = 0;
+                    
+                    for (var cy = 0; cy < cellSize && (y + cy) < height; cy++) {
+                        for (var cx = 0; cx < cellSize && (x + cx) < width; cx++) {
+                            var idx = ((y + cy) * width + (x + cx));
+                            sumGray += grayData[idx] || 0;
+                            count++;
+                        }
+                    }
+                    
+                    var avgGray = count > 0 ? sumGray / count : 0;
+                    
+                    // 根据灰度值计算圆点半径
+                    // 灰度值越高，圆点越大（白色区域）
+                    var normalizedGray = avgGray / 255;
+                    var radius = maxRadius * normalizedGray;
+                    
+                    // 单元格中心位置
+                    var centerX = x + cellSize / 2;
+                    var centerY = y + cellSize / 2;
+                    
+                    // 在单元格内绘制圆点
+                    for (var cy = 0; cy < cellSize && (y + cy) < height; cy++) {
+                        for (var cx = 0; cx < cellSize && (x + cx) < width; cx++) {
+                            var px = x + cx;
+                            var py = y + cy;
+                            var idx = (py * width + px) * 4;
+                            
+                            // 计算到中心的距离
+                            var dx = px - centerX;
+                            var dy = py - centerY;
+                            var dist = Math.sqrt(dx * dx + dy * dy);
+                            
+                            // 如果距离小于半径，绘制黑色点；否则绘制白色
+                            var pixelValue = dist <= radius ? 0 : 255;
+                            
+                            outputData[idx] = pixelValue;
+                            outputData[idx + 1] = pixelValue;
+                            outputData[idx + 2] = pixelValue;
+                            outputData[idx + 3] = data[idx + 3];
+                        }
+                    }
+                }
+            }
+            
+            return output;
+        }
+
+        // 增强描边效果
+        function applyOutline(imageData, ctx) {
+            var width = imageData.width;
+            var height = imageData.height;
+            var data = imageData.data;
+            
+            // 先转换为灰度
+            var grayData = new Array(width * height);
+            for (var i = 0; i < data.length; i += 4) {
+                var gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                grayData[i / 4] = gray;
+            }
+            
+            var output = ctx.createImageData(width, height);
+            var outputData = output.data;
+            
+            // 使用Sobel算子检测边缘
+            var sobelX = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+            var sobelY = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
+            
+            // 存储边缘强度
+            var edgeMap = new Array(width * height);
+            var maxEdge = 0;
+            
+            for (var y = 1; y < height - 1; y++) {
+                for (var x = 1; x < width - 1; x++) {
+                    var gx = 0, gy = 0;
+                    
+                    for (var ky = -1; ky <= 1; ky++) {
+                        for (var kx = -1; kx <= 1; kx++) {
+                            var idx = ((y + ky) * width + (x + kx));
+                            var gray = grayData[idx];
+                            gx += gray * sobelX[ky + 1][kx + 1];
+                            gy += gray * sobelY[ky + 1][kx + 1];
+                        }
+                    }
+                    
+                    var magnitude = Math.sqrt(gx * gx + gy * gy);
+                    var idx = y * width + x;
+                    edgeMap[idx] = magnitude;
+                    if (magnitude > maxEdge) {
+                        maxEdge = magnitude;
+                    }
+                }
+            }
+            
+            // 归一化边缘强度并增强描边
+            var threshold = maxEdge * 0.3; // 边缘阈值
+            
+            for (var y = 0; y < height; y++) {
+                for (var x = 0; x < width; x++) {
+                    var idx = y * width + x;
+                    var edgeStrength = edgeMap[idx] || 0;
+                    var originalIdx = idx * 4;
+                    
+                    // 如果边缘强度足够，增强描边
+                    if (edgeStrength > threshold) {
+                        // 增强边缘：将边缘区域变暗（黑色描边）
+                        var enhanceFactor = Math.min(1.0, edgeStrength / maxEdge);
+                        var darken = 255 * enhanceFactor * 0.8; // 描边强度
+                        
+                        // 在原始图像基础上加深边缘
+                        var originalGray = grayData[idx];
+                        var newGray = Math.max(0, originalGray - darken);
+                        
+                        outputData[originalIdx] = newGray;
+                        outputData[originalIdx + 1] = newGray;
+                        outputData[originalIdx + 2] = newGray;
+                        outputData[originalIdx + 3] = data[originalIdx + 3];
+                    } else {
+                        // 保持原始颜色
+                        outputData[originalIdx] = data[originalIdx];
+                        outputData[originalIdx + 1] = data[originalIdx + 1];
+                        outputData[originalIdx + 2] = data[originalIdx + 2];
+                        outputData[originalIdx + 3] = data[originalIdx + 3];
+                    }
+                }
+            }
+            
+            return output;
+        }
+
+        // 设置绘制canvas
+
+        function updatePrinterList() {
+            if (!api) return;
+            
+            var printerSelect = document.getElementById('printerSelect');
+            printerSelect.innerHTML = '<option value="">正在加载...</option>';
+            
+            try {
+                var printers = api.getPrinters({ onlyLocal: false });
+                printerSelect.innerHTML = '';
+                
+                if (printers && printers.length > 0) {
+                    for (var i = 0; i < printers.length; i++) {
+                        var printer = printers[i];
+                        var shownName = printer.deviceName || printer.name;
+                        var name = api.isLocalPrinter(printer) 
+                            ? shownName 
+                            : shownName + "@" + (printer.hostname || printer.ip);
+                        var value = api.isLocalPrinter(printer) 
+                            ? printer.name 
+                            : printer.name + "@" + printer.ip;
+                        
+                        var option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = name;
+                        printerSelect.appendChild(option);
+                    }
+                    
+                    document.getElementById('printBtn').disabled = false;
+                    showStatus('找到 ' + printers.length + ' 台打印机', 'success');
+                } else {
+                    printerSelect.innerHTML = '<option value="">未检测到打印机</option>';
+                    showStatus('未检测到打印机', 'error');
+                }
+            } catch (error) {
+                console.error('获取打印机列表失败:', error);
+                printerSelect.innerHTML = '<option value="">获取失败</option>';
+                showStatus('获取打印机列表失败', 'error');
+            }
+        }
+
+        function getCurrentPrinter() {
+            var printerSelect = document.getElementById('printerSelect');
+            var value = printerSelect.value;
+            if (!value) return null;
+            
+            var arr = value.split("@");
+            var result = { name: arr[0] };
+            if (arr[1]) {
+                result.ip = arr[1];
+            }
+            return result;
+        }
+
+        function printImage() {
+            if (!api) {
+                showStatus('打印助手未初始化', 'error');
+                return;
+            }
+            
+            if (!originalImage) {
+                showStatus('请先加载图片', 'error');
+                return;
+            }
+            
+            var printer = getCurrentPrinter();
+            if (!printer || !printer.name) {
+                showStatus('请选择打印机', 'error');
+                return;
+            }
+            
+            var labelWidth = paperWidth;
+            var labelHeight = paperHeight;
+            
+            var processedImageData = getProcessedImageData();
+            
+            showStatus('正在打印...', 'info');
+            
+            api.openPrinter(printer, function(success) {
+                if (!success) {
+                    showStatus('打印机打开失败', 'error');
+                    return;
+                }
+                
+                var startResult = api.startJob({
+                    width: labelWidth,
+                    height: labelHeight,
+                    jobName: "图片打印"
+                });
+                
+                if (!startResult) {
+                    showStatus('创建打印任务失败', 'error');
+                    api.closePrinter();
+                    return;
+                }
+                
+                // 如果有图片，绘制图片
+                if (originalImage) {
+                    // 使用SDK的灰度处理，传递整数阈值（不带小数点）
+                    // 257 = 直接打印原色（用于已处理的图片），256 = 灰度打印，0-255 = 黑白阈值
+                    var thresholdValue;
+                    if (halftoneEnabled || outlineEnabled || invertEnabled) {
+                        // 如果启用了前端处理的效果（半色调、描边、反色），使用257直接打印处理后的图片
+                        thresholdValue = 257;
+                    } else {
+                        // 使用整数阈值，让SDK自己处理灰度转换
+                        thresholdValue = Math.round(threshold);
+                        thresholdValue = Math.max(0, Math.min(255, thresholdValue));
+                    }
+                    
+                    api.drawImageD({
+                        data: processedImageData,
+                        x: imageX,
+                        y: imageY,
+                        drawWidth: imageWidth,
+                        drawHeight: imageHeight,
+                        threshold: thresholdValue,
+                        orientation: 0
+                    });
+                }
+                
+                api.commitJob(function(result) {
+                    api.closePrinter();
+                    if (result) {
+                        showStatus('打印成功！', 'success');
+                    } else {
+                        showStatus('打印失败', 'error');
+                    }
+                });
+            });
+        }
+
+        function getProcessedImageData() {
+            // 如果启用了前端处理的效果，需要先处理图片，然后使用threshold: 257直接打印
+            // 否则返回原始图片数据，让SDK使用threshold值进行黑白转换
+            if (!originalImage) return imageDataUrl;
+            
+            // 如果启用了任何前端处理效果（半色调、描边、反色），需要先处理图片
+            if (halftoneEnabled || outlineEnabled || invertEnabled) {
+                // 创建临时canvas处理图片
+                var tempCanvas = document.createElement('canvas');
+                var tempCtx = tempCanvas.getContext('2d');
+                
+                // 计算目标尺寸（像素）
+                var targetWidthPx = imageWidth * MM_TO_PX;
+                var targetHeightPx = imageHeight * MM_TO_PX;
+                
+                tempCanvas.width = targetWidthPx;
+                tempCanvas.height = targetHeightPx;
+                
+                // 绘制图片
+                tempCtx.drawImage(originalImage, 0, 0, targetWidthPx, targetHeightPx);
+                
+                // 获取图像数据并应用效果（和预览逻辑一致）
+                var imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // 1. 应用描边增强
+                if (outlineEnabled) {
+                    imageData = applyOutline(imageData, tempCtx);
+                }
+                
+                // 2. 应用反色效果
+                if (invertEnabled) {
+                    var data = imageData.data;
+                    for (var i = 0; i < data.length; i += 4) {
+                        data[i] = 255 - data[i];
+                        data[i + 1] = 255 - data[i + 1];
+                        data[i + 2] = 255 - data[i + 2];
+                    }
+                }
+                
+                // 3. 应用半色调效果
+                if (halftoneEnabled) {
+                    imageData = applyHalftone(imageData, tempCtx);
+                }
+                
+                // 将处理后的图像数据绘制回canvas
+                tempCtx.putImageData(imageData, 0, 0);
+                
+                // 返回处理后的图片数据（使用threshold: 257直接打印）
+                return tempCanvas.toDataURL('image/png');
+            }
+            
+            // 默认返回原始图片数据，让SDK处理灰度转换
+            return imageDataUrl;
+        }
+
+        // 等比例铺满纸张
+        function fitImageToPaper() {
+            if (!originalImage) {
+                showStatus('请先加载图片', 'error');
+                return;
+            }
+            
+            // 计算图片的宽高比
+            var imageAspectRatio = originalImage.width / originalImage.height;
+            var paperAspectRatio = paperWidth / paperHeight;
+            
+            // 计算等比例铺满的尺寸
+            // 如果图片比纸张更宽，则宽度铺满；否则高度铺满
+            if (imageAspectRatio > paperAspectRatio) {
+                // 图片更宽，宽度铺满
+                imageWidth = paperWidth;
+                imageHeight = paperWidth / imageAspectRatio;
+            } else {
+                // 图片更高，高度铺满
+                imageHeight = paperHeight;
+                imageWidth = paperHeight * imageAspectRatio;
+            }
+            
+            // 居中放置
+            imageX = (paperWidth - imageWidth) / 2;
+            imageY = (paperHeight - imageHeight) / 2;
+            
+            // 更新预览
+            createImagePreview();
+            updatePreviewCanvas();
+            showStatus('图片已等比例铺满纸张', 'success');
+        }
+
+        function startCrop() {
+            if (!originalImage) {
+                showStatus('请先加载图片', 'error');
+                return;
+            }
+            
+            var cropCanvas = document.getElementById('cropCanvas');
+            var cropCtx = cropCanvas.getContext('2d');
+            var cropOverlay = document.getElementById('cropOverlay');
+            
+            // 设置canvas尺寸
+            cropCanvas.width = originalImage.width;
+            cropCanvas.height = originalImage.height;
+            
+            // 绘制图片
+            cropCtx.drawImage(originalImage, 0, 0);
+            
+            // 初始化裁剪区域（整个图片）
+            cropX = 0;
+            cropY = 0;
+            cropWidth = originalImage.width;
+            cropHeight = originalImage.height;
+            
+            // 显示裁剪界面
+            cropOverlay.classList.add('active');
+            updateCropDisplay();
+            
+            // 绑定裁剪事件
+            setupCropEvents();
+        }
+
+        function setupCropEvents() {
+            var cropCanvas = document.getElementById('cropCanvas');
+            var handles = document.querySelectorAll('.crop-handle');
+            
+            // 处理拖拽手柄
+            handles.forEach(function(handle) {
+                handle.addEventListener('mousedown', function(e) {
+                    e.stopPropagation();
+                    isCropping = true;
+                    activeCropHandle = handle.className.split(' ')[1];
+                    cropStartX = e.clientX;
+                    cropStartY = e.clientY;
+                    cropStartCropX = cropX;
+                    cropStartCropY = cropY;
+                    cropStartCropW = cropWidth;
+                    cropStartCropH = cropHeight;
+                });
+            });
+            
+            // 处理画布拖拽（移动裁剪区域）
+            cropCanvas.addEventListener('mousedown', function(e) {
+                if (e.target === cropCanvas) {
+                    isCropping = true;
+                    activeCropHandle = 'move';
+                    cropStartX = e.clientX;
+                    cropStartY = e.clientY;
+                    cropStartCropX = cropX;
+                    cropStartCropY = cropY;
+                }
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isCropping) return;
+                
+                var rect = cropCanvas.getBoundingClientRect();
+                var scaleX = cropCanvas.width / rect.width;
+                var scaleY = cropCanvas.height / rect.height;
+                var deltaX = (e.clientX - cropStartX) * scaleX;
+                var deltaY = (e.clientY - cropStartY) * scaleY;
+                
+                if (activeCropHandle === 'move') {
+                    cropX = Math.max(0, Math.min(cropCanvas.width - cropWidth, cropStartCropX + deltaX));
+                    cropY = Math.max(0, Math.min(cropCanvas.height - cropHeight, cropStartCropY + deltaY));
+                } else {
+                    // 调整裁剪区域大小
+                    if (activeCropHandle.includes('n')) {
+                        cropHeight = Math.max(10, cropStartCropH - deltaY);
+                        cropY = Math.max(0, cropStartCropY + deltaY);
+                    }
+                    if (activeCropHandle.includes('s')) {
+                        cropHeight = Math.max(10, cropStartCropH + deltaY);
+                    }
+                    if (activeCropHandle.includes('w')) {
+                        cropWidth = Math.max(10, cropStartCropW - deltaX);
+                        cropX = Math.max(0, cropStartCropX + deltaX);
+                    }
+                    if (activeCropHandle.includes('e')) {
+                        cropWidth = Math.max(10, cropStartCropW + deltaX);
+                    }
+                    
+                    cropWidth = Math.min(cropWidth, cropCanvas.width - cropX);
+                    cropHeight = Math.min(cropHeight, cropCanvas.height - cropY);
+                }
+                
+                updateCropDisplay();
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isCropping = false;
+                activeCropHandle = null;
+            });
+        }
+
+        function updateCropDisplay() {
+            var cropCanvas = document.getElementById('cropCanvas');
+            var cropCtx = cropCanvas.getContext('2d');
+            var wrapper = document.getElementById('cropCanvasWrapper');
+            var rect = cropCanvas.getBoundingClientRect();
+            
+            // 重新绘制图片
+            cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+            cropCtx.drawImage(originalImage, 0, 0);
+            
+            // 绘制半透明遮罩（降低不透明度，让用户能看到图片）
+            cropCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+            // 清除裁剪区域，显示原图
+            cropCtx.clearRect(cropX, cropY, cropWidth, cropHeight);
+            
+            // 绘制裁剪框边框（更明显）
+            cropCtx.strokeStyle = '#fff';
+            cropCtx.lineWidth = 3;
+            cropCtx.strokeRect(cropX, cropY, cropWidth, cropHeight);
+            
+            // 绘制裁剪框内部阴影，突出裁剪区域
+            cropCtx.strokeStyle = '#000';
+            cropCtx.lineWidth = 1;
+            cropCtx.strokeRect(cropX + 1, cropY + 1, cropWidth - 2, cropHeight - 2);
+            
+            // 更新手柄位置
+            var scaleX = rect.width / cropCanvas.width;
+            var scaleY = rect.height / cropCanvas.height;
+            
+            var handles = {
+                nw: { x: cropX * scaleX, y: cropY * scaleY },
+                ne: { x: (cropX + cropWidth) * scaleX, y: cropY * scaleY },
+                sw: { x: cropX * scaleX, y: (cropY + cropHeight) * scaleY },
+                se: { x: (cropX + cropWidth) * scaleX, y: (cropY + cropHeight) * scaleY },
+                n: { x: (cropX + cropWidth / 2) * scaleX, y: cropY * scaleY },
+                s: { x: (cropX + cropWidth / 2) * scaleX, y: (cropY + cropHeight) * scaleY },
+                w: { x: cropX * scaleX, y: (cropY + cropHeight / 2) * scaleY },
+                e: { x: (cropX + cropWidth) * scaleX, y: (cropY + cropHeight / 2) * scaleY }
+            };
+            
+            Object.keys(handles).forEach(function(key) {
+                var handle = document.querySelector('.crop-handle.' + key);
+                if (handle) {
+                    handle.style.left = handles[key].x + 'px';
+                    handle.style.top = handles[key].y + 'px';
+                }
+            });
+        }
+
+        function confirmCrop() {
+            if (!originalImage) return;
+            
+            // 创建临时canvas进行裁剪
+            var tempCanvas = document.createElement('canvas');
+            tempCanvas.width = cropWidth;
+            tempCanvas.height = cropHeight;
+            var tempCtx = tempCanvas.getContext('2d');
+            
+            // 绘制裁剪后的图片
+            tempCtx.drawImage(originalImage, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+            
+            // 更新原始图片
+            originalImage = new Image();
+            originalImage.onload = function() {
+                // 重新计算图片尺寸以适应打印纸
+                var aspectRatio = originalImage.width / originalImage.height;
+                var maxWidth = paperWidth * 0.9;
+                var maxHeight = paperHeight * 0.9;
+                
+                if (aspectRatio > maxWidth / maxHeight) {
+                    imageWidth = maxWidth;
+                    imageHeight = maxWidth / aspectRatio;
+                } else {
+                    imageHeight = maxHeight;
+                    imageWidth = maxHeight * aspectRatio;
+                }
+                
+                // 居中放置
+                imageX = (paperWidth - imageWidth) / 2;
+                imageY = (paperHeight - imageHeight) / 2;
+                imageRotation = 0;
+                
+                document.getElementById('width').value = imageWidth.toFixed(1);
+                document.getElementById('height').value = imageHeight.toFixed(1);
+                document.getElementById('posX').value = imageX.toFixed(1);
+                document.getElementById('posY').value = imageY.toFixed(1);
+                
+                createImagePreview();
+                showStatus('图片裁剪成功', 'success');
+            };
+            originalImage.src = tempCanvas.toDataURL('image/png');
+            imageDataUrl = tempCanvas.toDataURL('image/png');
+            
+            // 关闭裁剪界面
+            cancelCrop();
+        }
+
+        function cancelCrop() {
+            var cropOverlay = document.getElementById('cropOverlay');
+            cropOverlay.classList.remove('active');
+            isCropping = false;
+            activeCropHandle = null;
+        }
+
+        function showStatus(message, type) {
+            var statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + type + ' show';
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(function() {
+                    statusEl.classList.remove('show');
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
