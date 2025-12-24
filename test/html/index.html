@@ -92,6 +92,34 @@
             z-index: 1000;
         }
 
+        .header-dropdown {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 300px;
+            background: white;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .header-dropdown.show {
+            display: flex;
+        }
+
+        .header-dropdown h3 {
+            margin-bottom: 16px;
+            font-size: 15px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .info-tooltip.show {
             display: flex;
         }
@@ -473,7 +501,7 @@
         <div class="header-links">
             <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔍</button>
             <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔳</button>
-            <a href="https://www.remove.bg/zh" target="_blank" class="btn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">✂️</a>
+            <button class="btn" id="removeBgBtn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✂️</button>
             <div class="info-btn" id="infoBtn" title="项目信息">
                 <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
@@ -496,7 +524,7 @@
                         <li>文字旋转 (90°) & 预览缩放 (10%-300%)</li>
                         <li>文字黑白颜色切换，支持图层反白打印</li>
                         <li>支持 Del/Backspace 快捷键删除元素</li>
-                        <li>集成一键 Logo 搜索 & 去背景工具</li>
+                        <li>集成一键 Logo 搜索 & 多种去背景工具</li>
                         <li>修复打印右侧白边，优化顶栏与侧边栏布局</li>
                     </ul>
                 </div>
@@ -504,6 +532,38 @@
                     <span class="info-title">👨‍💻 关于作者</span>
                     <p>Web 软件作者: <b>cornradio</b></p>
                     <a href="https://github.com/cornradio" target="_blank" class="info-link">GitHub: cornradio</a>
+                </div>
+            </div>
+
+            <!-- Search Dropdown -->
+            <div id="searchModal" class="header-dropdown">
+                <h3>🔍 Logo 搜索</h3>
+                <div class="control-group">
+                    <input type="text" id="logoSearchInput" placeholder="输入品牌/名称..." style="margin-bottom: 12px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button class="btn btn-primary" id="goGoogle">谷歌搜索</button>
+                        <button class="btn btn-primary" id="goBing">必应搜索</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Dropdown -->
+            <div id="qrModal" class="header-dropdown">
+                <h3>🔳 二维码创作</h3>
+                <div class="control-group">
+                    <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
+                    <button class="btn btn-primary btn-full" id="confirmQR">生成图片并添加</button>
+                </div>
+            </div>
+
+            <!-- Background Removal Dropdown -->
+            <div id="bgModal" class="header-dropdown">
+                <h3>✂️ 去除背景工具</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.remove.bg/zh', '_blank'); document.getElementById('bgModal').classList.remove('show');">Remove.bg (推荐)</button>
+                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.adobe.com/express/feature/image/remove-background', '_blank'); document.getElementById('bgModal').classList.remove('show');">Adobe Express</button>
+                    <button class="btn btn-primary btn-full" onclick="window.open('https://pixian.ai/', '_blank'); document.getElementById('bgModal').classList.remove('show');">Pixian.AI</button>
+                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.photoroom.com/tools/background-remover', '_blank'); document.getElementById('bgModal').classList.remove('show');">PhotoRoom</button>
                 </div>
             </div>
         </div>
@@ -695,33 +755,6 @@
     </div>
 
     <div class="status-bar" id="statusBar">提示消息</div>
-
-    <!-- Search Modal -->
-    <div id="searchModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000;">
-        <div style="background: white; padding: 24px; border-radius: 12px; width: 320px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-            <h3 style="margin-bottom: 16px; font-size: 16px;">🔍 Logo 搜索</h3>
-            <div class="control-group">
-                <input type="text" id="logoSearchInput" placeholder="输入品牌/名称..." style="margin-bottom: 12px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <button class="btn btn-primary" id="goGoogle">谷歌搜索</button>
-                    <button class="btn btn-primary" id="goBing">必应搜索</button>
-                </div>
-                <button class="btn btn-full" id="closeSearch" style="margin-top: 12px; border: none; color: var(--text-muted);">取消</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- QR Modal -->
-    <div id="qrModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000;">
-        <div style="background: white; padding: 24px; border-radius: 12px; width: 320px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-            <h3 style="margin-bottom: 16px; font-size: 16px;">🔳 二维码创作</h3>
-            <div class="control-group">
-                <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
-                <button class="btn btn-primary btn-full" id="confirmQR">生成图片</button>
-                <button class="btn btn-full" id="closeQR" style="margin-top: 12px; border: none; color: var(--text-muted);">取消</button>
-            </div>
-        </div>
-    </div>
 
     <script>
         // --- Configuration & Constants ---
@@ -1369,13 +1402,61 @@
             refreshPrinters();
 
             // Logo Search & QR Code logic
-            document.getElementById('searchLogoBtn').onclick = () => {
-                document.getElementById('searchModal').style.display = 'flex';
-                document.getElementById('logoSearchInput').focus();
+            const toggleDropdown = (id) => {
+                const dropdowns = ['infoTooltip', 'searchModal', 'qrModal', 'bgModal'];
+                dropdowns.forEach(dId => {
+                    const el = document.getElementById(dId);
+                    if (dId === id) {
+                        el.classList.toggle('show');
+                        if (el.classList.contains('show')) {
+                            const input = el.querySelector('input, textarea');
+                            if (input) setTimeout(() => input.focus(), 100);
+                        }
+                    } else {
+                        el.classList.remove('show');
+                    }
+                });
+                
+                const infoBtn = document.getElementById('infoBtn');
+                if (id === 'infoTooltip' && document.getElementById('infoTooltip').classList.contains('show')) {
+                    infoBtn.classList.add('active');
+                } else {
+                    infoBtn.classList.remove('active');
+                }
             };
-            document.getElementById('closeSearch').onclick = () => {
-                document.getElementById('searchModal').style.display = 'none';
+
+            document.getElementById('searchLogoBtn').onclick = (e) => {
+                toggleDropdown('searchModal');
+                e.stopPropagation();
             };
+            
+            document.getElementById('createQRBtn').onclick = (e) => {
+                toggleDropdown('qrModal');
+                e.stopPropagation();
+            };
+
+            document.getElementById('removeBgBtn').onclick = (e) => {
+                toggleDropdown('bgModal');
+                e.stopPropagation();
+            };
+
+            document.getElementById('infoBtn').onclick = (e) => {
+                toggleDropdown('infoTooltip');
+                e.stopPropagation();
+            };
+
+            // Global click to close dropdowns
+            window.addEventListener('click', (e) => {
+                if (!e.target.closest('.header-dropdown') && !e.target.closest('.info-tooltip')) {
+                    toggleDropdown(null);
+                }
+            });
+
+            // Prevent dropdowns from closing when clicking inside them
+            document.querySelectorAll('.header-dropdown, .info-tooltip').forEach(el => {
+                el.onclick = (e) => e.stopPropagation();
+            });
+
             const performSearch = (engine) => {
                 const brand = document.getElementById('logoSearchInput').value.trim();
                 if (!brand) return;
@@ -1384,22 +1465,16 @@
                     ? `https://www.google.com/search?q=${query}&tbm=isch`
                     : `https://www.bing.com/images/search?q=${query}`;
                 window.open(url, '_blank');
+                toggleDropdown(null);
             };
             document.getElementById('goGoogle').onclick = () => performSearch('google');
             document.getElementById('goBing').onclick = () => performSearch('bing');
 
-            document.getElementById('createQRBtn').onclick = () => {
-                document.getElementById('qrModal').style.display = 'flex';
-                document.getElementById('qrContentInput').focus();
-            };
-            document.getElementById('closeQR').onclick = () => {
-                document.getElementById('qrModal').style.display = 'none';
-            };
             document.getElementById('confirmQR').onclick = () => {
                 const text = document.getElementById('qrContentInput').value.trim();
                 if (!text) return;
                 
-                document.getElementById('qrModal').style.display = 'none';
+                toggleDropdown(null);
                 showStatus('正在生成二维码...');
                 
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(text)}`;
@@ -1432,27 +1507,6 @@
             document.getElementById('saveTplBtn').onclick = saveCurrentAsTpl;
             document.getElementById('loadTplBtn').onclick = loadSelectedTpl;
             document.getElementById('deleteTplBtn').onclick = deleteSelectedTpl;
-
-            // Project Info Toggle
-            document.getElementById('infoBtn').onclick = (e) => {
-                const tooltip = document.getElementById('infoTooltip');
-                const btn = document.getElementById('infoBtn');
-                tooltip.classList.toggle('show');
-                btn.classList.toggle('active');
-                e.stopPropagation();
-            };
-
-            // Close tooltip when clicking elsewhere
-            window.addEventListener('click', () => {
-                const tooltip = document.getElementById('infoTooltip');
-                const btn = document.getElementById('infoBtn');
-                if (tooltip.classList.contains('show')) {
-                    tooltip.classList.remove('show');
-                    btn.classList.remove('active');
-                }
-            });
-
-            document.getElementById('infoTooltip').onclick = (e) => e.stopPropagation();
 
             // Text Style Listeners
             document.getElementById('fontFamilySelect').onchange = (e) => {
