@@ -502,6 +502,7 @@
                         <li>文字黑白颜色切换，支持图层反白打印</li>
                         <li>集成一键 Logo 搜索 (谷歌/必应)</li>
                         <li>在线二维码创作与自动排版</li>
+                        <li>支持 Del/Backspace 快捷键删除元素</li>
                         <li>重构顶栏布局，修复打印右侧微小白边</li>
                     </ul>
                 </div>
@@ -1519,27 +1520,43 @@
                 document.getElementById('textInput').value = '';
             };
 
-            // Keyboard support for font size and editing
+            // Keyboard support for font size, editing, and deletion
             window.addEventListener('keydown', (e) => {
                 if (!state.selectedId) return;
-                const item = state.items.find(i => i.id === state.selectedId);
-                if (!item || item.type !== 'text') return;
+                
+                // Don't trigger if user is typing in an input or textarea
+                if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                    return;
+                }
 
-                if (e.key === 'ArrowUp') {
-                    item.size += 0.5;
-                    renderAll();
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item) return;
+
+                // Deletion (Works for both images and text)
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    deleteItem(item.id);
                     e.preventDefault();
-                } else if (e.key === 'ArrowDown') {
-                    item.size = Math.max(1, item.size - 0.5);
-                    renderAll();
-                    e.preventDefault();
-                } else if (e.key === 'Enter') {
-                    const newText = prompt('编辑文字内容:', item.text);
-                    if (newText !== null) {
-                        item.text = newText;
+                    return;
+                }
+
+                // Text specific shortcuts
+                if (item.type === 'text') {
+                    if (e.key === 'ArrowUp') {
+                        item.size += 0.5;
                         renderAll();
+                        e.preventDefault();
+                    } else if (e.key === 'ArrowDown') {
+                        item.size = Math.max(1, item.size - 0.5);
+                        renderAll();
+                        e.preventDefault();
+                    } else if (e.key === 'Enter') {
+                        const newText = prompt('编辑文字内容:', item.text);
+                        if (newText !== null) {
+                            item.text = newText;
+                            renderAll();
+                        }
+                        e.preventDefault();
                     }
-                    e.preventDefault();
                 }
             });
 
