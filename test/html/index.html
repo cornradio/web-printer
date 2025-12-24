@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>图片编辑与打印 V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&family=ZCOOL+KuaiLe&family=Long+Cang&family=Pacifico&family=Bangers&display=swap" rel="stylesheet">
     <script type="text/javascript" src="./browser-polyfill.min.js"></script>
     <script type="text/javascript" src="./lib/dtpweb.js"></script>
     <style>
@@ -396,7 +397,13 @@
 
         /* Components */
         .section {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section:last-child {
+            border-bottom: none;
         }
 
         .section-title {
@@ -579,6 +586,16 @@
             background: #eff6ff;
         }
 
+        body.dark .drop-zone:hover,
+        body.dark .drop-zone.drag-over,
+        @media (prefers-color-scheme: dark) {
+            body:not(.light) .drop-zone:hover,
+            body:not(.light) .drop-zone.drag-over {
+                background: #1e293b;
+                border-color: var(--primary-color);
+            }
+        }
+
         .drop-zone-text {
             font-size: 13px;
             color: var(--text-muted);
@@ -667,6 +684,38 @@
             gap: 12px;
         }
 
+        /* Text Edit Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: var(--panel-bg);
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 {
+            margin-bottom: 16px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
         /* Better Sliders */
         input[type="range"] {
             width: 100%;
@@ -691,6 +740,7 @@
     <header class="app-header">
         <h1 style="font-size: 18px;">图片打印编辑工具 V2</h1>
         <div class="header-links">
+            <button class="btn" id="aiToolsBtn" title="AI 绘图助手" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✨</button>
             <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔍</button>
             <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔳</button>
             <button class="btn" id="removeBgBtn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✂️</button>
@@ -715,20 +765,39 @@
                     <a href="https://www.dothantech.com/xiazaizhongxin/" target="_blank" class="info-link">官方驱动下载中心</a>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
-                    <span class="info-title">🚀 Release Note (v1.2)</span>
+                    <span class="info-title">🚀 Release Note (v2.2)</span>
                     <ul style="padding-left: 16px; margin-top: 4px; font-size: 11px; color: var(--text-muted);">
-                        <li><b>图片镜像翻转</b>：支持图片水平镜像切换</li>
-                        <li><b>图层一键复制</b>：支持在图层管理中快速克隆现有图层</li>
-                        <li><b>导出为 PNG</b>：支持将当前编辑效果导出为高分辨率图片</li>
-                        <li><b>图层管理 (Drag & Drop)</b>：支持鼠标自由拖拽排序及实时指示线</li>
-                        <li><b>侧滑抽屉面板</b>：图层管理改为右侧滑动呼出</li>
-                        <li><b>可视化缩略图</b>：图层列表显示真实内容预览</li>
+                        <li><b>AI 工具阵营优化</b>：新增通义千问、豆包，移除失效及收费工具</li>
+                        <li><b>AI 助手增强</b>：新增“单色黑线稿”话术，扩充主流 AI 快捷跳转</li>
+                        <li><b>集成 AI 绘图助手</b>：支持绘图话术一键复制及多款主流 AI</li>
                     </ul>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
                     <span class="info-title">👨‍💻 关于作者</span>
                     <p>Web 软件作者: <b>cornradio</b></p>
                     <a href="https://github.com/cornradio" target="_blank" class="info-link">GitHub: cornradio</a>
+                </div>
+            </div>
+
+            <!-- AI Tools Dropdown -->
+            <div id="aiModal" class="header-dropdown">
+                <h3>✨ AI 绘图助手</h3>
+                <div class="control-group">
+                    <label>复制绘图话术：</label>
+                    <div class="input-row" style="background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; margin-bottom: 4px;" onclick="navigator.clipboard.writeText('处理成单色黑素描风格'); showStatus('已复制话术');">
+                        <code style="font-size: 13px; color: var(--primary-color);">处理成单色黑素描风格</code>
+                        <span style="font-size: 12px; color: var(--text-muted);">📋</span>
+                    </div>
+                    <div class="input-row" style="background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="navigator.clipboard.writeText('处理成单色黑线稿'); showStatus('已复制话术');">
+                        <code style="font-size: 13px; color: var(--primary-color);">处理成单色黑线稿</code>
+                        <span style="font-size: 12px; color: var(--text-muted);">📋</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+                        <button class="btn btn-primary" onclick="window.open('https://gemini.google.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">Gemini</button>
+                        <button class="btn btn-primary" onclick="window.open('https://grok.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">Grok</button>
+                        <button class="btn btn-primary" onclick="window.open('https://www.doubao.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">豆包 (笨笨)</button>
+                        <button class="btn btn-primary" onclick="window.open('https://www.qianwen.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">千问</button>
+                    </div>
                 </div>
             </div>
 
@@ -773,16 +842,12 @@
                 <div class="section-title">📄 纸张设置</div>
                 <div class="control-group">
                     <div class="input-row">
-                        <div class="input-field">
-                            <label>宽度 (mm)</label>
-                            <input type="number" id="paperWidth" value="40" min="10" max="100">
-                        </div>
-                        <div class="input-field">
-                            <label>高度 (mm)</label>
-                            <input type="number" id="paperHeight" value="30" min="10" max="150">
-                        </div>
+                        <input type="text" id="paperSizeInput" placeholder="宽度 x 高度 (mm)" title="格式: 40x30" style="flex: 1;">
+                        <button class="btn" id="applyPaperSize" title="应用尺寸" style="padding: 8px 12px;">应用</button>
                     </div>
-                    <button class="btn btn-full" id="applyPaperSize">应用纸张设置</button>
+                    <div id="recentPaperSizes" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <!-- Quick buttons will be injected here -->
+                    </div>
                 </div>
             </div>
 
@@ -828,12 +893,23 @@
                 <div class="section-title">🎨 文字样式</div>
                 <div class="control-group">
                     <div>
-                        <label>字体名称</label>
-                        <select id="fontFamilySelect">
-                            <option value="微软雅黑">微软雅黑</option>
-                            <option value="宋体">宋体</option>
-                            <option value="黑体">黑体</option>
-                        </select>
+                        <label>字体名称 <span style="font-size: 10px; color: var(--primary-color); opacity: 0.8;">(←/→ 切换)</span></label>
+                        <div class="input-row">
+                            <select id="fontFamilySelect" style="flex: 1;">
+                                <option value="微软雅黑">微软雅黑</option>
+                                <option value="宋体">宋体</option>
+                                <option value="黑体">黑体</option>
+                                <optgroup label="🎨 个性字体">
+                                    <option value="'Ma Shan Zheng', cursive">马善政楷书 (书法)</option>
+                                    <option value="'ZCOOL XiaoWei', serif">站酷小薇体 (精美)</option>
+                                    <option value="'ZCOOL KuaiLe', cursive">站酷快乐体 (可爱)</option>
+                                    <option value="'Long Cang', cursive">龙藏体 (草书)</option>
+                                    <option value="'Pacifico', cursive">Pacifico (英文手写)</option>
+                                    <option value="'Bangers', system-ui">Bangers (漫画风)</option>
+                                </optgroup>
+                            </select>
+                            <button class="btn" id="browseSystemFontsBtn" title="扫描系统已安装字体" style="padding: 4px 8px;">🔍 扫描</button>
+                        </div>
                     </div>
                     <div>
                         <label>文字颜色</label>
@@ -896,14 +972,14 @@
                 <div class="control-group">
                     <div class="input-row">
                         <input type="text" id="tplNameInput" placeholder="输入模板名称..." style="flex: 1;">
-                        <button class="btn" id="saveTplBtn">保存</button>
+                        <button class="btn" id="saveTplBtn" title="保存当前内容为模板">💾</button>
                     </div>
-                    <select id="tplSelect">
-                        <option value="">-- 选择已保存模板 --</option>
-                    </select>
                     <div class="input-row">
-                        <button class="btn btn-full" id="loadTplBtn">加载选中</button>
-                        <button class="btn btn-danger" id="deleteTplBtn">删除</button>
+                        <select id="tplSelect" style="flex: 1;">
+                            <option value="">-- 选择模板 --</option>
+                        </select>
+                        <button class="btn" id="loadTplBtn" title="加载选中模板">📥</button>
+                        <button class="btn btn-danger" id="deleteTplBtn" title="删除选中模板">🗑️</button>
                     </div>
                 </div>
             </div>
@@ -964,7 +1040,20 @@
         </div>
     </div>
 
-    <div class="status-bar" id="statusBar">提示消息</div>
+    <div id="statusBar" class="status-bar">提示消息</div>
+
+    <!-- Text Edit Modal -->
+    <div id="textEditModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>📝 编辑文字内容</h3>
+            <textarea id="editTextarea" rows="6" style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; outline: none; resize: vertical; margin-bottom: 8px; font-family: inherit;"></textarea>
+            <div style="font-size: 11px; color: var(--text-muted); text-align: right;">按 Ctrl + Enter 快速保存</div>
+            <div class="modal-actions">
+                <button class="btn" id="cancelTextEdit">取消</button>
+                <button class="btn btn-primary" id="saveTextEdit">保存修改</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // --- Configuration & Constants ---
@@ -984,6 +1073,7 @@
             lastMousePos: { x: 0, y: 0 },
             isDragging: false,
             isResizing: false,
+            isResizingWidth: false,
             crop: {
                 active: false,
                 targetId: null,
@@ -1003,11 +1093,11 @@
 
         function initApp() {
             // Restore UI values from state
-            document.getElementById('paperWidth').value = state.paper.width;
-            document.getElementById('paperHeight').value = state.paper.height;
+            document.getElementById('paperSizeInput').value = `${state.paper.width}x${state.paper.height}`;
 
             updatePaperUI();
             renderLayersList();
+            renderRecentPaperSizes();
             
             api.checkPlugin((resp) => {
                 if (resp.statusCode === 0) {
@@ -1085,6 +1175,42 @@
             bar.innerText = msg;
             bar.classList.add('show');
             setTimeout(() => bar.classList.remove('show'), 3000);
+        }
+
+        function renderRecentPaperSizes() {
+            const container = document.getElementById('recentPaperSizes');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const recents = JSON.parse(localStorage.getItem('dtp_recent_papers') || '["40x30", "40x40", "30x20", "50x30"]');
+            
+            recents.forEach(size => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.style.padding = '4px 8px';
+                btn.style.fontSize = '11px';
+                btn.innerText = size;
+                btn.onclick = () => {
+                    document.getElementById('paperSizeInput').value = size;
+                    document.getElementById('applyPaperSize').click();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function addRecentPaperSize(w, h) {
+            const size = `${w}x${h}`;
+            let recents = JSON.parse(localStorage.getItem('dtp_recent_papers') || '["40x30", "40x40", "30x20", "50x30"]');
+            
+            // Remove if exists and add to front
+            recents = recents.filter(s => s !== size);
+            recents.unshift(size);
+            
+            // Keep only top 6
+            recents = recents.slice(0, 6);
+            
+            localStorage.setItem('dtp_recent_papers', JSON.stringify(recents));
+            renderRecentPaperSizes();
         }
 
         // --- Image Loading ---
@@ -1385,20 +1511,49 @@
             div.id = item.id;
             if (state.selectedId === item.id) div.classList.add('selected');
             
-            div.style.left = (item.x * MM_TO_PX) + 'px';
-            div.style.top = (item.y * MM_TO_PX) + 'px';
-            div.style.fontSize = (item.size * MM_TO_PX) + 'px';
-            div.style.fontFamily = item.fontFamily;
-            div.style.fontWeight = item.isBold ? 'bold' : 'normal';
-            div.style.color = item.color || 'black';
-            if (item.color === 'white') {
-                div.style.textShadow = '0 0 2px rgba(0,0,0,0.5)';
-            }
+            const dpi = MM_TO_PX;
+            const fontSize = item.size * dpi;
+            const maxWidth = (item.w || 30) * dpi;
+            
+            // Temporary canvas to measure and draw text exactly as it will be printed
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // First pass to get height
+            const textHeight = drawWrappedText(ctx, item, dpi);
+            
+            canvas.width = maxWidth;
+            canvas.height = textHeight;
+            
+            // Second pass to actually draw
+            drawWrappedText(ctx, item, dpi);
+
+            div.style.left = (item.x * dpi) + 'px';
+            div.style.top = (item.y * dpi) + 'px';
+            div.style.width = maxWidth + 'px';
+            div.style.height = textHeight + 'px';
             div.style.transform = `rotate(${item.orientation || 0}deg)`;
-            div.style.transformOrigin = '0 0'; // Top-left origin like the printer
+            div.style.transformOrigin = '0 0';
             
-            div.innerHTML = `<div class="text-content">${item.text}</div>`;
-            
+            // Add a handle for resizing width
+            const resizeH = document.createElement('div');
+            resizeH.className = 'resize-handle';
+            resizeH.style.right = '-6px';
+            resizeH.style.bottom = '50%';
+            resizeH.style.marginTop = '-6px';
+            resizeH.style.cursor = 'ew-resize';
+            resizeH.id = 'resize-width-' + item.id;
+            div.appendChild(resizeH);
+
+            const displayCanvas = document.createElement('canvas');
+            displayCanvas.width = maxWidth;
+            displayCanvas.height = textHeight;
+            displayCanvas.style.width = '100%';
+            displayCanvas.style.height = '100%';
+            const dCtx = displayCanvas.getContext('2d');
+            dCtx.drawImage(canvas, 0, 0);
+            div.appendChild(displayCanvas);
+
             const del = document.createElement('div');
             del.className = 'delete-handle';
             del.innerText = '×';
@@ -1410,7 +1565,8 @@
 
             div.onmousedown = (e) => {
                 state.selectedId = item.id;
-                state.isDragging = true;
+                state.isResizingWidth = e.target.id.startsWith('resize-width-');
+                state.isDragging = !state.isResizingWidth;
                 state.lastMousePos = { x: e.clientX, y: e.clientY };
                 renderAll();
                 e.stopPropagation();
@@ -1460,6 +1616,45 @@
             state.items = state.items.filter(i => i.id !== id);
             if (state.selectedId === id) state.selectedId = null;
             renderAll();
+        }
+
+        function drawWrappedText(ctx, item, dpi) {
+            const fontSize = item.size * dpi;
+            // Ensure font family is quoted if it contains spaces and isn't already quoted
+            const fontFamily = (item.fontFamily.includes(' ') && !item.fontFamily.includes("'") && !item.fontFamily.includes('"')) 
+                ? `"${item.fontFamily}"` 
+                : item.fontFamily;
+            
+            ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px ${fontFamily}`;
+            ctx.fillStyle = item.color || 'black';
+            ctx.textBaseline = 'top';
+            
+            const maxWidth = (item.w || 30) * dpi;
+            const paragraphs = item.text.split('\n');
+            const lines = [];
+
+            paragraphs.forEach(p => {
+                let currentLine = '';
+                for (let i = 0; i < p.length; i++) {
+                    const char = p[i];
+                    const testLine = currentLine + char;
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && currentLine !== '') {
+                        lines.push(currentLine);
+                        currentLine = char;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                lines.push(currentLine);
+            });
+
+            lines.forEach((line, index) => {
+                ctx.fillText(line, 0, index * fontSize * 1.2);
+            });
+            
+            // Return total height with a bit more buffer (1.3 instead of 1.2)
+            return lines.length * fontSize * 1.3; 
         }
 
         function duplicateItem(id) {
@@ -1641,9 +1836,22 @@
         function setupEventListeners() {
             // Paper size
             document.getElementById('applyPaperSize').onclick = () => {
-                const w = parseInt(document.getElementById('paperWidth').value);
-                const h = parseInt(document.getElementById('paperHeight').value);
+                const input = document.getElementById('paperSizeInput').value.trim().toLowerCase();
+                const match = input.match(/^(\d+)[x\*](\d+)$/);
                 
+                if (!match) {
+                    showStatus('尺寸格式错误 (例如: 40x30)', 'error');
+                    return;
+                }
+
+                const w = parseInt(match[1]);
+                const h = parseInt(match[2]);
+                
+                if (w < 10 || w > 100 || h < 10 || h > 150) {
+                    showStatus('尺寸超出范围 (宽10-100, 高10-150)', 'error');
+                    return;
+                }
+
                 state.paper.width = w;
                 state.paper.height = h;
                 
@@ -1651,12 +1859,12 @@
                 localStorage.setItem('dtp_paper_width', w);
                 localStorage.setItem('dtp_paper_height', h);
                 
+                // Save to recent sizes
+                addRecentPaperSize(w, h);
+                
                 updatePaperUI();
-                if (state.workingImg) {
-                    resetImagePos();
-                    renderWorkingImage();
-                }
-                showStatus('纸张尺寸已保存并应用');
+                renderAll();
+                showStatus('纸张尺寸已应用');
             };
 
             // File input
@@ -1799,7 +2007,7 @@
 
             // Logo Search & QR Code logic
             const toggleDropdown = (id) => {
-                const dropdowns = ['infoTooltip', 'searchModal', 'qrModal', 'bgModal'];
+                const dropdowns = ['infoTooltip', 'searchModal', 'qrModal', 'bgModal', 'aiModal'];
                 dropdowns.forEach(dId => {
                     const el = document.getElementById(dId);
                     if (dId === id) {
@@ -1826,6 +2034,11 @@
                 const btn = document.getElementById('layerToggleBtn');
                 sidebar.classList.toggle('show');
                 btn.classList.toggle('active');
+                e.stopPropagation();
+            };
+
+            document.getElementById('aiToolsBtn').onclick = (e) => {
+                toggleDropdown('aiModal');
                 e.stopPropagation();
             };
 
@@ -1931,6 +2144,50 @@
                 }
             };
 
+            document.getElementById('browseSystemFontsBtn').onclick = async () => {
+                if (!window.queryLocalFonts) {
+                    alert('您的浏览器不支持扫描本地字体，请手动输入名称。');
+                    return;
+                }
+
+                try {
+                    showStatus('正在扫描系统字体...');
+                    const availableFonts = await window.queryLocalFonts();
+                    if (availableFonts.length > 0) {
+                        // Extract unique family names
+                        const fontFamilies = [...new Set(availableFonts.map(f => f.family))].sort();
+                        
+                        const select = document.getElementById('fontFamilySelect');
+                        // Add to current select if not already there
+                        const existingValues = Array.from(select.options).map(opt => opt.value);
+                        
+                        const group = document.createElement('optgroup');
+                        group.label = '💻 系统已安装字体';
+                        
+                        let addedCount = 0;
+                        fontFamilies.forEach(family => {
+                            if (!existingValues.includes(family)) {
+                                const opt = document.createElement('option');
+                                opt.value = family;
+                                opt.text = family;
+                                group.appendChild(opt);
+                                addedCount++;
+                            }
+                        });
+                        
+                        if (addedCount > 0) {
+                            select.appendChild(group);
+                            showStatus(`成功加载 ${addedCount} 款系统字体`);
+                        } else {
+                            showStatus('未发现新字体');
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showStatus('获取本地字体失败: ' + err.message, 'error');
+                }
+            };
+
             document.getElementsByName('textColor').forEach(radio => {
                 radio.onchange = (e) => {
                     const item = state.items.find(i => i.id === state.selectedId);
@@ -1983,6 +2240,7 @@
                     text: text,
                     x: 5,
                     y: 5,
+                    w: 30, // Default width for wrapping
                     size: fontSize,
                     fontFamily: document.getElementById('fontFamilySelect').value || '微软雅黑',
                     color: document.querySelector('input[name="textColor"]:checked').value || 'black',
@@ -2023,16 +2281,55 @@
                         item.size = Math.max(1, item.size - 0.5);
                         renderAll();
                         e.preventDefault();
-                    } else if (e.key === 'Enter') {
-                        const newText = prompt('编辑文字内容:', item.text);
-                        if (newText !== null) {
-                            item.text = newText;
-                            renderAll();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                        const select = document.getElementById('fontFamilySelect');
+                        const options = Array.from(select.options).filter(opt => opt.value);
+                        let currentIndex = options.findIndex(opt => opt.value === item.fontFamily);
+                        
+                        if (e.key === 'ArrowLeft') {
+                            currentIndex = (currentIndex - 1 + options.length) % options.length;
+                        } else {
+                            currentIndex = (currentIndex + 1) % options.length;
                         }
+                        
+                        item.fontFamily = options[currentIndex].value;
+                        select.value = item.fontFamily;
+                        renderAll();
+                        e.preventDefault();
+                    } else if (e.key === 'Enter') {
+                        openTextEditModal(item);
                         e.preventDefault();
                     }
                 }
             });
+
+            // Text Edit Modal Event Listeners
+            document.getElementById('cancelTextEdit').onclick = () => {
+                document.getElementById('textEditModal').style.display = 'none';
+            };
+
+            document.getElementById('saveTextEdit').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (item && item.type === 'text') {
+                    item.text = document.getElementById('editTextarea').value;
+                    renderAll();
+                }
+                document.getElementById('textEditModal').style.display = 'none';
+            };
+
+            document.getElementById('editTextarea').onkeydown = (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    document.getElementById('saveTextEdit').click();
+                }
+            };
+
+            function openTextEditModal(item) {
+                const modal = document.getElementById('textEditModal');
+                const textarea = document.getElementById('editTextarea');
+                textarea.value = item.text;
+                modal.style.display = 'flex';
+                setTimeout(() => textarea.focus(), 100);
+            }
 
             // Print button
             document.getElementById('printBtn').onclick = doPrint;
@@ -2054,7 +2351,7 @@
             };
 
             window.onmousemove = (e) => {
-                if (!state.isDragging && !state.isResizing && !state.crop.isDragging) return;
+                if (!state.isDragging && !state.isResizing && !state.isResizingWidth && !state.crop.isDragging) return;
                 
                 const dx = e.clientX - state.lastMousePos.x;
                 const dy = e.clientY - state.lastMousePos.y;
@@ -2076,6 +2373,12 @@
                         item.h += dy / (MM_TO_PX * scale);
                         renderAll();
                     }
+                } else if (state.isResizingWidth) {
+                    const item = state.items.find(i => i.id === state.selectedId);
+                    if (item && item.type === 'text') {
+                        item.w = Math.max(5, (item.w || 30) + dx / (MM_TO_PX * scale));
+                        renderAll();
+                    }
                 } else if (state.crop.isDragging) {
                     handleCropDrag(e);
                 }
@@ -2085,6 +2388,7 @@
             window.onmouseup = () => {
                 state.isDragging = false;
                 state.isResizing = false;
+                state.isResizingWidth = false;
                 state.crop.isDragging = false;
                 state.crop.handle = null;
             };
@@ -2385,14 +2689,7 @@
                     tempCtx.putImageData(imageData, 0, 0);
                     ctx.drawImage(tempCanvas, 0, 0);
                 } else if (item.type === 'text') {
-                    const fontSize = item.size * dpi;
-                    ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px "${item.fontFamily}"`;
-                    ctx.fillStyle = item.color || 'black';
-                    ctx.textBaseline = 'top';
-                    const lines = item.text.split('\n');
-                    lines.forEach((line, index) => {
-                        ctx.fillText(line, 0, index * fontSize * 1.2);
-                    });
+                    drawWrappedText(ctx, item, dpi);
                 }
                 ctx.restore();
             });
@@ -2458,15 +2755,27 @@
                                 threshold: 257 
                             });
                         } else if (item.type === 'text') {
-                            api.drawText({
-                                text: item.text,
+                            // To ensure WYSIWYG, we render text as an image even in non-composite mode
+                            const dpi = 8; // 8 dots/mm
+                            const fontSize = item.size * dpi;
+                            const maxWidth = (item.w || 30) * dpi;
+                            
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            // Measure height
+                            const textHeight = drawWrappedText(ctx, item, dpi);
+                            canvas.width = maxWidth;
+                            canvas.height = textHeight;
+                            // Draw
+                            drawWrappedText(ctx, item, dpi);
+                            
+                            api.drawImageD({
+                                data: canvas.toDataURL('image/png'),
                                 x: item.x,
                                 y: item.y,
-                                fontHeight: item.size,
-                                fontName: item.fontFamily,
-                                fontStyle: item.isBold ? 1 : 0,
-                                orientation: item.orientation || 0,
-                                lineSpace: "1_2"
+                                drawWidth: item.w,
+                                drawHeight: textHeight / dpi,
+                                threshold: 257 
                             });
                         }
                     });
@@ -2507,14 +2816,7 @@
                             tempCtx.putImageData(imageData, 0, 0);
                             ctx.drawImage(tempCanvas, 0, 0);
                         } else if (item.type === 'text') {
-                            const fontSize = item.size * dpi;
-                            ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px "${item.fontFamily}"`;
-                            ctx.fillStyle = item.color || 'black';
-                            ctx.textBaseline = 'top';
-                            const lines = item.text.split('\n');
-                            lines.forEach((line, index) => {
-                                ctx.fillText(line, 0, index * fontSize * 1.2);
-                            });
+                            drawWrappedText(ctx, item, dpi);
                         }
                         ctx.restore();
                     });
