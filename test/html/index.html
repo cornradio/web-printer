@@ -153,8 +153,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: auto;
-            padding: 40px;
+            overflow: hidden; /* Change to hidden */
             background-image: 
                 linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
                 linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
@@ -162,6 +161,16 @@
                 linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .scroll-container {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
         }
 
         /* Components */
@@ -375,6 +384,34 @@
             transform: translateY(0);
         }
 
+        /* Zoom Control */
+        .zoom-control {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            padding: 10px 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+            border: 1px solid var(--border-color);
+        }
+
+        .zoom-control input[type="range"] {
+            width: 120px;
+        }
+
+        .zoom-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-color);
+            min-width: 40px;
+        }
+
         /* Crop Overlay */
         #cropModal {
             position: fixed;
@@ -432,14 +469,22 @@
 </head>
 <body>
     <header class="app-header">
-        <h1>图片打印编辑工具 V2</h1>
+        <h1 style="font-size: 18px;">图片打印编辑工具 V2</h1>
         <div class="header-links">
-            <div id="printerStatus" style="font-size: 12px; color: var(--text-muted);">正在初始化...</div>
+            <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔍</button>
+            <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔳</button>
             <div class="info-btn" id="infoBtn" title="项目信息">
                 <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
                 </svg>
             </div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <select id="printerSelect" style="width: 160px; padding: 4px 8px; font-size: 12px; height: 32px; border-radius: 6px;">
+                    <option value="">正在获取打印机...</option>
+                </select>
+                <button class="btn btn-primary" id="printBtn" disabled style="padding: 4px 16px; font-size: 13px; height: 32px;">🖨️ 打印</button>
+            </div>
+            <div id="printerStatus" style="display: none;"></div>
             <div class="info-tooltip" id="infoTooltip">
                 <div class="info-section">
                     <span class="info-title">🖨️ 适配机型</span>
@@ -449,6 +494,16 @@
                     <span class="info-title">🔗 官方资源</span>
                     <a href="https://weida.dothantech.com/#/editor" target="_blank" class="info-link">德佟云设计编辑器</a><br>
                     <a href="https://www.dothantech.com/xiazaizhongxin/" target="_blank" class="info-link">官方驱动下载中心</a>
+                </div>
+                <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                    <span class="info-title">🚀 Release Note (v1.0)</span>
+                    <ul style="padding-left: 16px; margin-top: 4px; font-size: 11px; color: var(--text-muted);">
+                        <li>文字旋转 (90°) & 预览缩放 (10%-300%)</li>
+                        <li>文字黑白颜色切换，支持图层反白打印</li>
+                        <li>集成一键 Logo 搜索 (谷歌/必应)</li>
+                        <li>在线二维码创作与自动排版</li>
+                        <li>重构顶栏布局，修复打印右侧微小白边</li>
+                    </ul>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
                     <span class="info-title">👨‍💻 关于作者</span>
@@ -525,7 +580,21 @@
                             <option value="黑体">黑体</option>
                         </select>
                     </div>
-                    <button class="btn btn-full" id="boldToggleBtn"><b>B</b> 加粗切换</button>
+                    <div>
+                        <label>文字颜色</label>
+                        <div style="display: flex; gap: 16px; padding: 4px 0;">
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
+                                <input type="radio" name="textColor" value="black" checked style="width: 16px; height: 16px;"> 黑色
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
+                                <input type="radio" name="textColor" value="white" style="width: 16px; height: 16px;"> 白色
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <button class="btn btn-full" id="boldToggleBtn"><b>B</b> 加粗</button>
+                        <button class="btn btn-full" id="textRotateBtn">🔄 旋转 90°</button>
+                    </div>
                 </div>
             </div>
 
@@ -583,27 +652,26 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 8. Print -->
-            <div class="section">
-                <div class="section-title">🖨️ 打印输出</div>
-                <div class="control-group">
-                    <label>选择打印机</label>
-                    <select id="printerSelect">
-                        <option value="">正在获取打印机...</option>
-                    </select>
-                    <button class="btn btn-primary btn-full" id="printBtn" disabled>开始打印</button>
-                </div>
-            </div>
         </aside>
 
         <section class="preview-area" id="previewArea">
-            <div class="paper-container" id="paperContainer">
-                <canvas id="previewCanvas"></canvas>
-                <div class="image-overlay" id="imageOverlay" style="display: none;">
-                    <canvas id="imageCanvas"></canvas>
-                    <div class="resize-handle" id="resizeHandle"></div>
+            <div class="scroll-container">
+                <div class="paper-container" id="paperContainer">
+                    <canvas id="previewCanvas"></canvas>
+                    <div class="image-overlay" id="imageOverlay" style="display: none;">
+                        <canvas id="imageCanvas"></canvas>
+                        <div class="resize-handle" id="resizeHandle"></div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Zoom Control -->
+            <div class="zoom-control">
+                <span style="font-size: 14px;">➖</span>
+                <input type="range" id="zoomRange" min="0.1" max="3" step="0.1" value="1">
+                <span style="font-size: 14px;">➕</span>
+                <span class="zoom-value" id="zoomValue">100%</span>
+                <button class="btn" id="resetZoomBtn" style="padding: 2px 8px; font-size: 11px;">重置</button>
             </div>
         </section>
     </main>
@@ -621,6 +689,33 @@
 
     <div class="status-bar" id="statusBar">提示消息</div>
 
+    <!-- Search Modal -->
+    <div id="searchModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000;">
+        <div style="background: white; padding: 24px; border-radius: 12px; width: 320px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            <h3 style="margin-bottom: 16px; font-size: 16px;">🔍 Logo 搜索</h3>
+            <div class="control-group">
+                <input type="text" id="logoSearchInput" placeholder="输入品牌/名称..." style="margin-bottom: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <button class="btn btn-primary" id="goGoogle">谷歌搜索</button>
+                    <button class="btn btn-primary" id="goBing">必应搜索</button>
+                </div>
+                <button class="btn btn-full" id="closeSearch" style="margin-top: 12px; border: none; color: var(--text-muted);">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div id="qrModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000;">
+        <div style="background: white; padding: 24px; border-radius: 12px; width: 320px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            <h3 style="margin-bottom: 16px; font-size: 16px;">🔳 二维码创作</h3>
+            <div class="control-group">
+                <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
+                <button class="btn btn-primary btn-full" id="confirmQR">生成图片</button>
+                <button class="btn btn-full" id="closeQR" style="margin-top: 12px; border: none; color: var(--text-muted);">取消</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- Configuration & Constants ---
         const MM_TO_PX = 8; // 8 pixels per mm for preview (approx 203 DPI scale)
@@ -634,6 +729,8 @@
             },
             items: [], // Array of { type: 'image'|'text', id, ...props }
             selectedId: null,
+            zoom: 1.0, // Manual zoom multiplier
+            autoScale: 1.0, // Calculated base scale to fit screen
             lastMousePos: { x: 0, y: 0 },
             isDragging: false,
             isResizing: false,
@@ -650,6 +747,7 @@
         window.onload = () => {
             initApp();
             setupEventListeners();
+            window.onresize = updateScale;
         };
 
         function initApp() {
@@ -720,9 +818,14 @@
             
             const scaleW = availableW / (state.paper.width * MM_TO_PX);
             const scaleH = availableH / (state.paper.height * MM_TO_PX);
-            const scale = Math.min(scaleW, scaleH, 2); // Max 2x zoom
+            state.autoScale = Math.min(scaleW, scaleH, 2); // Max 2x base zoom
             
-            container.style.transform = `scale(${scale})`;
+            const finalScale = state.autoScale * state.zoom;
+            container.style.transform = `scale(${finalScale})`;
+            
+            // Update zoom UI
+            document.getElementById('zoomValue').innerText = Math.round(state.zoom * 100) + '%';
+            document.getElementById('zoomRange').value = state.zoom;
         }
 
         function showStatus(msg) {
@@ -880,6 +983,12 @@
             div.style.fontSize = (item.size * MM_TO_PX) + 'px';
             div.style.fontFamily = item.fontFamily;
             div.style.fontWeight = item.isBold ? 'bold' : 'normal';
+            div.style.color = item.color || 'black';
+            if (item.color === 'white') {
+                div.style.textShadow = '0 0 2px rgba(0,0,0,0.5)';
+            }
+            div.style.transform = `rotate(${item.orientation || 0}deg)`;
+            div.style.transformOrigin = '0 0'; // Top-left origin like the printer
             
             div.innerHTML = `<div class="text-content">${item.text}</div>`;
             
@@ -928,6 +1037,8 @@
                 textStyleControls.style.display = 'block';
                 // Sync text styles
                 document.getElementById('fontFamilySelect').value = item.fontFamily;
+                const colorRadios = document.getElementsByName('textColor');
+                colorRadios.forEach(r => r.checked = r.value === (item.color || 'black'));
                 const boldBtn = document.getElementById('boldToggleBtn');
                 if (item.isBold) boldBtn.classList.add('btn-primary');
                 else boldBtn.classList.remove('btn-primary');
@@ -1250,6 +1361,66 @@
             // Printer refresh
             refreshPrinters();
 
+            // Logo Search & QR Code logic
+            document.getElementById('searchLogoBtn').onclick = () => {
+                document.getElementById('searchModal').style.display = 'flex';
+                document.getElementById('logoSearchInput').focus();
+            };
+            document.getElementById('closeSearch').onclick = () => {
+                document.getElementById('searchModal').style.display = 'none';
+            };
+            const performSearch = (engine) => {
+                const brand = document.getElementById('logoSearchInput').value.trim();
+                if (!brand) return;
+                const query = encodeURIComponent(brand + ' logo black and white');
+                const url = engine === 'google' 
+                    ? `https://www.google.com/search?q=${query}&tbm=isch`
+                    : `https://www.bing.com/images/search?q=${query}`;
+                window.open(url, '_blank');
+            };
+            document.getElementById('goGoogle').onclick = () => performSearch('google');
+            document.getElementById('goBing').onclick = () => performSearch('bing');
+
+            document.getElementById('createQRBtn').onclick = () => {
+                document.getElementById('qrModal').style.display = 'flex';
+                document.getElementById('qrContentInput').focus();
+            };
+            document.getElementById('closeQR').onclick = () => {
+                document.getElementById('qrModal').style.display = 'none';
+            };
+            document.getElementById('confirmQR').onclick = () => {
+                const text = document.getElementById('qrContentInput').value.trim();
+                if (!text) return;
+                
+                document.getElementById('qrModal').style.display = 'none';
+                showStatus('正在生成二维码...');
+                
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(text)}`;
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                    const id = 'qr-' + Date.now();
+                    let w = state.paper.width * 0.3;
+                    let h = w;
+                    state.items.push({
+                        type: 'image',
+                        id: id,
+                        originalImg: img,
+                        workingImg: img,
+                        x: (state.paper.width - w) / 2,
+                        y: (state.paper.height - h) / 2,
+                        w: w, h: h,
+                        ditherMode: 'threshold',
+                        threshold: 128, exposure: 0, invert: false
+                    });
+                    state.selectedId = id;
+                    renderAll();
+                    showStatus('二维码已添加到画布');
+                };
+                img.onerror = () => showStatus('二维码生成失败');
+                img.src = qrUrl;
+            };
+
             // Template Management
             document.getElementById('saveTplBtn').onclick = saveCurrentAsTpl;
             document.getElementById('loadTplBtn').onclick = loadSelectedTpl;
@@ -1285,12 +1456,41 @@
                 }
             };
 
+            document.getElementsByName('textColor').forEach(radio => {
+                radio.onchange = (e) => {
+                    const item = state.items.find(i => i.id === state.selectedId);
+                    if (item && item.type === 'text') {
+                        item.color = e.target.value;
+                        renderAll();
+                    }
+                };
+            });
+
             document.getElementById('boldToggleBtn').onclick = () => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (item && item.type === 'text') {
                     item.isBold = !item.isBold;
                     renderAll();
                 }
+            };
+
+            document.getElementById('textRotateBtn').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (item && item.type === 'text') {
+                    item.orientation = ((item.orientation || 0) + 90) % 360;
+                    renderAll();
+                }
+            };
+
+            // Zoom Listeners
+            document.getElementById('zoomRange').oninput = (e) => {
+                state.zoom = parseFloat(e.target.value);
+                updateScale();
+            };
+
+            document.getElementById('resetZoomBtn').onclick = () => {
+                state.zoom = 1.0;
+                updateScale();
             };
 
             // Add Text
@@ -1310,7 +1510,9 @@
                     y: 5,
                     size: fontSize,
                     fontFamily: document.getElementById('fontFamilySelect').value || '微软雅黑',
-                    isBold: false
+                    color: document.querySelector('input[name="textColor"]:checked').value || 'black',
+                    isBold: false,
+                    orientation: 0
                 });
                 state.selectedId = id;
                 renderAll();
@@ -1661,46 +1863,112 @@
                     return;
                 }
 
-                api.startJob({
-                    width: state.paper.width,
-                    height: state.paper.height,
-                    jobName: "MultiObjectPrint"
-                });
+                // Check if we need compositing (any white text or items overlapping?)
+                // To keep it simple and high quality, we only composite if there's white text.
+                const hasWhiteText = state.items.some(i => i.type === 'text' && i.color === 'white');
 
-                // Print all items in order
-                state.items.forEach(item => {
-                    if (item.type === 'image') {
-                        const canvas = document.createElement('canvas');
-                        const wPx = item.w * MM_TO_PX;
-                        const hPx = item.h * MM_TO_PX;
-                        canvas.width = wPx; canvas.height = hPx;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                        
-                        const imageData = ctx.getImageData(0, 0, wPx, hPx);
-                        applyDitheringToItem(imageData, item);
-                        ctx.putImageData(imageData, 0, 0);
-                        
-                        api.drawImageD({
-                            data: canvas.toDataURL('image/png'),
-                            x: item.x,
-                            y: item.y,
-                            drawWidth: item.w,
-                            drawHeight: item.h,
-                            threshold: 257 
-                        });
-                    } else if (item.type === 'text') {
-                        api.drawText({
-                            text: item.text,
-                            x: item.x,
-                            y: item.y,
-                            fontHeight: item.size,
-                            fontName: item.fontFamily,
-                            fontStyle: item.isBold ? 1 : 0, // 1 is Bold, 0 is Regular
-                            lineSpace: "1_2" // Better for multiline
-                        });
-                    }
-                });
+                if (!hasWhiteText) {
+                    // Original high-quality per-item printing
+                    api.startJob({
+                        width: state.paper.width,
+                        height: state.paper.height,
+                        jobName: "MultiObjectPrint",
+                        margin: 0
+                    });
+
+                    state.items.forEach(item => {
+                        if (item.type === 'image') {
+                            const canvas = document.createElement('canvas');
+                            const wPx = item.w * MM_TO_PX;
+                            const hPx = item.h * MM_TO_PX;
+                            canvas.width = wPx; canvas.height = hPx;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(item.workingImg, 0, 0, wPx, hPx);
+                            
+                            const imageData = ctx.getImageData(0, 0, wPx, hPx);
+                            applyDitheringToItem(imageData, item);
+                            ctx.putImageData(imageData, 0, 0);
+                            
+                            api.drawImageD({
+                                data: canvas.toDataURL('image/png'),
+                                x: item.x,
+                                y: item.y,
+                                drawWidth: item.w,
+                                drawHeight: item.h,
+                                threshold: 257 
+                            });
+                        } else if (item.type === 'text') {
+                            api.drawText({
+                                text: item.text,
+                                x: item.x,
+                                y: item.y,
+                                fontHeight: item.size,
+                                fontName: item.fontFamily,
+                                fontStyle: item.isBold ? 1 : 0,
+                                orientation: item.orientation || 0,
+                                lineSpace: "1_2"
+                            });
+                        }
+                    });
+                } else {
+                    // Composite mode required for white text (anti-color)
+                    // We use 8 dots/mm (203 DPI) for high quality
+                    const dpi = 8;
+                    const printCanvas = document.createElement('canvas');
+                    printCanvas.width = Math.round(state.paper.width * dpi);
+                    printCanvas.height = Math.round(state.paper.height * dpi);
+                    const ctx = printCanvas.getContext('2d');
+                    
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, printCanvas.width, printCanvas.height);
+
+                    state.items.forEach(item => {
+                        ctx.save();
+                        ctx.translate(item.x * dpi, item.y * dpi);
+                        if (item.orientation) {
+                            ctx.rotate((item.orientation * Math.PI) / 180);
+                        }
+
+                        if (item.type === 'image') {
+                            const wPx = item.w * dpi;
+                            const hPx = item.h * dpi;
+                            const tempCanvas = document.createElement('canvas');
+                            tempCanvas.width = wPx; tempCanvas.height = hPx;
+                            const tempCtx = tempCanvas.getContext('2d');
+                            tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
+                            
+                            const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
+                            applyDitheringToItem(imageData, item);
+                            tempCtx.putImageData(imageData, 0, 0);
+                            ctx.drawImage(tempCanvas, 0, 0);
+                        } else if (item.type === 'text') {
+                            const fontSize = item.size * dpi;
+                            ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px "${item.fontFamily}"`;
+                            ctx.fillStyle = item.color || 'black';
+                            ctx.textBaseline = 'top';
+                            const lines = item.text.split('\n');
+                            lines.forEach((line, index) => {
+                                ctx.fillText(line, 0, index * fontSize * 1.2);
+                            });
+                        }
+                        ctx.restore();
+                    });
+
+                    api.startJob({
+                        width: state.paper.width,
+                        height: state.paper.height,
+                        jobName: "CompositePrint",
+                        margin: 0
+                    });
+
+                    api.drawImageD({
+                        data: printCanvas.toDataURL('image/png'),
+                        x: 0, y: 0,
+                        drawWidth: state.paper.width,
+                        drawHeight: state.paper.height,
+                        threshold: 257 
+                    });
+                }
 
                 api.commitJob((result) => {
                     api.closePrinter();
