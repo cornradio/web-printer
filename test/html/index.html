@@ -174,6 +174,199 @@
             padding: 20px;
         }
 
+        .layers-sidebar {
+            width: 280px;
+            background: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+            position: absolute;
+            right: 0;
+            top: 60px;
+            bottom: 0;
+            z-index: 150;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .layers-sidebar.show {
+            transform: translateX(0);
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .layer-item:active {
+            cursor: grabbing;
+        }
+
+        .layer-item.dragging {
+            opacity: 0.5;
+            border: 1px dashed var(--primary-color);
+            background: #f1f5f9;
+        }
+
+        .layer-item.drag-over-top::before {
+            content: "";
+            position: absolute;
+            top: -6px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        .layer-item.drag-over-bottom::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        .layer-item:hover {
+            border-color: var(--primary-color);
+            background: #f8fafc;
+        }
+
+        .layer-item.selected {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+            box-shadow: 0 0 0 1px var(--primary-color);
+        }
+
+        .layer-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .layer-thumb img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .layer-thumb canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .layer-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .layer-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .layer-type {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .layer-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .layer-btn {
+            padding: 6px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .layer-btn:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .layer-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .layer-toggle-btn:hover {
+            background: var(--bg-color);
+            border-color: var(--text-muted);
+        }
+
+        .layer-toggle-btn.active {
+            background: #f1f5f9;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .layer-toggle-btn .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
         .preview-area {
             flex: 1;
             background: #cbd5e1;
@@ -323,7 +516,6 @@
 
         .image-overlay.selected, .text-overlay.selected {
             border-color: var(--primary-color);
-            z-index: 10;
         }
 
         .image-overlay canvas {
@@ -502,6 +694,10 @@
             <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔍</button>
             <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔳</button>
             <button class="btn" id="removeBgBtn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✂️</button>
+            <div class="layer-toggle-btn" id="layerToggleBtn" title="图层管理">
+                📂
+                <div class="badge" id="layerCountBadge" style="display: none;">0</div>
+            </div>
             <div class="info-btn" id="infoBtn" title="项目信息">
                 <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
@@ -519,13 +715,14 @@
                     <a href="https://www.dothantech.com/xiazaizhongxin/" target="_blank" class="info-link">官方驱动下载中心</a>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
-                    <span class="info-title">🚀 Release Note (v1.0)</span>
+                    <span class="info-title">🚀 Release Note (v1.1)</span>
                     <ul style="padding-left: 16px; margin-top: 4px; font-size: 11px; color: var(--text-muted);">
-                        <li>文字旋转 (90°) & 预览缩放 (10%-300%)</li>
-                        <li>文字黑白颜色切换，支持图层反白打印</li>
-                        <li>支持 Del/Backspace 快捷键删除元素</li>
-                        <li>集成一键 Logo 搜索 & 多种去背景工具</li>
-                        <li>修复打印右侧白边，优化顶栏与侧边栏布局</li>
+                        <li><b>图层管理 (Drag & Drop)</b>：支持鼠标自由拖拽排序及实时指示线</li>
+                        <li><b>侧滑抽屉面板</b>：图层管理改为右侧滑动呼出，带数量提醒角标</li>
+                        <li><b>可视化缩略图</b>：图层列表显示真实内容预览，告别 Emoji</li>
+                        <li><b>GitHub 式下拉菜单</b>：搜索/二维码/去背景统一右上角弹出</li>
+                        <li><b>文字旋转 & 缩放</b>：支持 90° 旋转及 10%-300% 预览缩放</li>
+                        <li><b>反白打印优化</b>：支持文字黑白切换，自动修复打印白边</li>
                     </ul>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
@@ -741,6 +938,13 @@
                 <button class="btn" id="resetZoomBtn" style="padding: 2px 8px; font-size: 11px;">重置</button>
             </div>
         </section>
+
+        <aside class="layers-sidebar" id="layersSidebar">
+            <div class="section-title">📂 图层管理</div>
+            <div id="layersList">
+                <!-- Layers will be injected here -->
+            </div>
+        </aside>
     </main>
 
     <!-- Crop Modal -->
@@ -780,7 +984,8 @@
                 rect: { x: 0, y: 0, w: 0, h: 0 },
                 isDragging: false,
                 handle: null
-            }
+            },
+            draggedId: null
         };
 
         // --- Initialization ---
@@ -796,6 +1001,7 @@
             document.getElementById('paperHeight').value = state.paper.height;
 
             updatePaperUI();
+            renderLayersList();
             
             api.checkPlugin((resp) => {
                 if (resp.statusCode === 0) {
@@ -954,6 +1160,149 @@
             });
 
             updateControlPanel();
+            renderLayersList();
+            
+            // Update layer count badge
+            const badge = document.getElementById('layerCountBadge');
+            if (state.items.length > 0) {
+                badge.innerText = state.items.length;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function renderLayersList() {
+            const list = document.getElementById('layersList');
+            if (!list) return;
+            list.innerHTML = '';
+            
+            // Show layers in reverse order (top of array = top of list = top in preview)
+            const reversedItems = [...state.items].reverse();
+            
+            reversedItems.forEach((item, index) => {
+                const actualIndex = state.items.length - 1 - index;
+                const div = document.createElement('div');
+                div.className = 'layer-item';
+                div.draggable = true;
+                if (state.selectedId === item.id) div.classList.add('selected');
+                if (state.draggedId === item.id) div.classList.add('dragging');
+                
+                let name = item.type === 'image' ? '图片' : item.text.trim();
+                if (name.length > 15) name = name.substring(0, 15) + '...';
+                if (!name) name = '(空文字)';
+                
+                div.innerHTML = `
+                    <div class="layer-thumb" id="thumb-${item.id}"></div>
+                    <div class="layer-info">
+                        <span class="layer-name">${name}</span>
+                        <span class="layer-type">${item.type === 'image' ? 'Image' : 'Text'}</span>
+                    </div>
+                    <div class="layer-actions">
+                        <button class="layer-btn" id="delete-layer-${item.id}" title="删除">🗑️</button>
+                    </div>
+                `;
+                
+                // Render thumbnail
+                setTimeout(() => renderLayerThumbnail(item), 0);
+
+                div.onclick = (e) => {
+                    if (e.target.closest('.layer-btn')) return;
+                    state.selectedId = item.id;
+                    renderAll();
+                };
+
+                // Drag and Drop events
+                div.ondragstart = (e) => {
+                    state.draggedId = item.id;
+                    div.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', item.id);
+                };
+
+                div.ondragend = (e) => {
+                    state.draggedId = null;
+                    div.classList.remove('dragging');
+                    document.querySelectorAll('.layer-item').forEach(el => el.classList.remove('drag-over'));
+                };
+
+                div.ondragover = (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    const target = e.target.closest('.layer-item');
+                    if (target && state.draggedId !== item.id) {
+                        const rect = target.getBoundingClientRect();
+                        const isAfter = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                        target.classList.remove('drag-over-top', 'drag-over-bottom');
+                        target.classList.add(isAfter ? 'drag-over-bottom' : 'drag-over-top');
+                    }
+                };
+
+                div.ondragleave = (e) => {
+                    const target = e.target.closest('.layer-item');
+                    if (target) {
+                        target.classList.remove('drag-over-top', 'drag-over-bottom');
+                    }
+                };
+
+                div.ondrop = (e) => {
+                    e.preventDefault();
+                    const draggedId = e.dataTransfer.getData('text/plain');
+                    if (draggedId !== item.id) {
+                        const rect = div.getBoundingClientRect();
+                        const isAfter = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                        moveLayerTo(draggedId, item.id, isAfter);
+                    }
+                };
+
+                div.querySelector(`#delete-layer-${item.id}`).onclick = (e) => {
+                    e.stopPropagation();
+                    deleteItem(item.id);
+                };
+                
+                list.appendChild(div);
+            });
+        }
+
+        function renderLayerThumbnail(item) {
+            const thumbContainer = document.getElementById(`thumb-${item.id}`);
+            if (!thumbContainer) return;
+            
+            if (item.type === 'image') {
+                const img = new Image();
+                img.src = item.workingImg.src;
+                thumbContainer.appendChild(img);
+            } else if (item.type === 'text') {
+                const canvas = document.createElement('canvas');
+                canvas.width = 40;
+                canvas.height = 40;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#f1f5f9';
+                ctx.fillRect(0, 0, 40, 40);
+                ctx.fillStyle = item.color === 'white' ? '#ccc' : 'black';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('T', 20, 20);
+                thumbContainer.appendChild(canvas);
+            }
+        }
+
+        function moveLayerTo(draggedId, targetId, isAfter) {
+            const draggedIdx = state.items.findIndex(i => i.id === draggedId);
+            const targetIdx = state.items.findIndex(i => i.id === targetId);
+            
+            if (draggedIdx === -1 || targetIdx === -1) return;
+            
+            const item = state.items.splice(draggedIdx, 1)[0];
+            const newTargetIdx = state.items.findIndex(i => i.id === targetId);
+            
+            // In the UI list (reversed), moving to the "bottom half" (isAfter=true) 
+            // means moving it towards the start of the state.items array.
+            const finalIdx = isAfter ? newTargetIdx : newTargetIdx + 1;
+            state.items.splice(finalIdx, 0, item);
+            
+            renderAll();
         }
 
         function renderImageItem(item, container) {
@@ -1425,6 +1774,14 @@
                 }
             };
 
+            document.getElementById('layerToggleBtn').onclick = (e) => {
+                const sidebar = document.getElementById('layersSidebar');
+                const btn = document.getElementById('layerToggleBtn');
+                sidebar.classList.toggle('show');
+                btn.classList.toggle('active');
+                e.stopPropagation();
+            };
+
             document.getElementById('searchLogoBtn').onclick = (e) => {
                 toggleDropdown('searchModal');
                 e.stopPropagation();
@@ -1450,10 +1807,20 @@
                 if (!e.target.closest('.header-dropdown') && !e.target.closest('.info-tooltip')) {
                     toggleDropdown(null);
                 }
+                
+                // Also close layers sidebar if clicking elsewhere (and not on the toggle button)
+                const sidebar = document.getElementById('layersSidebar');
+                const btn = document.getElementById('layerToggleBtn');
+                if (sidebar.classList.contains('show') && 
+                    !e.target.closest('#layersSidebar') && 
+                    !e.target.closest('#layerToggleBtn')) {
+                    sidebar.classList.remove('show');
+                    btn.classList.remove('active');
+                }
             });
 
             // Prevent dropdowns from closing when clicking inside them
-            document.querySelectorAll('.header-dropdown, .info-tooltip').forEach(el => {
+            document.querySelectorAll('.header-dropdown, .info-tooltip, .layers-sidebar').forEach(el => {
                 el.onclick = (e) => e.stopPropagation();
             });
 

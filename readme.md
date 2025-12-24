@@ -4,11 +4,29 @@
 > 使用方法：[在线编辑器](https://web-printer.cornradio.org/)。
 > 多数时候需要手动调整曝光到较淡的颜色后效果更好。
 
+
 ## 打印效果如下图
 
 <img width="560" height="1280" alt="image" src="https://github.com/user-attachments/assets/20245020-3691-4902-9624-8d89321887f9" />
 <img width="560" height="1088" alt="image" src="https://github.com/user-attachments/assets/284efbe2-82c2-4609-9048-350f5342efce" />
 <img width="560" height="1308" alt="image" src="https://github.com/user-attachments/assets/6f25a852-a61d-4357-8c02-1b690df84960" />
+
+
+
+## 更新日志 (Release Notes)
+
+### v1.1
+- **图层管理 (Drag & Drop)**：支持鼠标自由拖拽排序及实时指示线，操作更直观。
+- **侧滑抽屉面板**：图层管理改为右侧滑动呼出，节省空间并带有实时数量提醒角标。
+- **可视化缩略图**：图层列表显示真实内容预览，告别 Emoji。
+- **GitHub 式下拉菜单**：搜索/二维码/去背景工具统一优化为右上角下拉弹出。
+
+### v1.0
+- **文字旋转 & 预览缩放**：支持文字 90° 旋转以及预览区域 10%-300% 自由缩放。
+- **反白打印优化**：支持文字黑白切换，并自动修复了打印任务中可能出现的右侧白边问题。
+- **集成一键搜索**：内置 Logo 快速搜索（Google/Bing）及多种常用 AI 去背景工具链接。
+- **UI 布局重构**：将打印控制移至顶栏，侧边栏更加清爽，优化了整体交互体验。
+- **快捷键支持**：支持 `Del`/`Backspace` 删除元素，`ArrowUp`/`Down` 快速调节字号。
 
 
 ## 免责声明
