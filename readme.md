@@ -4,15 +4,19 @@
 > 使用方法：[在线编辑器](https://web-printer.cornradio.org/)。
 > 多数时候需要手动调整曝光到较淡的颜色后效果更好。
 
+## 效果对比图
+ps：已经和官方邮件确认，目前官方的pc端使用的图像算法是10年前的，而手机端由于是新开发的所以图像算法也新一些。
+<img width="560" height="1088" alt="image" src="https://github.com/user-attachments/assets/284efbe2-82c2-4609-9048-350f5342efce" />
+
+
 ## 使用界面如下图
 <img width="560" height="1308" alt="image" src="https://github.com/user-attachments/assets/6f25a852-a61d-4357-8c02-1b690df84960" />
 
 
 
-## 打印效果如下图
+## 更多打印效果实图
 
 <img width="560" height="1280" alt="image" src="https://github.com/user-attachments/assets/20245020-3691-4902-9624-8d89321887f9" />
-<img width="560" height="1088" alt="image" src="https://github.com/user-attachments/assets/284efbe2-82c2-4609-9048-350f5342efce" />
 <img width="1260" height="945" alt="图片" src="https://github.com/user-attachments/assets/196cd169-969a-48dc-b368-fa58c5416bee" />
 
 
