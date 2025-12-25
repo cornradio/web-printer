@@ -1,3 +1,6 @@
+
+<img width="100" height="100" alt="printer" src="https://github.com/user-attachments/assets/8e8ecbb8-ab2a-4049-b738-908411bcb1e2" />
+
 [web-printer](https://web-printer.cornradio.org/) 是一个适合各种标签打印机的 **WYSIWYG** （所见即所得）网页图片编辑器，帮助你打出效果更好的标签。
 
 
