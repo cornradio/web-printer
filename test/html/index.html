@@ -17,6 +17,30 @@
             --text-muted: #64748b;
         }
 
+        /* Mobile Warning */
+        .mobile-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .mobile-warning {
+                display: flex;
+            }
+        }
+        .mobile-warning h2 { margin-bottom: 10px; color: var(--primary-color); }
+        .mobile-warning p { color: var(--text-muted); line-height: 1.6; }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -737,6 +761,10 @@
     </style>
 </head>
 <body>
+    <div class="mobile-warning">
+        <h2>📱 暂不支持手机端</h2>
+        <p>为了获得最佳的编辑与打印体验，请复制链接到电脑端 (PC) 浏览器打开使用。</p>
+    </div>
     <header class="app-header">
         <h1 style="font-size: 18px;">图片打印编辑工具 V2</h1>
         <div class="header-links">
@@ -765,11 +793,12 @@
                     <a href="https://www.dothantech.com/xiazaizhongxin/" target="_blank" class="info-link">官方驱动下载中心</a>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
-                    <span class="info-title">🚀 Release Note (v2.2)</span>
+                    <span class="info-title">🚀 Release Note (v2.3)</span>
                     <ul style="padding-left: 16px; margin-top: 4px; font-size: 11px; color: var(--text-muted);">
-                        <li><b>AI 工具阵营优化</b>：新增通义千问、豆包，移除失效及收费工具</li>
-                        <li><b>AI 助手增强</b>：新增“单色黑线稿”话术，扩充主流 AI 快捷跳转</li>
-                        <li><b>集成 AI 绘图助手</b>：支持绘图话术一键复制及多款主流 AI</li>
+                        <li><b>移动端友好提示</b>：增加手机访问时的引导提示</li>
+                        <li><b>文字渲染优化</b>：解决首行截断问题，提升 WYSIWYG 还原度</li>
+                        <li><b>纸张设置增强</b>：支持删除已保存的常用尺寸</li>
+                        <li><b>AI 工具阵营优化</b>：新增 Grok、千问、豆包(笨笨)</li>
                     </ul>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
@@ -1185,16 +1214,45 @@
             const recents = JSON.parse(localStorage.getItem('dtp_recent_papers') || '["40x30", "40x40", "30x20", "50x30"]');
             
             recents.forEach(size => {
+                const group = document.createElement('div');
+                group.style.display = 'flex';
+                group.style.alignItems = 'center';
+                group.style.background = '#f1f5f9';
+                group.style.borderRadius = '4px';
+                group.style.overflow = 'hidden';
+                group.style.border = '1px solid var(--border-color)';
+
                 const btn = document.createElement('button');
                 btn.className = 'btn';
                 btn.style.padding = '4px 8px';
                 btn.style.fontSize = '11px';
+                btn.style.border = 'none';
+                btn.style.background = 'transparent';
                 btn.innerText = size;
                 btn.onclick = () => {
                     document.getElementById('paperSizeInput').value = size;
                     document.getElementById('applyPaperSize').click();
                 };
-                container.appendChild(btn);
+
+                const del = document.createElement('div');
+                del.innerText = '×';
+                del.style.padding = '0 6px';
+                del.style.fontSize = '12px';
+                del.style.cursor = 'pointer';
+                del.style.color = 'var(--text-muted)';
+                del.style.borderLeft = '1px solid var(--border-color)';
+                del.onclick = (e) => {
+                    e.stopPropagation();
+                    const newRecents = recents.filter(s => s !== size);
+                    localStorage.setItem('dtp_recent_papers', JSON.stringify(newRecents));
+                    renderRecentPaperSizes();
+                };
+                del.onmouseover = () => del.style.background = '#fee2e2';
+                del.onmouseleave = () => del.style.background = 'transparent';
+
+                group.appendChild(btn);
+                group.appendChild(del);
+                container.appendChild(group);
             });
         }
 
@@ -1650,11 +1708,12 @@
             });
 
             lines.forEach((line, index) => {
-                ctx.fillText(line, 0, index * fontSize * 1.2);
+                // Add a small 0.15 * fontSize padding to the top to prevent clipping
+                ctx.fillText(line, 0, (index * fontSize * 1.2) + (fontSize * 0.15));
             });
             
-            // Return total height with a bit more buffer (1.3 instead of 1.2)
-            return lines.length * fontSize * 1.3; 
+            // Return total height with a bit more buffer (1.4 instead of 1.3)
+            return lines.length * fontSize * 1.2 + (fontSize * 0.3); 
         }
 
         function duplicateItem(id) {
@@ -2715,127 +2774,61 @@
                     return;
                 }
 
-                // Check if we need compositing (any white text or items overlapping?)
-                // To keep it simple and high quality, we only composite if there's white text.
-                const hasWhiteText = state.items.some(i => i.type === 'text' && i.color === 'white');
+                // Use composite mode for all prints to ensure high quality and WYSIWYG transparency
+                const dpi = 8; // 8 dots/mm (203 DPI)
+                const printCanvas = document.createElement('canvas');
+                printCanvas.width = Math.round(state.paper.width * dpi);
+                printCanvas.height = Math.round(state.paper.height * dpi);
+                const ctx = printCanvas.getContext('2d');
+                
+                // Background is white (no ink)
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, printCanvas.width, printCanvas.height);
 
-                if (!hasWhiteText) {
-                    // Original high-quality per-item printing
-                    api.startJob({
-                        width: state.paper.width,
-                        height: state.paper.height,
-                        jobName: "MultiObjectPrint",
-                        margin: 0
-                    });
+                state.items.forEach(item => {
+                    ctx.save();
+                    ctx.translate(item.x * dpi, item.y * dpi);
+                    if (item.orientation) {
+                        ctx.rotate((item.orientation * Math.PI) / 180);
+                    }
 
-                    state.items.forEach(item => {
-                        if (item.type === 'image') {
-                            const canvas = document.createElement('canvas');
-                            const wPx = item.w * MM_TO_PX;
-                            const hPx = item.h * MM_TO_PX;
-                            canvas.width = wPx; canvas.height = hPx;
-                            const ctx = canvas.getContext('2d');
+                    if (item.type === 'image') {
+                        const wPx = item.w * dpi;
+                        const hPx = item.h * dpi;
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = wPx; tempCanvas.height = hPx;
+                        const tempCtx = tempCanvas.getContext('2d');
 
-                            if (item.isFlipped) {
-                                ctx.translate(wPx, 0);
-                                ctx.scale(-1, 1);
-                            }
-                            ctx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                            
-                            const imageData = ctx.getImageData(0, 0, wPx, hPx);
-                            applyDitheringToItem(imageData, item);
-                            ctx.putImageData(imageData, 0, 0);
-                            
-                            api.drawImageD({
-                                data: canvas.toDataURL('image/png'),
-                                x: item.x,
-                                y: item.y,
-                                drawWidth: item.w,
-                                drawHeight: item.h,
-                                threshold: 257 
-                            });
-                        } else if (item.type === 'text') {
-                            // To ensure WYSIWYG, we render text as an image even in non-composite mode
-                            const dpi = 8; // 8 dots/mm
-                            const fontSize = item.size * dpi;
-                            const maxWidth = (item.w || 30) * dpi;
-                            
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            // Measure height
-                            const textHeight = drawWrappedText(ctx, item, dpi);
-                            canvas.width = maxWidth;
-                            canvas.height = textHeight;
-                            // Draw
-                            drawWrappedText(ctx, item, dpi);
-                            
-                            api.drawImageD({
-                                data: canvas.toDataURL('image/png'),
-                                x: item.x,
-                                y: item.y,
-                                drawWidth: item.w,
-                                drawHeight: textHeight / dpi,
-                                threshold: 257 
-                            });
+                        if (item.isFlipped) {
+                            tempCtx.translate(wPx, 0);
+                            tempCtx.scale(-1, 1);
                         }
-                    });
-                } else {
-                    // Composite mode required for white text (anti-color)
-                    // We use 8 dots/mm (203 DPI) for high quality
-                    const dpi = 8;
-                    const printCanvas = document.createElement('canvas');
-                    printCanvas.width = Math.round(state.paper.width * dpi);
-                    printCanvas.height = Math.round(state.paper.height * dpi);
-                    const ctx = printCanvas.getContext('2d');
-                    
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, printCanvas.width, printCanvas.height);
+                        tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
+                        
+                        const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
+                        applyDitheringToItem(imageData, item);
+                        tempCtx.putImageData(imageData, 0, 0);
+                        ctx.drawImage(tempCanvas, 0, 0);
+                    } else if (item.type === 'text') {
+                        drawWrappedText(ctx, item, dpi);
+                    }
+                    ctx.restore();
+                });
 
-                    state.items.forEach(item => {
-                        ctx.save();
-                        ctx.translate(item.x * dpi, item.y * dpi);
-                        if (item.orientation) {
-                            ctx.rotate((item.orientation * Math.PI) / 180);
-                        }
+                api.startJob({
+                    width: state.paper.width,
+                    height: state.paper.height,
+                    jobName: "CompositePrint",
+                    margin: 0
+                });
 
-                        if (item.type === 'image') {
-                            const wPx = item.w * dpi;
-                            const hPx = item.h * dpi;
-                            const tempCanvas = document.createElement('canvas');
-                            tempCanvas.width = wPx; tempCanvas.height = hPx;
-                            const tempCtx = tempCanvas.getContext('2d');
-
-                            if (item.isFlipped) {
-                                tempCtx.translate(wPx, 0);
-                                tempCtx.scale(-1, 1);
-                            }
-                            tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                            
-                            const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
-                            applyDitheringToItem(imageData, item);
-                            tempCtx.putImageData(imageData, 0, 0);
-                            ctx.drawImage(tempCanvas, 0, 0);
-                        } else if (item.type === 'text') {
-                            drawWrappedText(ctx, item, dpi);
-                        }
-                        ctx.restore();
-                    });
-
-                    api.startJob({
-                        width: state.paper.width,
-                        height: state.paper.height,
-                        jobName: "CompositePrint",
-                        margin: 0
-                    });
-
-                    api.drawImageD({
-                        data: printCanvas.toDataURL('image/png'),
-                        x: 0, y: 0,
-                        drawWidth: state.paper.width,
-                        drawHeight: state.paper.height,
-                        threshold: 257 
-                    });
-                }
+                api.drawImageD({
+                    data: printCanvas.toDataURL('image/png'),
+                    x: 0, y: 0,
+                    drawWidth: state.paper.width,
+                    drawHeight: state.paper.height,
+                    threshold: 257 
+                });
 
                 api.commitJob((result) => {
                     api.closePrinter();
