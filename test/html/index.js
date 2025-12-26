@@ -2782,8 +2782,7 @@
 
             // Restore paper
             state.paper = tpl.paper;
-            document.getElementById('paperWidth').value = state.paper.width;
-            document.getElementById('paperHeight').value = state.paper.height;
+            document.getElementById('paperSizeInput').value = `${state.paper.width}x${state.paper.height}`;
             updatePaperUI();
 
             // Restore items
