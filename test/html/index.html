@@ -566,7 +566,7 @@
         .delete-handle {
             position: absolute;
             top: -10px;
-            right: -10px;
+            left: -10px;
             width: 20px;
             height: 20px;
             background: #ef4444;
@@ -646,11 +646,43 @@
             transform: translateY(0);
         }
 
+        /* Clear Button */
+        .clear-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0px 5px;
+            border-radius: 2px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .clear-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .clear-btn:active {
+            transform: translateY(0);
+        }
+
         /* Zoom Control */
         .zoom-control {
             position: absolute;
             bottom: 24px;
-            right: 24px;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(4px);
             padding: 10px 16px;
@@ -667,11 +699,81 @@
             width: 120px;
         }
 
+        .zoom-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-color);
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .zoom-btn:hover {
+            background: var(--bg-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
         .zoom-value {
             font-size: 12px;
             font-weight: 600;
             color: var(--text-color);
-            min-width: 40px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .reality-scale-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .reality-scale-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            padding: 16px 20px;
+            background: #1e293b;
+            color: white;
+            font-size: 14px;
+            line-height: 1.7;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            width: 500px;
+            max-width: calc(100vw - 40px);
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .reality-scale-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1e293b;
+        }
+
+        .reality-scale-container:hover .reality-scale-tooltip {
+            opacity: 1;
         }
 
         /* Crop Overlay */
@@ -940,6 +1042,7 @@
                             </select>
                             <button class="btn" id="browseSystemFontsBtn" title="扫描系统已安装字体" style="padding: 4px 8px;">🔍 扫描</button>
                         </div>
+
                     </div>
                     <div>
                         <label>文字颜色</label>
@@ -1041,13 +1144,25 @@
                 </div>
             </div>
 
+            <!-- Clear Button -->
+            <button class="clear-btn" id="clearBtn" title="清空所有元素"> x </button>
+
             <!-- Zoom Control -->
             <div class="zoom-control">
-                <span style="font-size: 14px;">➖</span>
-                <input type="range" id="zoomRange" min="0.1" max="3" step="0.1" value="1">
-                <span style="font-size: 14px;">➕</span>
+                <button class="zoom-btn" id="zoomDecreaseBtn" title="缩小">➖</button>
+                <input type="range" id="zoomRange" min="0.1" max="3" step="0.01" value="1">
+                <button class="zoom-btn" id="zoomIncreaseBtn" title="放大">➕</button>
                 <span class="zoom-value" id="zoomValue">100%</span>
-                <button class="btn" id="resetZoomBtn" style="padding: 2px 8px; font-size: 11px;">重置</button>
+                <button class="btn" id="zoom100Btn" style="padding: 2px 8px; font-size: 11px;" title="缩放到100%">默认</button>
+                <div class="reality-scale-container">
+                    <button class="btn" id="realityScaleBtn" style="padding: 2px 8px; font-size: 11px;">现实</button>
+                    <div class="reality-scale-tooltip">
+                        您可以拿一张打印纸放在屏幕上，调整打印纸与显示宽度一致，即可做到真正的所见即所得。<br>
+                        点击左键，即可设置/缩放到现实比例。<br>
+                        点击右键，即可清除现实比例设置。
+                        <br>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1111,7 +1226,8 @@
                 isDragging: false,
                 handle: null
             },
-            draggedId: null
+            draggedId: null,
+            clipboardItem: null // 存储复制的元素
         };
 
         // --- Initialization ---
@@ -1124,6 +1240,10 @@
         function initApp() {
             // Restore UI values from state
             document.getElementById('paperSizeInput').value = `${state.paper.width}x${state.paper.height}`;
+
+            // 默认缩放为100%，不自动加载现实比例
+            state.zoom = 1.0;
+            updateScale();
 
             updatePaperUI();
             renderLayersList();
@@ -1195,9 +1315,22 @@
             const finalScale = state.autoScale * state.zoom;
             container.style.transform = `scale(${finalScale})`;
             
-            // Update zoom UI
+            // Update zoom UI - 精确到1%
+            state.zoom = Math.round(state.zoom * 100) / 100; // 确保精确到0.01
             document.getElementById('zoomValue').innerText = Math.round(state.zoom * 100) + '%';
             document.getElementById('zoomRange').value = state.zoom;
+            
+            // 更新现实比例按钮提示
+            const realityScaleBtn = document.getElementById('realityScaleBtn');
+            if (realityScaleBtn) {
+                const savedScale = localStorage.getItem('dtp_reality_scale');
+                if (savedScale) {
+                    const scale = parseFloat(savedScale);
+                    realityScaleBtn.title = `点击缩放到现实比例 (${Math.round(scale * 100)}%)`;
+                } else {
+                    realityScaleBtn.title = '点击设置当前缩放比例为现实比例';
+                }
+            }
         }
 
         function showStatus(msg) {
@@ -1677,6 +1810,15 @@
             renderAll();
         }
 
+        function clearAllItems() {
+            if (confirm('确定要清空所有元素吗？此操作不可撤销。')) {
+                state.items = [];
+                state.selectedId = null;
+                renderAll();
+                showStatus('已清空所有元素');
+            }
+        }
+
         function drawWrappedText(ctx, item, dpi) {
             const fontSize = item.size * dpi;
             // Ensure font family is quoted if it contains spaces and isn't already quoted
@@ -1736,6 +1878,56 @@
             state.selectedId = newItem.id;
             renderAll();
             showStatus('已复制图层');
+        }
+
+        // 复制元素到剪贴板
+        function copyItemToClipboard(id) {
+            const item = state.items.find(i => i.id === id);
+            if (!item) return;
+            
+            // 深拷贝元素，包括图片对象
+            const copiedItem = JSON.parse(JSON.stringify(item));
+            
+            // 对于图片类型，需要重新创建Image对象
+            if (item.type === 'image') {
+                // 将图片转换为dataURL以便后续恢复
+                const canvas = document.createElement('canvas');
+                canvas.width = item.workingImg.width;
+                canvas.height = item.workingImg.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(item.workingImg, 0, 0);
+                copiedItem.imageDataUrl = canvas.toDataURL('image/png');
+            }
+            
+            state.clipboardItem = copiedItem;
+            showStatus('已复制到剪贴板');
+        }
+
+        // 复制元素并放置在原图下面（不重叠）
+        function duplicateItemBelow(id) {
+            const index = state.items.findIndex(i => i.id === id);
+            if (index === -1) return;
+            
+            const original = state.items[index];
+            const newItem = { ...original };
+            
+            // Generate new ID
+            newItem.id = (original.type === 'image' ? 'img-' : 'text-') + Date.now() + '-' + Math.floor(Math.random() * 1000);
+            
+            // 位置放在原图下面，保持相同大小，不重叠
+            newItem.x = original.x;
+            newItem.y = original.y + original.h; // 放在原图正下方
+            
+            // 确保不超出纸张范围
+            if (newItem.y + newItem.h > state.paper.height) {
+                newItem.y = Math.max(0, state.paper.height - newItem.h);
+            }
+            
+            // Insert after the original (on top in the preview)
+            state.items.splice(index + 1, 0, newItem);
+            state.selectedId = newItem.id;
+            renderAll();
+            showStatus('已复制并放置');
         }
 
         function applyDitheringToItem(imageData, item) {
@@ -2280,10 +2472,77 @@
                 updateScale();
             };
 
-            document.getElementById('resetZoomBtn').onclick = () => {
-                state.zoom = 1.0;
+            // 缩放加减按钮 - 精确到1%
+            document.getElementById('zoomDecreaseBtn').onclick = () => {
+                state.zoom = Math.max(0.1, Math.round((state.zoom - 0.01) * 100) / 100);
                 updateScale();
             };
+
+            document.getElementById('zoomIncreaseBtn').onclick = () => {
+                state.zoom = Math.min(3, Math.round((state.zoom + 0.01) * 100) / 100);
+                updateScale();
+            };
+
+            // 100%按钮：缩放到100%
+            document.getElementById('zoom100Btn').onclick = () => {
+                state.zoom = 1.0;
+                updateScale();
+                showStatus('已缩放到100%');
+            };
+
+            // 现实比例按钮 - 保存/恢复缩放比例
+            const realityScaleBtn = document.getElementById('realityScaleBtn');
+            
+            function updateRealityScaleBtn() {
+                const savedScale = localStorage.getItem('dtp_reality_scale');
+                if (savedScale) {
+                    const scale = parseFloat(savedScale);
+                    realityScaleBtn.style.background = 'var(--primary-color)';
+                    realityScaleBtn.style.color = 'white';
+                    realityScaleBtn.title = `点击缩放到现实比例 (${Math.round(scale * 100)}%)，右键清除设置`;
+                } else {
+                    realityScaleBtn.style.background = '';
+                    realityScaleBtn.style.color = '';
+                    realityScaleBtn.title = '点击设置当前缩放比例为现实比例';
+                }
+            }
+            
+            // 初始化按钮状态
+            updateRealityScaleBtn();
+
+            // 现实比例按钮：第一次点击设置，之后点击恢复
+            realityScaleBtn.onclick = () => {
+                const savedScale = localStorage.getItem('dtp_reality_scale');
+                if (savedScale) {
+                    // 已保存，则缩放到现实比例
+                    const scale = parseFloat(savedScale);
+                    state.zoom = scale;
+                    updateScale();
+                    showStatus(`已缩放到现实比例: ${Math.round(scale * 100)}%`);
+                } else {
+                    // 未保存，则保存当前比例
+                    localStorage.setItem('dtp_reality_scale', state.zoom.toString());
+                    updateRealityScaleBtn();
+                    showStatus(`已设置现实比例: ${Math.round(state.zoom * 100)}%`);
+                }
+            };
+            
+            // 右键点击清除现实比例设置
+            realityScaleBtn.oncontextmenu = (e) => {
+                e.preventDefault();
+                const savedScale = localStorage.getItem('dtp_reality_scale');
+                if (savedScale) {
+                    if (confirm('确定要清除现实比例设置吗？')) {
+                        localStorage.removeItem('dtp_reality_scale');
+                        updateRealityScaleBtn();
+                        showStatus('已清除现实比例设置');
+                    }
+                } else {
+                    showStatus('当前没有保存的现实比例');
+                }
+            };
+            
+
 
             // Add Text
             document.getElementById('addTextBtn').onclick = () => {
@@ -2314,12 +2573,36 @@
 
             // Keyboard support for font size, editing, and deletion
             window.addEventListener('keydown', (e) => {
-                if (!state.selectedId) return;
-                
                 // Don't trigger if user is typing in an input or textarea
                 if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
                     return;
                 }
+
+                // Ctrl-C: 复制当前元素
+                if (e.ctrlKey && e.key === 'c') {
+                    if (state.selectedId) {
+                        const item = state.items.find(i => i.id === state.selectedId);
+                        if (item) {
+                            copyItemToClipboard(item.id);
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                }
+
+                // Ctrl-D: 复制并放置当前元素（保持大小相同、位置放在原图下面不重叠）
+                if (e.ctrlKey && e.key === 'd') {
+                    if (state.selectedId) {
+                        const item = state.items.find(i => i.id === state.selectedId);
+                        if (item) {
+                            duplicateItemBelow(item.id);
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                }
+
+                if (!state.selectedId) return;
 
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item) return;
@@ -2394,6 +2677,7 @@
             // Print button
             document.getElementById('printBtn').onclick = doPrint;
             document.getElementById('exportPngBtn').onclick = exportToPNG;
+            document.getElementById('clearBtn').onclick = clearAllItems;
 
             // Overlay dragging
             const overlay = document.getElementById('imageOverlay');
@@ -2841,5 +3125,6 @@
     </script>
 </body>
 </html>
+
 
 

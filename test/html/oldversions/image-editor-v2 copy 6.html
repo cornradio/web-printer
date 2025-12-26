@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./printer.png" type="image/x-icon">
     <title>图片编辑与打印 V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&family=ZCOOL+KuaiLe&family=Long+Cang&family=Pacifico&family=Bangers&display=swap" rel="stylesheet">
     <script type="text/javascript" src="./browser-polyfill.min.js"></script>
     <script type="text/javascript" src="./lib/dtpweb.js"></script>
     <style>
@@ -15,6 +17,30 @@
             --text-color: #1e293b;
             --text-muted: #64748b;
         }
+
+        /* Mobile Warning */
+        .mobile-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .mobile-warning {
+                display: flex;
+            }
+        }
+        .mobile-warning h2 { margin-bottom: 10px; color: var(--primary-color); }
+        .mobile-warning p { color: var(--text-muted); line-height: 1.6; }
 
         * {
             box-sizing: border-box;
@@ -92,6 +118,34 @@
             z-index: 1000;
         }
 
+        .header-dropdown {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 300px;
+            background: white;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .header-dropdown.show {
+            display: flex;
+        }
+
+        .header-dropdown h3 {
+            margin-bottom: 16px;
+            font-size: 15px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .info-tooltip.show {
             display: flex;
         }
@@ -146,6 +200,199 @@
             padding: 20px;
         }
 
+        .layers-sidebar {
+            width: 280px;
+            background: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+            position: absolute;
+            right: 0;
+            top: 60px;
+            bottom: 0;
+            z-index: 150;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .layers-sidebar.show {
+            transform: translateX(0);
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .layer-item:active {
+            cursor: grabbing;
+        }
+
+        .layer-item.dragging {
+            opacity: 0.5;
+            border: 1px dashed var(--primary-color);
+            background: #f1f5f9;
+        }
+
+        .layer-item.drag-over-top::before {
+            content: "";
+            position: absolute;
+            top: -6px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        .layer-item.drag-over-bottom::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        .layer-item:hover {
+            border-color: var(--primary-color);
+            background: #f8fafc;
+        }
+
+        .layer-item.selected {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+            box-shadow: 0 0 0 1px var(--primary-color);
+        }
+
+        .layer-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .layer-thumb img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .layer-thumb canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .layer-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .layer-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .layer-type {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .layer-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .layer-btn {
+            padding: 6px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .layer-btn:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .layer-toggle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .layer-toggle-btn:hover {
+            background: var(--bg-color);
+            border-color: var(--text-muted);
+        }
+
+        .layer-toggle-btn.active {
+            background: #f1f5f9;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .layer-toggle-btn .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
         .preview-area {
             flex: 1;
             background: #cbd5e1;
@@ -175,7 +422,13 @@
 
         /* Components */
         .section {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section:last-child {
+            border-bottom: none;
         }
 
         .section-title {
@@ -295,7 +548,6 @@
 
         .image-overlay.selected, .text-overlay.selected {
             border-color: var(--primary-color);
-            z-index: 10;
         }
 
         .image-overlay canvas {
@@ -359,6 +611,16 @@
             background: #eff6ff;
         }
 
+        body.dark .drop-zone:hover,
+        body.dark .drop-zone.drag-over,
+        @media (prefers-color-scheme: dark) {
+            body:not(.light) .drop-zone:hover,
+            body:not(.light) .drop-zone.drag-over {
+                background: #1e293b;
+                border-color: var(--primary-color);
+            }
+        }
+
         .drop-zone-text {
             font-size: 13px;
             color: var(--text-muted);
@@ -381,6 +643,37 @@
         }
 
         .status-bar.show {
+            transform: translateY(0);
+        }
+
+        /* Clear Button */
+        .clear-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .clear-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .clear-btn:active {
             transform: translateY(0);
         }
 
@@ -447,6 +740,38 @@
             gap: 12px;
         }
 
+        /* Text Edit Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: var(--panel-bg);
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 {
+            margin-bottom: 16px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
         /* Better Sliders */
         input[type="range"] {
             width: 100%;
@@ -468,21 +793,25 @@
     </style>
 </head>
 <body>
+    <div class="mobile-warning">
+        <h2>📱 暂不支持手机端</h2>
+        <p>为了获得最佳的编辑与打印体验，请复制链接到电脑端 (PC) 浏览器打开使用。</p>
+    </div>
     <header class="app-header">
         <h1 style="font-size: 18px;">图片打印编辑工具 V2</h1>
         <div class="header-links">
+            <button class="btn" id="aiToolsBtn" title="AI 绘图助手" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✨</button>
             <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔍</button>
             <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔳</button>
+            <button class="btn" id="removeBgBtn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✂️</button>
+            <div class="layer-toggle-btn" id="layerToggleBtn" title="图层管理">
+                📂
+                <div class="badge" id="layerCountBadge" style="display: none;">0</div>
+            </div>
             <div class="info-btn" id="infoBtn" title="项目信息">
                 <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
                 </svg>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-                <select id="printerSelect" style="width: 160px; padding: 4px 8px; font-size: 12px; height: 32px; border-radius: 6px;">
-                    <option value="">正在获取打印机...</option>
-                </select>
-                <button class="btn btn-primary" id="printBtn" disabled style="padding: 4px 16px; font-size: 13px; height: 32px;">🖨️ 打印</button>
             </div>
             <div id="printerStatus" style="display: none;"></div>
             <div class="info-tooltip" id="infoTooltip">
@@ -496,19 +825,72 @@
                     <a href="https://www.dothantech.com/xiazaizhongxin/" target="_blank" class="info-link">官方驱动下载中心</a>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
-                    <span class="info-title">🚀 Release Note (v1.0)</span>
+                    <span class="info-title">🚀 Release Note (v2.3)</span>
                     <ul style="padding-left: 16px; margin-top: 4px; font-size: 11px; color: var(--text-muted);">
-                        <li>文字旋转 (90°) & 预览缩放 (10%-300%)</li>
-                        <li>文字黑白颜色切换，支持图层反白打印</li>
-                        <li>集成一键 Logo 搜索 (谷歌/必应)</li>
-                        <li>在线二维码创作与自动排版</li>
-                        <li>重构顶栏布局，修复打印右侧微小白边</li>
+                        <li><b>移动端友好提示</b>：增加手机访问时的引导提示</li>
+                        <li><b>文字渲染优化</b>：解决首行截断问题，提升 WYSIWYG 还原度</li>
+                        <li><b>纸张设置增强</b>：支持删除已保存的常用尺寸</li>
+                        <li><b>AI 工具阵营优化</b>：新增 Grok、千问、豆包(笨笨)</li>
                     </ul>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
                     <span class="info-title">👨‍💻 关于作者</span>
                     <p>Web 软件作者: <b>cornradio</b></p>
                     <a href="https://github.com/cornradio" target="_blank" class="info-link">GitHub: cornradio</a>
+                </div>
+            </div>
+
+            <!-- AI Tools Dropdown -->
+            <div id="aiModal" class="header-dropdown">
+                <h3>✨ AI 绘图助手</h3>
+                <div class="control-group">
+                    <label>复制绘图话术：</label>
+                    <div class="input-row" style="background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; margin-bottom: 4px;" onclick="navigator.clipboard.writeText('处理成单色黑素描风格'); showStatus('已复制话术');">
+                        <code style="font-size: 13px; color: var(--primary-color);">处理成单色黑素描风格</code>
+                        <span style="font-size: 12px; color: var(--text-muted);">📋</span>
+                    </div>
+                    <div class="input-row" style="background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="navigator.clipboard.writeText('处理成单色黑线稿'); showStatus('已复制话术');">
+                        <code style="font-size: 13px; color: var(--primary-color);">处理成单色黑线稿</code>
+                        <span style="font-size: 12px; color: var(--text-muted);">📋</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+                        <button class="btn btn-primary" onclick="window.open('https://gemini.google.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">Gemini</button>
+                        <button class="btn btn-primary" onclick="window.open('https://grok.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">Grok</button>
+                        <button class="btn btn-primary" onclick="window.open('https://www.doubao.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">豆包 (笨笨)</button>
+                        <button class="btn btn-primary" onclick="window.open('https://www.qianwen.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">千问</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Dropdown -->
+            <div id="searchModal" class="header-dropdown">
+                <h3>🔍 Logo 搜索</h3>
+                <div class="control-group">
+                    <input type="text" id="logoSearchInput" placeholder="输入品牌/名称..." style="margin-bottom: 12px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button class="btn btn-primary" id="goGoogle">谷歌搜索</button>
+                        <button class="btn btn-primary" id="goBing">必应搜索</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Dropdown -->
+            <div id="qrModal" class="header-dropdown">
+                <h3>🔳 二维码创作</h3>
+                <div class="control-group">
+                    <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
+                    <button class="btn btn-primary btn-full" id="confirmQR">生成图片并添加</button>
+                </div>
+            </div>
+
+            <!-- Background Removal Dropdown -->
+            <div id="bgModal" class="header-dropdown">
+                <h3>✂️ 去除背景工具</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.remove.bg/zh', '_blank'); document.getElementById('bgModal').classList.remove('show');">Remove.bg (推荐)</button>
+                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.adobe.com/express/feature/image/remove-background', '_blank'); document.getElementById('bgModal').classList.remove('show');">Adobe Express</button>
+                    <button class="btn btn-primary btn-full" onclick="window.open('https://pixian.ai/', '_blank'); document.getElementById('bgModal').classList.remove('show');">Pixian.AI</button>
+                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.photoroom.com/tools/background-remover', '_blank'); document.getElementById('bgModal').classList.remove('show');">PhotoRoom</button>
                 </div>
             </div>
         </div>
@@ -521,16 +903,12 @@
                 <div class="section-title">📄 纸张设置</div>
                 <div class="control-group">
                     <div class="input-row">
-                        <div class="input-field">
-                            <label>宽度 (mm)</label>
-                            <input type="number" id="paperWidth" value="40" min="10" max="100">
-                        </div>
-                        <div class="input-field">
-                            <label>高度 (mm)</label>
-                            <input type="number" id="paperHeight" value="30" min="10" max="150">
-                        </div>
+                        <input type="text" id="paperSizeInput" placeholder="宽度 x 高度 (mm)" title="格式: 40x30" style="flex: 1;">
+                        <button class="btn" id="applyPaperSize" title="应用尺寸" style="padding: 8px 12px;">应用</button>
                     </div>
-                    <button class="btn btn-full" id="applyPaperSize">应用纸张设置</button>
+                    <div id="recentPaperSizes" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <!-- Quick buttons will be injected here -->
+                    </div>
                 </div>
             </div>
 
@@ -551,7 +929,10 @@
                         <button class="btn btn-full" id="startCropBtn">✂️ 裁剪</button>
                         <button class="btn btn-full" id="rotateBtn">🔄 旋转 90°</button>
                     </div>
-                    <button class="btn btn-full" id="fitToPaperBtn">📐 等比例铺满</button>
+                    <div class="input-row">
+                        <button class="btn btn-full" id="mirrorFlipBtn">↔️ 镜像翻转</button>
+                        <button class="btn btn-full" id="fitToPaperBtn">📐 铺满</button>
+                    </div>
                     <button class="btn btn-full" id="resetImageBtn">🔄 重置图片</button>
                 </div>
             </div>
@@ -573,12 +954,24 @@
                 <div class="section-title">🎨 文字样式</div>
                 <div class="control-group">
                     <div>
-                        <label>字体名称</label>
-                        <select id="fontFamilySelect">
-                            <option value="微软雅黑">微软雅黑</option>
-                            <option value="宋体">宋体</option>
-                            <option value="黑体">黑体</option>
-                        </select>
+                        <label>字体名称 <span style="font-size: 10px; color: var(--primary-color); opacity: 0.8;">(←/→ 切换)</span></label>
+                        <div class="input-row">
+                            <select id="fontFamilySelect" style="flex: 1;">
+                                <option value="微软雅黑">微软雅黑</option>
+                                <option value="宋体">宋体</option>
+                                <option value="黑体">黑体</option>
+                                <optgroup label="🎨 个性字体">
+                                    <option value="'Ma Shan Zheng', cursive">马善政楷书 (书法)</option>
+                                    <option value="'ZCOOL XiaoWei', serif">站酷小薇体 (精美)</option>
+                                    <option value="'ZCOOL KuaiLe', cursive">站酷快乐体 (可爱)</option>
+                                    <option value="'Long Cang', cursive">龙藏体 (草书)</option>
+                                    <option value="'Pacifico', cursive">Pacifico (英文手写)</option>
+                                    <option value="'Bangers', system-ui">Bangers (漫画风)</option>
+                                </optgroup>
+                            </select>
+                            <button class="btn" id="browseSystemFontsBtn" title="扫描系统已安装字体" style="padding: 4px 8px;">🔍 扫描</button>
+                        </div>
+
                     </div>
                     <div>
                         <label>文字颜色</label>
@@ -641,14 +1034,29 @@
                 <div class="control-group">
                     <div class="input-row">
                         <input type="text" id="tplNameInput" placeholder="输入模板名称..." style="flex: 1;">
-                        <button class="btn" id="saveTplBtn">保存</button>
+                        <button class="btn" id="saveTplBtn" title="保存当前内容为模板">💾</button>
                     </div>
-                    <select id="tplSelect">
-                        <option value="">-- 选择已保存模板 --</option>
+                    <div class="input-row">
+                        <select id="tplSelect" style="flex: 1;">
+                            <option value="">-- 选择模板 --</option>
+                        </select>
+                        <button class="btn" id="loadTplBtn" title="加载选中模板">📥</button>
+                        <button class="btn btn-danger" id="deleteTplBtn" title="删除选中模板">🗑️</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Print -->
+            <div class="section">
+                <div class="section-title">🖨️ 打印输出</div>
+                <div class="control-group">
+                    <label>选择打印机</label>
+                    <select id="printerSelect">
+                        <option value="">正在获取打印机...</option>
                     </select>
                     <div class="input-row">
-                        <button class="btn btn-full" id="loadTplBtn">加载选中</button>
-                        <button class="btn btn-danger" id="deleteTplBtn">删除</button>
+                        <button class="btn btn-primary btn-full" id="printBtn" disabled>开始打印</button>
+                        <button class="btn btn-full" id="exportPngBtn" title="导出为 PNG 图片">🖼️ 导出</button>
                     </div>
                 </div>
             </div>
@@ -665,6 +1073,9 @@
                 </div>
             </div>
 
+            <!-- Clear Button -->
+            <button class="clear-btn" id="clearBtn" title="清空所有元素">🗑️ 清空</button>
+
             <!-- Zoom Control -->
             <div class="zoom-control">
                 <span style="font-size: 14px;">➖</span>
@@ -674,6 +1085,13 @@
                 <button class="btn" id="resetZoomBtn" style="padding: 2px 8px; font-size: 11px;">重置</button>
             </div>
         </section>
+
+        <aside class="layers-sidebar" id="layersSidebar">
+            <div class="section-title">📂 图层管理</div>
+            <div id="layersList">
+                <!-- Layers will be injected here -->
+            </div>
+        </aside>
     </main>
 
     <!-- Crop Modal -->
@@ -687,31 +1105,17 @@
         </div>
     </div>
 
-    <div class="status-bar" id="statusBar">提示消息</div>
+    <div id="statusBar" class="status-bar">提示消息</div>
 
-    <!-- Search Modal -->
-    <div id="searchModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000;">
-        <div style="background: white; padding: 24px; border-radius: 12px; width: 320px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-            <h3 style="margin-bottom: 16px; font-size: 16px;">🔍 Logo 搜索</h3>
-            <div class="control-group">
-                <input type="text" id="logoSearchInput" placeholder="输入品牌/名称..." style="margin-bottom: 12px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <button class="btn btn-primary" id="goGoogle">谷歌搜索</button>
-                    <button class="btn btn-primary" id="goBing">必应搜索</button>
-                </div>
-                <button class="btn btn-full" id="closeSearch" style="margin-top: 12px; border: none; color: var(--text-muted);">取消</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- QR Modal -->
-    <div id="qrModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000;">
-        <div style="background: white; padding: 24px; border-radius: 12px; width: 320px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-            <h3 style="margin-bottom: 16px; font-size: 16px;">🔳 二维码创作</h3>
-            <div class="control-group">
-                <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
-                <button class="btn btn-primary btn-full" id="confirmQR">生成图片</button>
-                <button class="btn btn-full" id="closeQR" style="margin-top: 12px; border: none; color: var(--text-muted);">取消</button>
+    <!-- Text Edit Modal -->
+    <div id="textEditModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>📝 编辑文字内容</h3>
+            <textarea id="editTextarea" rows="6" style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; outline: none; resize: vertical; margin-bottom: 8px; font-family: inherit;"></textarea>
+            <div style="font-size: 11px; color: var(--text-muted); text-align: right;">按 Ctrl + Enter 快速保存</div>
+            <div class="modal-actions">
+                <button class="btn" id="cancelTextEdit">取消</button>
+                <button class="btn btn-primary" id="saveTextEdit">保存修改</button>
             </div>
         </div>
     </div>
@@ -734,13 +1138,16 @@
             lastMousePos: { x: 0, y: 0 },
             isDragging: false,
             isResizing: false,
+            isResizingWidth: false,
             crop: {
                 active: false,
                 targetId: null,
                 rect: { x: 0, y: 0, w: 0, h: 0 },
                 isDragging: false,
                 handle: null
-            }
+            },
+            draggedId: null,
+            clipboardItem: null // 存储复制的元素
         };
 
         // --- Initialization ---
@@ -752,10 +1159,11 @@
 
         function initApp() {
             // Restore UI values from state
-            document.getElementById('paperWidth').value = state.paper.width;
-            document.getElementById('paperHeight').value = state.paper.height;
+            document.getElementById('paperSizeInput').value = `${state.paper.width}x${state.paper.height}`;
 
             updatePaperUI();
+            renderLayersList();
+            renderRecentPaperSizes();
             
             api.checkPlugin((resp) => {
                 if (resp.statusCode === 0) {
@@ -835,6 +1243,71 @@
             setTimeout(() => bar.classList.remove('show'), 3000);
         }
 
+        function renderRecentPaperSizes() {
+            const container = document.getElementById('recentPaperSizes');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const recents = JSON.parse(localStorage.getItem('dtp_recent_papers') || '["40x30", "40x40", "30x20", "50x30"]');
+            
+            recents.forEach(size => {
+                const group = document.createElement('div');
+                group.style.display = 'flex';
+                group.style.alignItems = 'center';
+                group.style.background = '#f1f5f9';
+                group.style.borderRadius = '4px';
+                group.style.overflow = 'hidden';
+                group.style.border = '1px solid var(--border-color)';
+
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.style.padding = '4px 8px';
+                btn.style.fontSize = '11px';
+                btn.style.border = 'none';
+                btn.style.background = 'transparent';
+                btn.innerText = size;
+                btn.onclick = () => {
+                    document.getElementById('paperSizeInput').value = size;
+                    document.getElementById('applyPaperSize').click();
+                };
+
+                const del = document.createElement('div');
+                del.innerText = '×';
+                del.style.padding = '0 6px';
+                del.style.fontSize = '12px';
+                del.style.cursor = 'pointer';
+                del.style.color = 'var(--text-muted)';
+                del.style.borderLeft = '1px solid var(--border-color)';
+                del.onclick = (e) => {
+                    e.stopPropagation();
+                    const newRecents = recents.filter(s => s !== size);
+                    localStorage.setItem('dtp_recent_papers', JSON.stringify(newRecents));
+                    renderRecentPaperSizes();
+                };
+                del.onmouseover = () => del.style.background = '#fee2e2';
+                del.onmouseleave = () => del.style.background = 'transparent';
+
+                group.appendChild(btn);
+                group.appendChild(del);
+                container.appendChild(group);
+            });
+        }
+
+        function addRecentPaperSize(w, h) {
+            const size = `${w}x${h}`;
+            let recents = JSON.parse(localStorage.getItem('dtp_recent_papers') || '["40x30", "40x40", "30x20", "50x30"]');
+            
+            // Remove if exists and add to front
+            recents = recents.filter(s => s !== size);
+            recents.unshift(size);
+            
+            // Keep only top 6
+            recents = recents.slice(0, 6);
+            
+            localStorage.setItem('dtp_recent_papers', JSON.stringify(recents));
+            renderRecentPaperSizes();
+        }
+
         // --- Image Loading ---
         function handleFile(file) {
             if (!file || !file.type.startsWith('image/')) {
@@ -866,7 +1339,8 @@
                         ditherMode: 'atkinson',
                         threshold: 128,
                         exposure: 0,
-                        invert: false
+                        invert: false,
+                        isFlipped: false
                     });
                     
                     state.selectedId = id;
@@ -914,6 +1388,155 @@
             });
 
             updateControlPanel();
+            renderLayersList();
+            
+            // Update layer count badge
+            const badge = document.getElementById('layerCountBadge');
+            if (state.items.length > 0) {
+                badge.innerText = state.items.length;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function renderLayersList() {
+            const list = document.getElementById('layersList');
+            if (!list) return;
+            list.innerHTML = '';
+            
+            // Show layers in reverse order (top of array = top of list = top in preview)
+            const reversedItems = [...state.items].reverse();
+            
+            reversedItems.forEach((item, index) => {
+                const actualIndex = state.items.length - 1 - index;
+                const div = document.createElement('div');
+                div.className = 'layer-item';
+                div.draggable = true;
+                if (state.selectedId === item.id) div.classList.add('selected');
+                if (state.draggedId === item.id) div.classList.add('dragging');
+                
+                let name = item.type === 'image' ? '图片' : item.text.trim();
+                if (name.length > 15) name = name.substring(0, 15) + '...';
+                if (!name) name = '(空文字)';
+                
+                div.innerHTML = `
+                    <div class="layer-thumb" id="thumb-${item.id}"></div>
+                    <div class="layer-info">
+                        <span class="layer-name">${name}</span>
+                        <span class="layer-type">${item.type === 'image' ? 'Image' : 'Text'}</span>
+                    </div>
+                    <div class="layer-actions">
+                        <button class="layer-btn" id="duplicate-layer-${item.id}" title="复制图层">📋</button>
+                        <button class="layer-btn" id="delete-layer-${item.id}" title="删除">🗑️</button>
+                    </div>
+                `;
+                
+                // Render thumbnail
+                setTimeout(() => renderLayerThumbnail(item), 0);
+
+                div.onclick = (e) => {
+                    if (e.target.closest('.layer-btn')) return;
+                    state.selectedId = item.id;
+                    renderAll();
+                };
+
+                // Drag and Drop events
+                div.ondragstart = (e) => {
+                    state.draggedId = item.id;
+                    div.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', item.id);
+                };
+
+                div.ondragend = (e) => {
+                    state.draggedId = null;
+                    div.classList.remove('dragging');
+                    document.querySelectorAll('.layer-item').forEach(el => el.classList.remove('drag-over'));
+                };
+
+                div.ondragover = (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    const target = e.target.closest('.layer-item');
+                    if (target && state.draggedId !== item.id) {
+                        const rect = target.getBoundingClientRect();
+                        const isAfter = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                        target.classList.remove('drag-over-top', 'drag-over-bottom');
+                        target.classList.add(isAfter ? 'drag-over-bottom' : 'drag-over-top');
+                    }
+                };
+
+                div.ondragleave = (e) => {
+                    const target = e.target.closest('.layer-item');
+                    if (target) {
+                        target.classList.remove('drag-over-top', 'drag-over-bottom');
+                    }
+                };
+
+                div.ondrop = (e) => {
+                    e.preventDefault();
+                    const draggedId = e.dataTransfer.getData('text/plain');
+                    if (draggedId !== item.id) {
+                        const rect = div.getBoundingClientRect();
+                        const isAfter = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                        moveLayerTo(draggedId, item.id, isAfter);
+                    }
+                };
+
+                div.querySelector(`#delete-layer-${item.id}`).onclick = (e) => {
+                    e.stopPropagation();
+                    deleteItem(item.id);
+                };
+
+                div.querySelector(`#duplicate-layer-${item.id}`).onclick = (e) => {
+                    e.stopPropagation();
+                    duplicateItem(item.id);
+                };
+                
+                list.appendChild(div);
+            });
+        }
+
+        function renderLayerThumbnail(item) {
+            const thumbContainer = document.getElementById(`thumb-${item.id}`);
+            if (!thumbContainer) return;
+            
+            if (item.type === 'image') {
+                const img = new Image();
+                img.src = item.workingImg.src;
+                thumbContainer.appendChild(img);
+            } else if (item.type === 'text') {
+                const canvas = document.createElement('canvas');
+                canvas.width = 40;
+                canvas.height = 40;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#f1f5f9';
+                ctx.fillRect(0, 0, 40, 40);
+                ctx.fillStyle = item.color === 'white' ? '#ccc' : 'black';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('T', 20, 20);
+                thumbContainer.appendChild(canvas);
+            }
+        }
+
+        function moveLayerTo(draggedId, targetId, isAfter) {
+            const draggedIdx = state.items.findIndex(i => i.id === draggedId);
+            const targetIdx = state.items.findIndex(i => i.id === targetId);
+            
+            if (draggedIdx === -1 || targetIdx === -1) return;
+            
+            const item = state.items.splice(draggedIdx, 1)[0];
+            const newTargetIdx = state.items.findIndex(i => i.id === targetId);
+            
+            // In the UI list (reversed), moving to the "bottom half" (isAfter=true) 
+            // means moving it towards the start of the state.items array.
+            const finalIdx = isAfter ? newTargetIdx : newTargetIdx + 1;
+            state.items.splice(finalIdx, 0, item);
+            
+            renderAll();
         }
 
         function renderImageItem(item, container) {
@@ -965,6 +1588,11 @@
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = wPx; tempCanvas.height = hPx;
             const tempCtx = tempCanvas.getContext('2d');
+            
+            if (item.isFlipped) {
+                tempCtx.translate(wPx, 0);
+                tempCtx.scale(-1, 1);
+            }
             tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
             
             const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
@@ -978,20 +1606,49 @@
             div.id = item.id;
             if (state.selectedId === item.id) div.classList.add('selected');
             
-            div.style.left = (item.x * MM_TO_PX) + 'px';
-            div.style.top = (item.y * MM_TO_PX) + 'px';
-            div.style.fontSize = (item.size * MM_TO_PX) + 'px';
-            div.style.fontFamily = item.fontFamily;
-            div.style.fontWeight = item.isBold ? 'bold' : 'normal';
-            div.style.color = item.color || 'black';
-            if (item.color === 'white') {
-                div.style.textShadow = '0 0 2px rgba(0,0,0,0.5)';
-            }
+            const dpi = MM_TO_PX;
+            const fontSize = item.size * dpi;
+            const maxWidth = (item.w || 30) * dpi;
+            
+            // Temporary canvas to measure and draw text exactly as it will be printed
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // First pass to get height
+            const textHeight = drawWrappedText(ctx, item, dpi);
+            
+            canvas.width = maxWidth;
+            canvas.height = textHeight;
+            
+            // Second pass to actually draw
+            drawWrappedText(ctx, item, dpi);
+
+            div.style.left = (item.x * dpi) + 'px';
+            div.style.top = (item.y * dpi) + 'px';
+            div.style.width = maxWidth + 'px';
+            div.style.height = textHeight + 'px';
             div.style.transform = `rotate(${item.orientation || 0}deg)`;
-            div.style.transformOrigin = '0 0'; // Top-left origin like the printer
+            div.style.transformOrigin = '0 0';
             
-            div.innerHTML = `<div class="text-content">${item.text}</div>`;
-            
+            // Add a handle for resizing width
+            const resizeH = document.createElement('div');
+            resizeH.className = 'resize-handle';
+            resizeH.style.right = '-6px';
+            resizeH.style.bottom = '50%';
+            resizeH.style.marginTop = '-6px';
+            resizeH.style.cursor = 'ew-resize';
+            resizeH.id = 'resize-width-' + item.id;
+            div.appendChild(resizeH);
+
+            const displayCanvas = document.createElement('canvas');
+            displayCanvas.width = maxWidth;
+            displayCanvas.height = textHeight;
+            displayCanvas.style.width = '100%';
+            displayCanvas.style.height = '100%';
+            const dCtx = displayCanvas.getContext('2d');
+            dCtx.drawImage(canvas, 0, 0);
+            div.appendChild(displayCanvas);
+
             const del = document.createElement('div');
             del.className = 'delete-handle';
             del.innerText = '×';
@@ -1003,7 +1660,8 @@
 
             div.onmousedown = (e) => {
                 state.selectedId = item.id;
-                state.isDragging = true;
+                state.isResizingWidth = e.target.id.startsWith('resize-width-');
+                state.isDragging = !state.isResizingWidth;
                 state.lastMousePos = { x: e.clientX, y: e.clientY };
                 renderAll();
                 e.stopPropagation();
@@ -1053,6 +1711,131 @@
             state.items = state.items.filter(i => i.id !== id);
             if (state.selectedId === id) state.selectedId = null;
             renderAll();
+        }
+
+        function clearAllItems() {
+            if (state.items.length === 0) {
+                showStatus('当前没有元素需要清空');
+                return;
+            }
+            
+            if (confirm('确定要清空所有元素吗？此操作不可撤销。')) {
+                state.items = [];
+                state.selectedId = null;
+                renderAll();
+                showStatus('已清空所有元素');
+            }
+        }
+
+        function drawWrappedText(ctx, item, dpi) {
+            const fontSize = item.size * dpi;
+            // Ensure font family is quoted if it contains spaces and isn't already quoted
+            const fontFamily = (item.fontFamily.includes(' ') && !item.fontFamily.includes("'") && !item.fontFamily.includes('"')) 
+                ? `"${item.fontFamily}"` 
+                : item.fontFamily;
+            
+            ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px ${fontFamily}`;
+            ctx.fillStyle = item.color || 'black';
+            ctx.textBaseline = 'top';
+            
+            const maxWidth = (item.w || 30) * dpi;
+            const paragraphs = item.text.split('\n');
+            const lines = [];
+
+            paragraphs.forEach(p => {
+                let currentLine = '';
+                for (let i = 0; i < p.length; i++) {
+                    const char = p[i];
+                    const testLine = currentLine + char;
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && currentLine !== '') {
+                        lines.push(currentLine);
+                        currentLine = char;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                lines.push(currentLine);
+            });
+
+            lines.forEach((line, index) => {
+                // Add a small 0.15 * fontSize padding to the top to prevent clipping
+                ctx.fillText(line, 0, (index * fontSize * 1.2) + (fontSize * 0.15));
+            });
+            
+            // Return total height with a bit more buffer (1.4 instead of 1.3)
+            return lines.length * fontSize * 1.2 + (fontSize * 0.3); 
+        }
+
+        function duplicateItem(id) {
+            const index = state.items.findIndex(i => i.id === id);
+            if (index === -1) return;
+            
+            const original = state.items[index];
+            const newItem = { ...original };
+            
+            // Generate new ID
+            newItem.id = (original.type === 'image' ? 'img-' : 'text-') + Date.now() + '-' + Math.floor(Math.random() * 1000);
+            
+            // Offset position slightly
+            newItem.x += 2;
+            newItem.y += 2;
+            
+            // Insert after the original (on top in the preview)
+            state.items.splice(index + 1, 0, newItem);
+            state.selectedId = newItem.id;
+            renderAll();
+            showStatus('已复制图层');
+        }
+
+        // 复制元素到剪贴板
+        function copyItemToClipboard(id) {
+            const item = state.items.find(i => i.id === id);
+            if (!item) return;
+            
+            // 深拷贝元素，包括图片对象
+            const copiedItem = JSON.parse(JSON.stringify(item));
+            
+            // 对于图片类型，需要重新创建Image对象
+            if (item.type === 'image') {
+                // 将图片转换为dataURL以便后续恢复
+                const canvas = document.createElement('canvas');
+                canvas.width = item.workingImg.width;
+                canvas.height = item.workingImg.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(item.workingImg, 0, 0);
+                copiedItem.imageDataUrl = canvas.toDataURL('image/png');
+            }
+            
+            state.clipboardItem = copiedItem;
+            showStatus('已复制到剪贴板');
+        }
+
+        // 复制元素并放置在原图下面（不重叠）
+        function duplicateItemBelow(id) {
+            const index = state.items.findIndex(i => i.id === id);
+            if (index === -1) return;
+            
+            const original = state.items[index];
+            const newItem = { ...original };
+            
+            // Generate new ID
+            newItem.id = (original.type === 'image' ? 'img-' : 'text-') + Date.now() + '-' + Math.floor(Math.random() * 1000);
+            
+            // 位置放在原图下面，保持相同大小，不重叠
+            newItem.x = original.x;
+            newItem.y = original.y + original.h; // 放在原图正下方
+            
+            // 确保不超出纸张范围
+            if (newItem.y + newItem.h > state.paper.height) {
+                newItem.y = Math.max(0, state.paper.height - newItem.h);
+            }
+            
+            // Insert after the original (on top in the preview)
+            state.items.splice(index + 1, 0, newItem);
+            state.selectedId = newItem.id;
+            renderAll();
+            showStatus('已复制并放置');
         }
 
         function applyDitheringToItem(imageData, item) {
@@ -1213,9 +1996,22 @@
         function setupEventListeners() {
             // Paper size
             document.getElementById('applyPaperSize').onclick = () => {
-                const w = parseInt(document.getElementById('paperWidth').value);
-                const h = parseInt(document.getElementById('paperHeight').value);
+                const input = document.getElementById('paperSizeInput').value.trim().toLowerCase();
+                const match = input.match(/^(\d+)[x\*](\d+)$/);
                 
+                if (!match) {
+                    showStatus('尺寸格式错误 (例如: 40x30)', 'error');
+                    return;
+                }
+
+                const w = parseInt(match[1]);
+                const h = parseInt(match[2]);
+                
+                if (w < 10 || w > 100 || h < 10 || h > 150) {
+                    showStatus('尺寸超出范围 (宽10-100, 高10-150)', 'error');
+                    return;
+                }
+
                 state.paper.width = w;
                 state.paper.height = h;
                 
@@ -1223,12 +2019,12 @@
                 localStorage.setItem('dtp_paper_width', w);
                 localStorage.setItem('dtp_paper_height', h);
                 
+                // Save to recent sizes
+                addRecentPaperSize(w, h);
+                
                 updatePaperUI();
-                if (state.workingImg) {
-                    resetImagePos();
-                    renderWorkingImage();
-                }
-                showStatus('纸张尺寸已保存并应用');
+                renderAll();
+                showStatus('纸张尺寸已应用');
             };
 
             // File input
@@ -1327,6 +2123,14 @@
                 const aspect = item.workingImg.width / item.workingImg.height;
                 item.w = state.paper.width * 0.5;
                 item.h = item.w / aspect;
+                item.isFlipped = false;
+                renderAll();
+            };
+
+            document.getElementById('mirrorFlipBtn').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item || item.type !== 'image') return;
+                item.isFlipped = !item.isFlipped;
                 renderAll();
             };
 
@@ -1362,13 +2166,84 @@
             refreshPrinters();
 
             // Logo Search & QR Code logic
-            document.getElementById('searchLogoBtn').onclick = () => {
-                document.getElementById('searchModal').style.display = 'flex';
-                document.getElementById('logoSearchInput').focus();
+            const toggleDropdown = (id) => {
+                const dropdowns = ['infoTooltip', 'searchModal', 'qrModal', 'bgModal', 'aiModal'];
+                dropdowns.forEach(dId => {
+                    const el = document.getElementById(dId);
+                    if (dId === id) {
+                        el.classList.toggle('show');
+                        if (el.classList.contains('show')) {
+                            const input = el.querySelector('input, textarea');
+                            if (input) setTimeout(() => input.focus(), 100);
+                        }
+                    } else {
+                        el.classList.remove('show');
+                    }
+                });
+                
+                const infoBtn = document.getElementById('infoBtn');
+                if (id === 'infoTooltip' && document.getElementById('infoTooltip').classList.contains('show')) {
+                    infoBtn.classList.add('active');
+                } else {
+                    infoBtn.classList.remove('active');
+                }
             };
-            document.getElementById('closeSearch').onclick = () => {
-                document.getElementById('searchModal').style.display = 'none';
+
+            document.getElementById('layerToggleBtn').onclick = (e) => {
+                const sidebar = document.getElementById('layersSidebar');
+                const btn = document.getElementById('layerToggleBtn');
+                sidebar.classList.toggle('show');
+                btn.classList.toggle('active');
+                e.stopPropagation();
             };
+
+            document.getElementById('aiToolsBtn').onclick = (e) => {
+                toggleDropdown('aiModal');
+                e.stopPropagation();
+            };
+
+            document.getElementById('searchLogoBtn').onclick = (e) => {
+                toggleDropdown('searchModal');
+                e.stopPropagation();
+            };
+            
+            document.getElementById('createQRBtn').onclick = (e) => {
+                toggleDropdown('qrModal');
+                e.stopPropagation();
+            };
+
+            document.getElementById('removeBgBtn').onclick = (e) => {
+                toggleDropdown('bgModal');
+                e.stopPropagation();
+            };
+
+            document.getElementById('infoBtn').onclick = (e) => {
+                toggleDropdown('infoTooltip');
+                e.stopPropagation();
+            };
+
+            // Global click to close dropdowns
+            window.addEventListener('click', (e) => {
+                if (!e.target.closest('.header-dropdown') && !e.target.closest('.info-tooltip')) {
+                    toggleDropdown(null);
+                }
+                
+                // Also close layers sidebar if clicking elsewhere (and not on the toggle button)
+                const sidebar = document.getElementById('layersSidebar');
+                const btn = document.getElementById('layerToggleBtn');
+                if (sidebar.classList.contains('show') && 
+                    !e.target.closest('#layersSidebar') && 
+                    !e.target.closest('#layerToggleBtn')) {
+                    sidebar.classList.remove('show');
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Prevent dropdowns from closing when clicking inside them
+            document.querySelectorAll('.header-dropdown, .info-tooltip, .layers-sidebar').forEach(el => {
+                el.onclick = (e) => e.stopPropagation();
+            });
+
             const performSearch = (engine) => {
                 const brand = document.getElementById('logoSearchInput').value.trim();
                 if (!brand) return;
@@ -1377,22 +2252,16 @@
                     ? `https://www.google.com/search?q=${query}&tbm=isch`
                     : `https://www.bing.com/images/search?q=${query}`;
                 window.open(url, '_blank');
+                toggleDropdown(null);
             };
             document.getElementById('goGoogle').onclick = () => performSearch('google');
             document.getElementById('goBing').onclick = () => performSearch('bing');
 
-            document.getElementById('createQRBtn').onclick = () => {
-                document.getElementById('qrModal').style.display = 'flex';
-                document.getElementById('qrContentInput').focus();
-            };
-            document.getElementById('closeQR').onclick = () => {
-                document.getElementById('qrModal').style.display = 'none';
-            };
             document.getElementById('confirmQR').onclick = () => {
                 const text = document.getElementById('qrContentInput').value.trim();
                 if (!text) return;
                 
-                document.getElementById('qrModal').style.display = 'none';
+                toggleDropdown(null);
                 showStatus('正在生成二维码...');
                 
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(text)}`;
@@ -1426,33 +2295,56 @@
             document.getElementById('loadTplBtn').onclick = loadSelectedTpl;
             document.getElementById('deleteTplBtn').onclick = deleteSelectedTpl;
 
-            // Project Info Toggle
-            document.getElementById('infoBtn').onclick = (e) => {
-                const tooltip = document.getElementById('infoTooltip');
-                const btn = document.getElementById('infoBtn');
-                tooltip.classList.toggle('show');
-                btn.classList.toggle('active');
-                e.stopPropagation();
-            };
-
-            // Close tooltip when clicking elsewhere
-            window.addEventListener('click', () => {
-                const tooltip = document.getElementById('infoTooltip');
-                const btn = document.getElementById('infoBtn');
-                if (tooltip.classList.contains('show')) {
-                    tooltip.classList.remove('show');
-                    btn.classList.remove('active');
-                }
-            });
-
-            document.getElementById('infoTooltip').onclick = (e) => e.stopPropagation();
-
             // Text Style Listeners
             document.getElementById('fontFamilySelect').onchange = (e) => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (item && item.type === 'text') {
                     item.fontFamily = e.target.value;
                     renderAll();
+                }
+            };
+
+            document.getElementById('browseSystemFontsBtn').onclick = async () => {
+                if (!window.queryLocalFonts) {
+                    alert('您的浏览器不支持扫描本地字体，请手动输入名称。');
+                    return;
+                }
+
+                try {
+                    showStatus('正在扫描系统字体...');
+                    const availableFonts = await window.queryLocalFonts();
+                    if (availableFonts.length > 0) {
+                        // Extract unique family names
+                        const fontFamilies = [...new Set(availableFonts.map(f => f.family))].sort();
+                        
+                        const select = document.getElementById('fontFamilySelect');
+                        // Add to current select if not already there
+                        const existingValues = Array.from(select.options).map(opt => opt.value);
+                        
+                        const group = document.createElement('optgroup');
+                        group.label = '💻 系统已安装字体';
+                        
+                        let addedCount = 0;
+                        fontFamilies.forEach(family => {
+                            if (!existingValues.includes(family)) {
+                                const opt = document.createElement('option');
+                                opt.value = family;
+                                opt.text = family;
+                                group.appendChild(opt);
+                                addedCount++;
+                            }
+                        });
+                        
+                        if (addedCount > 0) {
+                            select.appendChild(group);
+                            showStatus(`成功加载 ${addedCount} 款系统字体`);
+                        } else {
+                            showStatus('未发现新字体');
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showStatus('获取本地字体失败: ' + err.message, 'error');
                 }
             };
 
@@ -1508,6 +2400,7 @@
                     text: text,
                     x: 5,
                     y: 5,
+                    w: 30, // Default width for wrapping
                     size: fontSize,
                     fontFamily: document.getElementById('fontFamilySelect').value || '微软雅黑',
                     color: document.querySelector('input[name="textColor"]:checked').value || 'black',
@@ -1519,32 +2412,113 @@
                 document.getElementById('textInput').value = '';
             };
 
-            // Keyboard support for font size and editing
+            // Keyboard support for font size, editing, and deletion
             window.addEventListener('keydown', (e) => {
-                if (!state.selectedId) return;
-                const item = state.items.find(i => i.id === state.selectedId);
-                if (!item || item.type !== 'text') return;
+                // Don't trigger if user is typing in an input or textarea
+                if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                    return;
+                }
 
-                if (e.key === 'ArrowUp') {
-                    item.size += 0.5;
-                    renderAll();
-                    e.preventDefault();
-                } else if (e.key === 'ArrowDown') {
-                    item.size = Math.max(1, item.size - 0.5);
-                    renderAll();
-                    e.preventDefault();
-                } else if (e.key === 'Enter') {
-                    const newText = prompt('编辑文字内容:', item.text);
-                    if (newText !== null) {
-                        item.text = newText;
-                        renderAll();
+                // Ctrl-C: 复制当前元素
+                if (e.ctrlKey && e.key === 'c') {
+                    if (state.selectedId) {
+                        const item = state.items.find(i => i.id === state.selectedId);
+                        if (item) {
+                            copyItemToClipboard(item.id);
+                            e.preventDefault();
+                            return;
+                        }
                     }
+                }
+
+                // Ctrl-D: 复制并放置当前元素（保持大小相同、位置放在原图下面不重叠）
+                if (e.ctrlKey && e.key === 'd') {
+                    if (state.selectedId) {
+                        const item = state.items.find(i => i.id === state.selectedId);
+                        if (item) {
+                            duplicateItemBelow(item.id);
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                }
+
+                if (!state.selectedId) return;
+
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (!item) return;
+
+                // Deletion (Works for both images and text)
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    deleteItem(item.id);
                     e.preventDefault();
+                    return;
+                }
+
+                // Text specific shortcuts
+                if (item.type === 'text') {
+                    if (e.key === 'ArrowUp') {
+                        item.size += 0.5;
+                        renderAll();
+                        e.preventDefault();
+                    } else if (e.key === 'ArrowDown') {
+                        item.size = Math.max(1, item.size - 0.5);
+                        renderAll();
+                        e.preventDefault();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                        const select = document.getElementById('fontFamilySelect');
+                        const options = Array.from(select.options).filter(opt => opt.value);
+                        let currentIndex = options.findIndex(opt => opt.value === item.fontFamily);
+                        
+                        if (e.key === 'ArrowLeft') {
+                            currentIndex = (currentIndex - 1 + options.length) % options.length;
+                        } else {
+                            currentIndex = (currentIndex + 1) % options.length;
+                        }
+                        
+                        item.fontFamily = options[currentIndex].value;
+                        select.value = item.fontFamily;
+                        renderAll();
+                        e.preventDefault();
+                    } else if (e.key === 'Enter') {
+                        openTextEditModal(item);
+                        e.preventDefault();
+                    }
                 }
             });
 
+            // Text Edit Modal Event Listeners
+            document.getElementById('cancelTextEdit').onclick = () => {
+                document.getElementById('textEditModal').style.display = 'none';
+            };
+
+            document.getElementById('saveTextEdit').onclick = () => {
+                const item = state.items.find(i => i.id === state.selectedId);
+                if (item && item.type === 'text') {
+                    item.text = document.getElementById('editTextarea').value;
+                    renderAll();
+                }
+                document.getElementById('textEditModal').style.display = 'none';
+            };
+
+            document.getElementById('editTextarea').onkeydown = (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    document.getElementById('saveTextEdit').click();
+                }
+            };
+
+            function openTextEditModal(item) {
+                const modal = document.getElementById('textEditModal');
+                const textarea = document.getElementById('editTextarea');
+                textarea.value = item.text;
+                modal.style.display = 'flex';
+                setTimeout(() => textarea.focus(), 100);
+            }
+
             // Print button
             document.getElementById('printBtn').onclick = doPrint;
+            document.getElementById('exportPngBtn').onclick = exportToPNG;
+            document.getElementById('clearBtn').onclick = clearAllItems;
 
             // Overlay dragging
             const overlay = document.getElementById('imageOverlay');
@@ -1562,7 +2536,7 @@
             };
 
             window.onmousemove = (e) => {
-                if (!state.isDragging && !state.isResizing && !state.crop.isDragging) return;
+                if (!state.isDragging && !state.isResizing && !state.isResizingWidth && !state.crop.isDragging) return;
                 
                 const dx = e.clientX - state.lastMousePos.x;
                 const dy = e.clientY - state.lastMousePos.y;
@@ -1584,6 +2558,12 @@
                         item.h += dy / (MM_TO_PX * scale);
                         renderAll();
                     }
+                } else if (state.isResizingWidth) {
+                    const item = state.items.find(i => i.id === state.selectedId);
+                    if (item && item.type === 'text') {
+                        item.w = Math.max(5, (item.w || 30) + dx / (MM_TO_PX * scale));
+                        renderAll();
+                    }
                 } else if (state.crop.isDragging) {
                     handleCropDrag(e);
                 }
@@ -1593,6 +2573,7 @@
             window.onmouseup = () => {
                 state.isDragging = false;
                 state.isResizing = false;
+                state.isResizingWidth = false;
                 state.crop.isDragging = false;
                 state.crop.handle = null;
             };
@@ -1850,6 +2831,62 @@
         }
 
         // --- Printing ---
+        function exportToPNG() {
+            if (state.items.length === 0) {
+                showStatus('没有可导出的内容');
+                return;
+            }
+
+            showStatus('正在生成图片...');
+            
+            // Use 10 dots/mm for high resolution export
+            const dpi = 10;
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = Math.round(state.paper.width * dpi);
+            exportCanvas.height = Math.round(state.paper.height * dpi);
+            const ctx = exportCanvas.getContext('2d');
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+            state.items.forEach(item => {
+                ctx.save();
+                ctx.translate(item.x * dpi, item.y * dpi);
+                if (item.orientation) {
+                    ctx.rotate((item.orientation * Math.PI) / 180);
+                }
+
+                if (item.type === 'image') {
+                    const wPx = item.w * dpi;
+                    const hPx = item.h * dpi;
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = wPx; tempCanvas.height = hPx;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    if (item.isFlipped) {
+                        tempCtx.translate(wPx, 0);
+                        tempCtx.scale(-1, 1);
+                    }
+                    tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
+                    
+                    const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
+                    applyDitheringToItem(imageData, item);
+                    tempCtx.putImageData(imageData, 0, 0);
+                    ctx.drawImage(tempCanvas, 0, 0);
+                } else if (item.type === 'text') {
+                    drawWrappedText(ctx, item, dpi);
+                }
+                ctx.restore();
+            });
+
+            // Trigger download
+            const link = document.createElement('a');
+            link.download = `web-printer-export-${Date.now()}.png`;
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+            showStatus('图片导出成功');
+        }
+
         function doPrint() {
             if (state.items.length === 0) return;
             const printer = getSelectedPrinterInfo();
@@ -1863,112 +2900,61 @@
                     return;
                 }
 
-                // Check if we need compositing (any white text or items overlapping?)
-                // To keep it simple and high quality, we only composite if there's white text.
-                const hasWhiteText = state.items.some(i => i.type === 'text' && i.color === 'white');
+                // Use composite mode for all prints to ensure high quality and WYSIWYG transparency
+                const dpi = 8; // 8 dots/mm (203 DPI)
+                const printCanvas = document.createElement('canvas');
+                printCanvas.width = Math.round(state.paper.width * dpi);
+                printCanvas.height = Math.round(state.paper.height * dpi);
+                const ctx = printCanvas.getContext('2d');
+                
+                // Background is white (no ink)
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, printCanvas.width, printCanvas.height);
 
-                if (!hasWhiteText) {
-                    // Original high-quality per-item printing
-                    api.startJob({
-                        width: state.paper.width,
-                        height: state.paper.height,
-                        jobName: "MultiObjectPrint",
-                        margin: 0
-                    });
+                state.items.forEach(item => {
+                    ctx.save();
+                    ctx.translate(item.x * dpi, item.y * dpi);
+                    if (item.orientation) {
+                        ctx.rotate((item.orientation * Math.PI) / 180);
+                    }
 
-                    state.items.forEach(item => {
-                        if (item.type === 'image') {
-                            const canvas = document.createElement('canvas');
-                            const wPx = item.w * MM_TO_PX;
-                            const hPx = item.h * MM_TO_PX;
-                            canvas.width = wPx; canvas.height = hPx;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                            
-                            const imageData = ctx.getImageData(0, 0, wPx, hPx);
-                            applyDitheringToItem(imageData, item);
-                            ctx.putImageData(imageData, 0, 0);
-                            
-                            api.drawImageD({
-                                data: canvas.toDataURL('image/png'),
-                                x: item.x,
-                                y: item.y,
-                                drawWidth: item.w,
-                                drawHeight: item.h,
-                                threshold: 257 
-                            });
-                        } else if (item.type === 'text') {
-                            api.drawText({
-                                text: item.text,
-                                x: item.x,
-                                y: item.y,
-                                fontHeight: item.size,
-                                fontName: item.fontFamily,
-                                fontStyle: item.isBold ? 1 : 0,
-                                orientation: item.orientation || 0,
-                                lineSpace: "1_2"
-                            });
+                    if (item.type === 'image') {
+                        const wPx = item.w * dpi;
+                        const hPx = item.h * dpi;
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = wPx; tempCanvas.height = hPx;
+                        const tempCtx = tempCanvas.getContext('2d');
+
+                        if (item.isFlipped) {
+                            tempCtx.translate(wPx, 0);
+                            tempCtx.scale(-1, 1);
                         }
-                    });
-                } else {
-                    // Composite mode required for white text (anti-color)
-                    // We use 8 dots/mm (203 DPI) for high quality
-                    const dpi = 8;
-                    const printCanvas = document.createElement('canvas');
-                    printCanvas.width = Math.round(state.paper.width * dpi);
-                    printCanvas.height = Math.round(state.paper.height * dpi);
-                    const ctx = printCanvas.getContext('2d');
-                    
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, printCanvas.width, printCanvas.height);
+                        tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
+                        
+                        const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
+                        applyDitheringToItem(imageData, item);
+                        tempCtx.putImageData(imageData, 0, 0);
+                        ctx.drawImage(tempCanvas, 0, 0);
+                    } else if (item.type === 'text') {
+                        drawWrappedText(ctx, item, dpi);
+                    }
+                    ctx.restore();
+                });
 
-                    state.items.forEach(item => {
-                        ctx.save();
-                        ctx.translate(item.x * dpi, item.y * dpi);
-                        if (item.orientation) {
-                            ctx.rotate((item.orientation * Math.PI) / 180);
-                        }
+                api.startJob({
+                    width: state.paper.width,
+                    height: state.paper.height,
+                    jobName: "CompositePrint",
+                    margin: 0
+                });
 
-                        if (item.type === 'image') {
-                            const wPx = item.w * dpi;
-                            const hPx = item.h * dpi;
-                            const tempCanvas = document.createElement('canvas');
-                            tempCanvas.width = wPx; tempCanvas.height = hPx;
-                            const tempCtx = tempCanvas.getContext('2d');
-                            tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                            
-                            const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
-                            applyDitheringToItem(imageData, item);
-                            tempCtx.putImageData(imageData, 0, 0);
-                            ctx.drawImage(tempCanvas, 0, 0);
-                        } else if (item.type === 'text') {
-                            const fontSize = item.size * dpi;
-                            ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px "${item.fontFamily}"`;
-                            ctx.fillStyle = item.color || 'black';
-                            ctx.textBaseline = 'top';
-                            const lines = item.text.split('\n');
-                            lines.forEach((line, index) => {
-                                ctx.fillText(line, 0, index * fontSize * 1.2);
-                            });
-                        }
-                        ctx.restore();
-                    });
-
-                    api.startJob({
-                        width: state.paper.width,
-                        height: state.paper.height,
-                        jobName: "CompositePrint",
-                        margin: 0
-                    });
-
-                    api.drawImageD({
-                        data: printCanvas.toDataURL('image/png'),
-                        x: 0, y: 0,
-                        drawWidth: state.paper.width,
-                        drawHeight: state.paper.height,
-                        threshold: 257 
-                    });
-                }
+                api.drawImageD({
+                    data: printCanvas.toDataURL('image/png'),
+                    x: 0, y: 0,
+                    drawWidth: state.paper.width,
+                    drawHeight: state.paper.height,
+                    threshold: 257 
+                });
 
                 api.commitJob((result) => {
                     api.closePrinter();
@@ -1980,5 +2966,6 @@
     </script>
 </body>
 </html>
+
 
 

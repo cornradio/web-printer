@@ -566,7 +566,7 @@
         .delete-handle {
             position: absolute;
             top: -10px;
-            left: -10px;
+            right: -10px;
             width: 20px;
             height: 20px;
             background: #ef4444;
@@ -649,18 +649,18 @@
         /* Clear Button */
         .clear-btn {
             position: absolute;
-            top: 4px;
-            right: 4px;
+            top: 24px;
+            right: 24px;
             background: #ef4444;
             color: white;
             border: none;
-            padding: 0px 5px;
-            border-radius: 2px;
+            padding: 10px 20px;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 100;
+            z-index: 200;
             transition: all 0.2s;
             display: flex;
             align-items: center;
@@ -1145,7 +1145,7 @@
             </div>
 
             <!-- Clear Button -->
-            <button class="clear-btn" id="clearBtn" title="清空所有元素"> x </button>
+            <button class="clear-btn" id="clearBtn" title="清空所有元素">🗑️ 清空</button>
 
             <!-- Zoom Control -->
             <div class="zoom-control">
@@ -1157,10 +1157,7 @@
                 <div class="reality-scale-container">
                     <button class="btn" id="realityScaleBtn" style="padding: 2px 8px; font-size: 11px;">现实</button>
                     <div class="reality-scale-tooltip">
-                        您可以拿一张打印纸放在屏幕上，调整打印纸与显示宽度一致，即可做到真正的所见即所得。<br>
-                        点击左键，即可设置/缩放到现实比例。<br>
-                        点击右键，即可清除现实比例设置。
-                        <br>
+                        您可以拿一张打印纸放在屏幕上，调整打印纸与显示宽度一致，即可做到真正的所见即所得。<br><br>
                     </div>
                 </div>
             </div>
