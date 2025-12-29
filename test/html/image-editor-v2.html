@@ -612,7 +612,10 @@
         }
 
         body.dark .drop-zone:hover,
-        body.dark .drop-zone.drag-over,
+        body.dark .drop-zone.drag-over {
+            background: #1e293b;
+        }
+        
         @media (prefers-color-scheme: dark) {
             body:not(.light) .drop-zone:hover,
             body:not(.light) .drop-zone.drag-over {
@@ -861,6 +864,91 @@
             font-weight: 600;
             color: var(--primary-color);
         }
+
+        /* Template Gallery Modal */
+        .template-gallery-modal {
+            max-width: 900px;
+            width: 95%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .template-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .template-item {
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .template-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .template-item.selected {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-rgb), 0.1);
+        }
+        .template-thumbnail {
+            width: 100%;
+            height: 150px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .template-thumbnail img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .template-thumbnail canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .template-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 4px;
+            text-align: center;
+            word-break: break-word;
+        }
+        .template-info {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .template-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .template-actions button {
+            flex: 1;
+            padding: 6px;
+            font-size: 12px;
+        }
+        .template-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        .template-empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
@@ -1108,11 +1196,7 @@
                         <button class="btn" id="saveTplBtn" title="保存当前内容为模板">💾</button>
                     </div>
                     <div class="input-row">
-                        <select id="tplSelect" style="flex: 1;">
-                            <option value="">-- 选择模板 --</option>
-                        </select>
-                        <button class="btn" id="loadTplBtn" title="加载选中模板">📥</button>
-                        <button class="btn btn-danger" id="deleteTplBtn" title="删除选中模板">🗑️</button>
+                        <button class="btn btn-full" id="showTplGalleryBtn" title="选择模板">📚 选择模板</button>
                     </div>
                 </div>
             </div>
@@ -1196,6 +1280,21 @@
             <div class="modal-actions">
                 <button class="btn" id="cancelTextEdit">取消</button>
                 <button class="btn btn-primary" id="saveTextEdit">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Gallery Modal -->
+    <div id="templateGalleryModal" class="modal-overlay">
+        <div class="modal-content template-gallery-modal">
+            <h3>📚 选择模板</h3>
+            <div id="templateGalleryGrid" class="template-gallery-grid">
+                <!-- Templates will be loaded here -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="closeTemplateGallery">取消</button>
+                <button class="btn btn-danger" id="deleteTemplateFromGallery" style="display: none;">删除选中</button>
+                <button class="btn btn-primary" id="loadTemplateFromGallery" style="display: none;">加载模板</button>
             </div>
         </div>
     </div>
@@ -2444,8 +2543,7 @@
 
             // Template Management
             document.getElementById('saveTplBtn').onclick = saveCurrentAsTpl;
-            document.getElementById('loadTplBtn').onclick = loadSelectedTpl;
-            document.getElementById('deleteTplBtn').onclick = deleteSelectedTpl;
+            document.getElementById('showTplGalleryBtn').onclick = showTemplateGallery;
 
             // Text Style Listeners
             document.getElementById('fontFamilySelect').onchange = (e) => {
@@ -2942,15 +3040,241 @@
 
         // --- Template Logic ---
         function refreshTplList() {
-            const select = document.getElementById('tplSelect');
-            select.innerHTML = '<option value="">-- 选择已保存模板 --</option>';
+            // This function is kept for backward compatibility but not used in new UI
+            const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
+            return Object.keys(tpls);
+        }
+
+        // Generate thumbnail for a template
+        async function generateTemplateThumbnail(tplData, maxWidth = 200, maxHeight = 150) {
+            return new Promise((resolve) => {
+                const dpi = 2; // Lower DPI for thumbnail
+                const canvas = document.createElement('canvas');
+                const paperWidth = tplData.paper.width;
+                const paperHeight = tplData.paper.height;
+                
+                // Calculate thumbnail size maintaining aspect ratio
+                const aspectRatio = paperWidth / paperHeight;
+                let thumbWidth = maxWidth;
+                let thumbHeight = maxHeight;
+                
+                if (aspectRatio > 1) {
+                    thumbHeight = thumbWidth / aspectRatio;
+                } else {
+                    thumbWidth = thumbHeight * aspectRatio;
+                }
+                
+                canvas.width = Math.round(paperWidth * dpi);
+                canvas.height = Math.round(paperHeight * dpi);
+                const ctx = canvas.getContext('2d');
+                
+                // White background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Load and render items
+                const loadPromises = tplData.items.map(item => {
+                    return new Promise((itemResolve) => {
+                        if (item.type === 'image' && item.imgData) {
+                            const img = new Image();
+                            img.onload = () => {
+                                ctx.save();
+                                ctx.translate(item.x * dpi, item.y * dpi);
+                                if (item.orientation) {
+                                    ctx.rotate((item.orientation * Math.PI) / 180);
+                                }
+                                ctx.drawImage(img, 0, 0, item.w * dpi, item.h * dpi);
+                                ctx.restore();
+                                itemResolve();
+                            };
+                            img.onerror = () => itemResolve();
+                            img.src = item.imgData;
+                        } else if (item.type === 'text') {
+                            ctx.save();
+                            ctx.translate(item.x * dpi, item.y * dpi);
+                            if (item.orientation) {
+                                ctx.rotate((item.orientation * Math.PI) / 180);
+                            }
+                            drawWrappedText(ctx, item, dpi);
+                            ctx.restore();
+                            itemResolve();
+                        } else {
+                            itemResolve();
+                        }
+                    });
+                });
+                
+                Promise.all(loadPromises).then(() => {
+                    // Create thumbnail canvas
+                    const thumbCanvas = document.createElement('canvas');
+                    thumbCanvas.width = thumbWidth;
+                    thumbCanvas.height = thumbHeight;
+                    const thumbCtx = thumbCanvas.getContext('2d');
+                    thumbCtx.drawImage(canvas, 0, 0, thumbWidth, thumbHeight);
+                    resolve(thumbCanvas.toDataURL('image/png'));
+                });
+            });
+        }
+
+        // Show template gallery modal
+        async function showTemplateGallery() {
+            const modal = document.getElementById('templateGalleryModal');
+            const grid = document.getElementById('templateGalleryGrid');
+            const loadBtn = document.getElementById('loadTemplateFromGallery');
+            const deleteBtn = document.getElementById('deleteTemplateFromGallery');
+            
+            modal.style.display = 'flex';
+            grid.innerHTML = '';
             
             const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
-            Object.keys(tpls).forEach(name => {
-                const opt = document.createElement('option');
-                opt.value = name;
-                opt.text = name;
-                select.appendChild(opt);
+            const templateNames = Object.keys(tpls);
+            
+            if (templateNames.length === 0) {
+                grid.innerHTML = `
+                    <div class="template-empty" style="grid-column: 1 / -1;">
+                        <div class="template-empty-icon">📄</div>
+                        <p>还没有保存任何模板</p>
+                        <p style="font-size: 12px; margin-top: 8px;">保存模板后，缩略图会显示在这里</p>
+                    </div>
+                `;
+                loadBtn.style.display = 'none';
+                deleteBtn.style.display = 'none';
+                return;
+            }
+            
+            let selectedTemplate = null;
+            
+            // Load thumbnails
+            for (const name of templateNames) {
+                const tpl = tpls[name];
+                const item = document.createElement('div');
+                item.className = 'template-item';
+                item.dataset.templateName = name;
+                
+                const thumbDiv = document.createElement('div');
+                thumbDiv.className = 'template-thumbnail';
+                
+                // Try to load existing thumbnail or generate new one
+                if (tpl.thumbnail) {
+                    const img = document.createElement('img');
+                    img.src = tpl.thumbnail;
+                    thumbDiv.appendChild(img);
+                } else {
+                    // Generate thumbnail on the fly
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.style.cssText = 'color: var(--text-muted); font-size: 12px;';
+                    loadingDiv.textContent = '生成中...';
+                    thumbDiv.appendChild(loadingDiv);
+                    
+                    generateTemplateThumbnail(tpl).then(thumbData => {
+                        loadingDiv.remove();
+                        const img = document.createElement('img');
+                        img.src = thumbData;
+                        thumbDiv.appendChild(img);
+                        
+                        // Save thumbnail for future use
+                        tpl.thumbnail = thumbData;
+                        tpls[name] = tpl;
+                        localStorage.setItem('dtp_templates', JSON.stringify(tpls));
+                    });
+                }
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'template-name';
+                nameDiv.textContent = name;
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'template-info';
+                const itemCount = tpl.items ? tpl.items.length : 0;
+                infoDiv.textContent = `${tpl.paper.width}×${tpl.paper.height}mm · ${itemCount}个元素`;
+                
+                item.appendChild(thumbDiv);
+                item.appendChild(nameDiv);
+                item.appendChild(infoDiv);
+                
+                item.onclick = () => {
+                    // Toggle selection
+                    document.querySelectorAll('.template-item').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    item.classList.add('selected');
+                    selectedTemplate = name;
+                    loadBtn.style.display = 'inline-block';
+                    deleteBtn.style.display = 'inline-block';
+                };
+                
+                grid.appendChild(item);
+            }
+            
+            // Load button handler
+            loadBtn.onclick = () => {
+                if (selectedTemplate) {
+                    loadTemplateByName(selectedTemplate);
+                    modal.style.display = 'none';
+                }
+            };
+            
+            // Delete button handler
+            deleteBtn.onclick = () => {
+                if (selectedTemplate && confirm(`确定要删除模板 "${selectedTemplate}" 吗？`)) {
+                    const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
+                    delete tpls[selectedTemplate];
+                    localStorage.setItem('dtp_templates', JSON.stringify(tpls));
+                    showTemplateGallery(); // Refresh
+                }
+            };
+            
+            // Close button handler
+            document.getElementById('closeTemplateGallery').onclick = () => {
+                modal.style.display = 'none';
+            };
+            
+            // Close on overlay click
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        }
+
+        // Load template by name
+        function loadTemplateByName(name) {
+            if (!name) return;
+
+            showStatus('正在加载模板...');
+            const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
+            const tpl = tpls[name];
+
+            if (!tpl) return;
+
+            // Restore paper
+            state.paper = tpl.paper;
+            document.getElementById('paperSizeInput').value = `${state.paper.width}x${state.paper.height}`;
+            updatePaperUI();
+
+            // Restore items
+            const loadPromises = tpl.items.map(item => {
+                return new Promise((resolve) => {
+                    if (item.type === 'image') {
+                        const img = new Image();
+                        img.onload = () => {
+                            item.originalImg = img;
+                            item.workingImg = img;
+                            resolve(item);
+                        };
+                        img.src = item.imgData;
+                        delete item.imgData; // Clean up
+                    } else {
+                        resolve(item);
+                    }
+                });
+            });
+
+            Promise.all(loadPromises).then(items => {
+                state.items = items;
+                state.selectedId = null;
+                renderAll();
+                showStatus('模板已成功加载');
             });
         }
 
@@ -2984,6 +3308,14 @@
                 paper: state.paper,
                 items: serializedItems
             };
+
+            // Generate thumbnail
+            showStatus('正在生成缩略图...');
+            try {
+                tplData.thumbnail = await generateTemplateThumbnail(tplData);
+            } catch (e) {
+                console.error('Failed to generate thumbnail:', e);
+            }
 
             const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
             tpls[name] = tplData;
