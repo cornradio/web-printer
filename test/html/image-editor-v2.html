@@ -1903,6 +1903,44 @@
             showStatus('已复制到剪贴板');
         }
 
+        // 计算文字高度（单位：毫米）
+        function calculateTextHeight(item) {
+            const dpi = MM_TO_PX;
+            const fontSize = item.size * dpi;
+            const maxWidth = (item.w || 30) * dpi;
+            
+            // 创建临时 canvas 来测量文字
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const fontFamily = (item.fontFamily.includes(' ') && !item.fontFamily.includes("'") && !item.fontFamily.includes('"')) 
+                ? `"${item.fontFamily}"` 
+                : item.fontFamily;
+            ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px ${fontFamily}`;
+            
+            const paragraphs = item.text.split('\n');
+            const lines = [];
+            
+            paragraphs.forEach(p => {
+                let currentLine = '';
+                for (let i = 0; i < p.length; i++) {
+                    const char = p[i];
+                    const testLine = currentLine + char;
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && currentLine !== '') {
+                        lines.push(currentLine);
+                        currentLine = char;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                lines.push(currentLine);
+            });
+            
+            // 计算总高度（像素），然后转换为毫米
+            const heightPx = lines.length * fontSize * 1.2 + (fontSize * 0.3);
+            return heightPx / dpi; // 转换为毫米
+        }
+
         // 复制元素并放置在原图下面（不重叠）
         function duplicateItemBelow(id) {
             const index = state.items.findIndex(i => i.id === id);
@@ -1914,13 +1952,35 @@
             // Generate new ID
             newItem.id = (original.type === 'image' ? 'img-' : 'text-') + Date.now() + '-' + Math.floor(Math.random() * 1000);
             
-            // 位置放在原图下面，保持相同大小，不重叠
-            newItem.x = original.x;
-            newItem.y = original.y + original.h; // 放在原图正下方
-            
-            // 确保不超出纸张范围
-            if (newItem.y + newItem.h > state.paper.height) {
-                newItem.y = Math.max(0, state.paper.height - newItem.h);
+            if (original.type === 'text') {
+                // 针对文字的特殊处理
+                // 计算原文字的高度
+                const textHeight = calculateTextHeight(original);
+                
+                // 位置放在原文字下面，使用计算出的高度作为偏移
+                newItem.x = original.x;
+                newItem.y = original.y + textHeight + 1; // 加1mm间距，避免重叠
+                
+                // 确保不超出纸张范围，如果超出则放在纸张内部
+                const newTextHeight = calculateTextHeight(newItem);
+                if (newItem.y + newTextHeight > state.paper.height) {
+                    // 如果超出，尝试放在原文字上方
+                    if (original.y - textHeight - 1 >= 0) {
+                        newItem.y = original.y - textHeight - 1;
+                    } else {
+                        // 如果上方也放不下，就放在纸张顶部
+                        newItem.y = Math.max(0, state.paper.height - newTextHeight);
+                    }
+                }
+            } else {
+                // 针对图片的处理（保持原有逻辑）
+                newItem.x = original.x;
+                newItem.y = original.y + (original.h || 0); // 放在原图正下方
+                
+                // 确保不超出纸张范围
+                if (newItem.y + (newItem.h || 0) > state.paper.height) {
+                    newItem.y = Math.max(0, state.paper.height - (newItem.h || 0));
+                }
             }
             
             // Insert after the original (on top in the preview)
