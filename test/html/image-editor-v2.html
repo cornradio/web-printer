@@ -1316,6 +1316,7 @@
             <canvas id="cropCanvas"></canvas>
         </div>
         <div class="crop-controls">
+            <button class="btn" id="freeRatioBtn" style="margin-right: auto;">自由比例</button>
             <button class="btn btn-danger" id="cancelCrop">取消</button>
             <button class="btn btn-primary" id="confirmCrop">完成裁剪</button>
         </div>
@@ -1375,7 +1376,8 @@
                 targetId: null,
                 rect: { x: 0, y: 0, w: 0, h: 0 },
                 isDragging: false,
-                handle: null
+                handle: null,
+                freeRatio: false
             },
             draggedId: null,
             clipboardItem: null // 存储复制的元素
@@ -2257,6 +2259,11 @@
                 w: w,
                 h: h
             };
+            
+            state.crop.freeRatio = false;
+            const freeRatioBtn = document.getElementById('freeRatioBtn');
+            freeRatioBtn.classList.remove('btn-primary');
+            freeRatioBtn.textContent = '自由比例';
             
             state.crop.active = true;
             modal.style.display = 'flex';
@@ -3144,6 +3151,18 @@
                 }
             };
 
+            document.getElementById('freeRatioBtn').onclick = () => {
+                state.crop.freeRatio = !state.crop.freeRatio;
+                const btn = document.getElementById('freeRatioBtn');
+                if (state.crop.freeRatio) {
+                    btn.classList.add('btn-primary');
+                    btn.textContent = '锁定比例';
+                } else {
+                    btn.classList.remove('btn-primary');
+                    btn.textContent = '自由比例';
+                }
+            };
+
             document.getElementById('cancelCrop').onclick = () => {
                 document.getElementById('cropModal').style.display = 'none';
                 state.crop.active = false;
@@ -3185,6 +3204,7 @@
             
             const r = state.crop.rect;
             const h = state.crop.handle;
+            const freeRatio = state.crop.freeRatio;
             const paperAspect = state.paper.width / state.paper.height;
             
             if (h === 'move') {
@@ -3197,30 +3217,60 @@
                 const anchorX = (h === 'tl' || h === 'bl') ? r.x + r.w : r.x;
                 const anchorY = (h === 'tl' || h === 'tr') ? r.y + r.h : r.y;
 
-                if (h === 'br' || h === 'tr') {
-                    newW = mx - anchorX;
+                if (freeRatio) {
+                    // Free ratio: allow independent width and height adjustment
+                    if (h === 'br' || h === 'tr') {
+                        newW = mx - anchorX;
+                    } else {
+                        newW = anchorX - mx;
+                    }
+                    
+                    if (h === 'bl' || h === 'br') {
+                        newH = my - anchorY;
+                    } else {
+                        newH = anchorY - my;
+                    }
+                    
+                    // Bounds check and clamp
+                    if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) < 0) {
+                        newW = anchorX;
+                    }
+                    if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) > canvas.width) {
+                        newW = canvas.width - anchorX;
+                    }
+                    if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) < 0) {
+                        newH = anchorY;
+                    }
+                    if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) > canvas.height) {
+                        newH = canvas.height - anchorY;
+                    }
                 } else {
-                    newW = anchorX - mx;
-                }
+                    // Locked ratio: maintain paper aspect ratio
+                    if (h === 'br' || h === 'tr') {
+                        newW = mx - anchorX;
+                    } else {
+                        newW = anchorX - mx;
+                    }
 
-                newH = newW / paperAspect;
+                    newH = newW / paperAspect;
 
-                // Bounds check and clamp
-                if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) < 0) {
-                    newW = anchorX;
-                    newH = newW / paperAspect;
-                }
-                if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) > canvas.width) {
-                    newW = canvas.width - anchorX;
-                    newH = newW / paperAspect;
-                }
-                if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) < 0) {
-                    newH = anchorY;
-                    newW = newH * paperAspect;
-                }
-                if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) > canvas.height) {
-                    newH = canvas.height - anchorY;
-                    newW = newH * paperAspect;
+                    // Bounds check and clamp
+                    if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) < 0) {
+                        newW = anchorX;
+                        newH = newW / paperAspect;
+                    }
+                    if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) > canvas.width) {
+                        newW = canvas.width - anchorX;
+                        newH = newW / paperAspect;
+                    }
+                    if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) < 0) {
+                        newH = anchorY;
+                        newW = newH * paperAspect;
+                    }
+                    if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) > canvas.height) {
+                        newH = canvas.height - anchorY;
+                        newW = newH * paperAspect;
+                    }
                 }
 
                 // Update rect

@@ -81,7 +81,7 @@
             width: 32px;
             height: 32px;
             border-radius: 6px;
-            border: 1px solid var(--border-color);
+            border: none;
             background: white;
             color: var(--text-color);
             display: flex;
@@ -93,12 +93,10 @@
 
         .info-btn:hover {
             background: var(--bg-color);
-            border-color: var(--text-muted);
         }
 
         .info-btn.active {
             background: #f1f5f9;
-            border-color: var(--primary-color);
             color: var(--primary-color);
         }
 
@@ -354,7 +352,7 @@
             width: 32px;
             height: 32px;
             border-radius: 6px;
-            border: 1px solid var(--border-color);
+            border: none;
             background: white;
             color: var(--text-color);
             display: flex;
@@ -367,12 +365,10 @@
 
         .layer-toggle-btn:hover {
             background: var(--bg-color);
-            border-color: var(--text-muted);
         }
 
         .layer-toggle-btn.active {
             background: #f1f5f9;
-            border-color: var(--primary-color);
             color: var(--primary-color);
         }
 
@@ -959,10 +955,10 @@
     <header class="app-header">
         <h1 style="font-size: 18px;">图片打印编辑工具 V2</h1>
         <div class="header-links">
-            <button class="btn" id="aiToolsBtn" title="AI 绘图助手" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✨</button>
-            <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔍</button>
-            <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔳</button>
-            <button class="btn" id="removeBgBtn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✂️</button>
+            <button class="btn" id="aiToolsBtn" title="AI 绘图助手" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">✨</button>
+            <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">🔍</button>
+            <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">🔳</button>
+            <button class="btn" id="removeBgBtn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">✂️</button>
             <div class="layer-toggle-btn" id="layerToggleBtn" title="图层管理">
                 📂
                 <div class="badge" id="layerCountBadge" style="display: none;">0</div>
@@ -991,6 +987,60 @@
                         <li><b>纸张设置增强</b>：支持删除已保存的常用尺寸</li>
                         <li><b>AI 工具阵营优化</b>：新增 Grok、千问、豆包(笨笨)</li>
                     </ul>
+                </div>
+                <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                    <span class="info-title">⌨️ 键盘快捷键</span>
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-color); margin-top: 4px;">通用快捷键</div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>复制当前元素</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">Ctrl+C</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>复制并放置</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">Ctrl+D</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>删除元素</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">Delete</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>旋转 90°</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">R</kbd>
+                            </div>
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-color); margin-top: 8px;">图片编辑</div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>镜像翻转</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">V</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>铺满</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">F</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>裁剪</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">X</kbd>
+                            </div>
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-color); margin-top: 8px;">文本编辑</div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>增大/减小字体</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">↑↓</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>切换字体</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">←→</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                <span>编辑文本</span>
+                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">Enter</kbd>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
                     <span class="info-title">👨‍💻 关于作者</span>
@@ -1116,6 +1166,7 @@
                         <label>字体名称 <span style="font-size: 10px; color: var(--primary-color); opacity: 0.8;">(←/→ 切换)</span></label>
                         <div class="input-row">
                             <select id="fontFamilySelect" style="flex: 1;">
+                                <optgroup id="favoriteFontsGroup" label="⭐ 收藏字体" style="display: none;"></optgroup>
                                 <option value="微软雅黑">微软雅黑</option>
                                 <option value="宋体">宋体</option>
                                 <option value="黑体">黑体</option>
@@ -1128,6 +1179,7 @@
                                     <option value="'Bangers', system-ui">Bangers (漫画风)</option>
                                 </optgroup>
                             </select>
+                            <button class="btn" id="favoriteFontBtn" title="收藏当前字体" style="padding: 4px 8px;">收藏</button>
                             <button class="btn" id="browseSystemFontsBtn" title="扫描系统已安装字体" style="padding: 4px 8px;">🔍 扫描</button>
                         </div>
 
@@ -1264,6 +1316,7 @@
             <canvas id="cropCanvas"></canvas>
         </div>
         <div class="crop-controls">
+            <button class="btn" id="freeRatioBtn" style="margin-right: auto;">自由比例</button>
             <button class="btn btn-danger" id="cancelCrop">取消</button>
             <button class="btn btn-primary" id="confirmCrop">完成裁剪</button>
         </div>
@@ -1323,7 +1376,8 @@
                 targetId: null,
                 rect: { x: 0, y: 0, w: 0, h: 0 },
                 isDragging: false,
-                handle: null
+                handle: null,
+                freeRatio: false
             },
             draggedId: null,
             clipboardItem: null // 存储复制的元素
@@ -1366,13 +1420,18 @@
                 const fonts = api.getFontNames();
                 const select = document.getElementById('fontFamilySelect');
                 if (fonts && fonts.length > 0) {
-                    select.innerHTML = '';
+                    // Get existing option values to avoid duplicates
+                    const existingValues = Array.from(select.options).map(opt => opt.value);
+                    
+                    // Add system fonts that don't already exist
                     fonts.forEach(font => {
-                        const opt = document.createElement('option');
-                        opt.value = font;
-                        opt.text = font;
-                        if (font === '微软雅黑') opt.selected = true;
-                        select.appendChild(opt);
+                        if (!existingValues.includes(font)) {
+                            const opt = document.createElement('option');
+                            opt.value = font;
+                            opt.text = font;
+                            if (font === '微软雅黑' && !select.value) opt.selected = true;
+                            select.appendChild(opt);
+                        }
                     });
                 }
             } catch (e) {
@@ -2201,6 +2260,11 @@
                 h: h
             };
             
+            state.crop.freeRatio = false;
+            const freeRatioBtn = document.getElementById('freeRatioBtn');
+            freeRatioBtn.classList.remove('btn-primary');
+            freeRatioBtn.textContent = '自由比例';
+            
             state.crop.active = true;
             modal.style.display = 'flex';
             drawCropOverlay();
@@ -2545,12 +2609,112 @@
             document.getElementById('saveTplBtn').onclick = saveCurrentAsTpl;
             document.getElementById('showTplGalleryBtn').onclick = showTemplateGallery;
 
+            // Font Favorites Functions
+            function getFavoriteFonts() {
+                return JSON.parse(localStorage.getItem('dtp_favorite_fonts') || '[]');
+            }
+
+            function saveFavoriteFonts(fonts) {
+                localStorage.setItem('dtp_favorite_fonts', JSON.stringify(fonts));
+            }
+
+            function addFavoriteFont(fontFamily) {
+                const favorites = getFavoriteFonts();
+                if (!favorites.includes(fontFamily)) {
+                    favorites.push(fontFamily);
+                    saveFavoriteFonts(favorites);
+                    renderFavoriteFonts();
+                    showStatus('已收藏字体: ' + fontFamily);
+                }
+            }
+
+            function removeFavoriteFont(fontFamily) {
+                const favorites = getFavoriteFonts();
+                const index = favorites.indexOf(fontFamily);
+                if (index > -1) {
+                    favorites.splice(index, 1);
+                    saveFavoriteFonts(favorites);
+                    renderFavoriteFonts();
+                    showStatus('已取消收藏: ' + fontFamily);
+                }
+            }
+
+            function isFavoriteFont(fontFamily) {
+                if (!fontFamily) return false;
+                const favorites = getFavoriteFonts();
+                // Exact match
+                if (favorites.includes(fontFamily)) return true;
+                // Also check with trimmed and normalized (remove quotes)
+                const normalized = fontFamily.trim().replace(/^["']|["']$/g, '');
+                return favorites.some(fav => {
+                    const favNormalized = fav.trim().replace(/^["']|["']$/g, '');
+                    return favNormalized === normalized || fav === normalized || favNormalized === fontFamily;
+                });
+            }
+
+            function renderFavoriteFonts() {
+                const select = document.getElementById('fontFamilySelect');
+                const favoriteGroup = document.getElementById('favoriteFontsGroup');
+                
+                // Clear existing favorite options
+                favoriteGroup.innerHTML = '';
+                
+                const favorites = getFavoriteFonts();
+                if (favorites.length > 0) {
+                    favorites.forEach(fontFamily => {
+                        const opt = document.createElement('option');
+                        opt.value = fontFamily;
+                        opt.text = fontFamily;
+                        favoriteGroup.appendChild(opt);
+                    });
+                    favoriteGroup.style.display = '';
+                } else {
+                    favoriteGroup.style.display = 'none';
+                }
+            }
+
+            // Removed updateFavoriteButton - button now just shows "收藏" text
+
+            // Initialize favorite fonts on load
+            renderFavoriteFonts();
+
             // Text Style Listeners
-            document.getElementById('fontFamilySelect').onchange = (e) => {
+            const fontFamilySelect = document.getElementById('fontFamilySelect');
+            
+            // Function to handle font change
+            function handleFontChange(newValue) {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (item && item.type === 'text') {
-                    item.fontFamily = e.target.value;
+                    item.fontFamily = newValue;
                     renderAll();
+                }
+            }
+            
+            // Use addEventListener for better compatibility
+            fontFamilySelect.addEventListener('change', (e) => {
+                handleFontChange(e.target.value);
+            });
+            
+            // Also listen to input event (for some browsers)
+            fontFamilySelect.addEventListener('input', (e) => {
+                handleFontChange(e.target.value);
+            });
+            
+
+            document.getElementById('favoriteFontBtn').onclick = () => {
+                const select = document.getElementById('fontFamilySelect');
+                const currentFont = select.value;
+                
+                if (!currentFont) {
+                    showStatus('请先选择字体');
+                    return;
+                }
+                
+                // Toggle favorite: if already favorite, remove it; otherwise add it
+                if (isFavoriteFont(currentFont)) {
+                    removeFavoriteFont(currentFont);
+                } else {
+                    addFavoriteFont(currentFont);
                 }
             };
 
@@ -2772,6 +2936,75 @@
                     return;
                 }
 
+                // R key: Rotate 90° (Works for both images and text)
+                if (e.key === 'r' || e.key === 'R') {
+                    if (item.type === 'image') {
+                        // Rotate image 90 degrees
+                        const canvas = document.createElement('canvas');
+                        canvas.width = item.workingImg.height;
+                        canvas.height = item.workingImg.width;
+                        const ctx = canvas.getContext('2d');
+                        
+                        ctx.translate(canvas.width / 2, canvas.height / 2);
+                        ctx.rotate(Math.PI / 2);
+                        ctx.drawImage(item.workingImg, -item.workingImg.width / 2, -item.workingImg.height / 2);
+                        
+                        const newImg = new Image();
+                        newImg.onload = () => {
+                            item.workingImg = newImg;
+                            // Swap w and h
+                            const oldW = item.w;
+                            item.w = item.h;
+                            item.h = oldW;
+                            renderAll();
+                        };
+                        newImg.src = canvas.toDataURL();
+                    } else if (item.type === 'text') {
+                        // Rotate text 90 degrees
+                        item.orientation = ((item.orientation || 0) + 90) % 360;
+                        renderAll();
+                    }
+                    e.preventDefault();
+                    return;
+                }
+
+                // Image specific shortcuts
+                if (item.type === 'image') {
+                    // V key: Mirror flip
+                    if (e.key === 'v' || e.key === 'V') {
+                        item.isFlipped = !item.isFlipped;
+                        renderAll();
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    // F key: Fit to paper
+                    if (e.key === 'f' || e.key === 'F') {
+                        const aspect = item.workingImg.width / item.workingImg.height;
+                        const paperAspect = state.paper.width / state.paper.height;
+                        
+                        if (aspect > paperAspect) {
+                            item.w = state.paper.width;
+                            item.h = state.paper.width / aspect;
+                        } else {
+                            item.h = state.paper.height;
+                            item.w = state.paper.height * aspect;
+                        }
+                        item.x = (state.paper.width - item.w) / 2;
+                        item.y = (state.paper.height - item.h) / 2;
+                        renderAll();
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    // X key: Start crop
+                    if (e.key === 'x' || e.key === 'X') {
+                        startCrop(item);
+                        e.preventDefault();
+                        return;
+                    }
+                }
+
                 // Text specific shortcuts
                 if (item.type === 'text') {
                     if (e.key === 'ArrowUp') {
@@ -2918,6 +3151,18 @@
                 }
             };
 
+            document.getElementById('freeRatioBtn').onclick = () => {
+                state.crop.freeRatio = !state.crop.freeRatio;
+                const btn = document.getElementById('freeRatioBtn');
+                if (state.crop.freeRatio) {
+                    btn.classList.add('btn-primary');
+                    btn.textContent = '锁定比例';
+                } else {
+                    btn.classList.remove('btn-primary');
+                    btn.textContent = '自由比例';
+                }
+            };
+
             document.getElementById('cancelCrop').onclick = () => {
                 document.getElementById('cropModal').style.display = 'none';
                 state.crop.active = false;
@@ -2959,6 +3204,7 @@
             
             const r = state.crop.rect;
             const h = state.crop.handle;
+            const freeRatio = state.crop.freeRatio;
             const paperAspect = state.paper.width / state.paper.height;
             
             if (h === 'move') {
@@ -2971,30 +3217,60 @@
                 const anchorX = (h === 'tl' || h === 'bl') ? r.x + r.w : r.x;
                 const anchorY = (h === 'tl' || h === 'tr') ? r.y + r.h : r.y;
 
-                if (h === 'br' || h === 'tr') {
-                    newW = mx - anchorX;
+                if (freeRatio) {
+                    // Free ratio: allow independent width and height adjustment
+                    if (h === 'br' || h === 'tr') {
+                        newW = mx - anchorX;
+                    } else {
+                        newW = anchorX - mx;
+                    }
+                    
+                    if (h === 'bl' || h === 'br') {
+                        newH = my - anchorY;
+                    } else {
+                        newH = anchorY - my;
+                    }
+                    
+                    // Bounds check and clamp
+                    if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) < 0) {
+                        newW = anchorX;
+                    }
+                    if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) > canvas.width) {
+                        newW = canvas.width - anchorX;
+                    }
+                    if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) < 0) {
+                        newH = anchorY;
+                    }
+                    if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) > canvas.height) {
+                        newH = canvas.height - anchorY;
+                    }
                 } else {
-                    newW = anchorX - mx;
-                }
+                    // Locked ratio: maintain paper aspect ratio
+                    if (h === 'br' || h === 'tr') {
+                        newW = mx - anchorX;
+                    } else {
+                        newW = anchorX - mx;
+                    }
 
-                newH = newW / paperAspect;
+                    newH = newW / paperAspect;
 
-                // Bounds check and clamp
-                if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) < 0) {
-                    newW = anchorX;
-                    newH = newW / paperAspect;
-                }
-                if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) > canvas.width) {
-                    newW = canvas.width - anchorX;
-                    newH = newW / paperAspect;
-                }
-                if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) < 0) {
-                    newH = anchorY;
-                    newW = newH * paperAspect;
-                }
-                if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) > canvas.height) {
-                    newH = canvas.height - anchorY;
-                    newW = newH * paperAspect;
+                    // Bounds check and clamp
+                    if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) < 0) {
+                        newW = anchorX;
+                        newH = newW / paperAspect;
+                    }
+                    if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) > canvas.width) {
+                        newW = canvas.width - anchorX;
+                        newH = newW / paperAspect;
+                    }
+                    if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) < 0) {
+                        newH = anchorY;
+                        newW = newH * paperAspect;
+                    }
+                    if (anchorY + (h === 'bl' || h === 'br' ? newH : -newH) > canvas.height) {
+                        newH = canvas.height - anchorY;
+                        newW = newH * paperAspect;
+                    }
                 }
 
                 // Update rect
