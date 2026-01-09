@@ -600,6 +600,20 @@ function updateControlPanel() {
         const boldBtn = document.getElementById('boldToggleBtn');
         if (item.isBold) boldBtn.classList.add('btn-primary');
         else boldBtn.classList.remove('btn-primary');
+
+        // Sync alignment buttons
+        const currentAlign = item.align || 'left';
+        ['Left', 'Center', 'Right'].forEach(a => {
+            const btn = document.getElementById('align' + a + 'Btn');
+            if (a.toLowerCase() === currentAlign) {
+                btn.classList.add('btn-primary');
+            } else {
+                btn.classList.remove('btn-primary');
+                // Clear any manual styles set by click handlers if any
+                btn.style.background = '';
+                btn.style.color = '';
+            }
+        });
     } else {
         imgControls.style.display = 'none';
         textStyleControls.style.display = 'none';
@@ -654,8 +668,19 @@ function drawWrappedText(ctx, item, dpi) {
     });
 
     lines.forEach((line, index) => {
+        // Calculate x offset based on alignment
+        let xOffset = 0;
+        const lineMetrics = ctx.measureText(line);
+        const lineWidth = lineMetrics.width;
+
+        if (item.align === 'center') {
+            xOffset = (maxWidth - lineWidth) / 2;
+        } else if (item.align === 'right') {
+            xOffset = maxWidth - lineWidth;
+        }
+
         // Add a small 0.15 * fontSize padding to the top to prevent clipping
-        ctx.fillText(line, 0, (index * fontSize * 1.2) + (fontSize * 0.15));
+        ctx.fillText(line, xOffset, (index * fontSize * 1.2) + (fontSize * 0.15));
     });
 
     // Return total height with a bit more buffer (1.4 instead of 1.3)
@@ -1437,6 +1462,19 @@ function setupEventListeners() {
             renderAll();
         }
     };
+
+    // Text Alignment
+    const setTextAlign = (align) => {
+        const item = state.items.find(i => i.id === state.selectedId);
+        if (item && item.type === 'text') {
+            item.align = align;
+            renderAll();
+        }
+    };
+
+    document.getElementById('alignLeftBtn').onclick = () => setTextAlign('left');
+    document.getElementById('alignCenterBtn').onclick = () => setTextAlign('center');
+    document.getElementById('alignRightBtn').onclick = () => setTextAlign('right');
 
     // Zoom Listeners
     document.getElementById('zoomRange').oninput = (e) => {
