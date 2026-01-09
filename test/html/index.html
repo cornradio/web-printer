@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body>    <div class="mobile-warning">
+<body>
+    <div class="mobile-warning">
         <h2>📱 暂不支持手机端</h2>
         <p>为了获得最佳的编辑与打印体验，请复制链接到电脑端 (PC) 浏览器打开使用。</p>
     </div>
@@ -63,9 +64,8 @@
                 </div>
                 <div class="info-section"
                     style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
-                    <span class="info-title">⌨️ 快捷键说明</span>
-                    <button class="btn btn-full" id="showShortcutsBtn"
-                        style="font-size: 11px; padding: 4px 8px;">查看详细快捷键 (K)</button>
+                    <button class="btn btn-full" id="showShortcutsBtn" style="font-size: 11px; padding: 4px 8px;">⌨️
+                        快捷键说明 (K)</button>
                 </div>
                 <div class="info-section"
                     style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
@@ -309,9 +309,18 @@
                 <div class="section-title">🖨️ 打印输出</div>
                 <div class="control-group">
                     <label>选择打印机</label>
-                    <select id="printerSelect">
-                        <option value="">正在获取打印机...</option>
-                    </select>
+                    <div class="input-row">
+                        <select id="printerSelect" style="flex: 1;">
+                            <option value="">正在获取打印机...</option>
+                        </select>
+                        <button class="btn" id="refreshPrintersBtn" title="刷新打印机列表"
+                            style="padding: 8px 12px;">🔄</button>
+                    </div>
+                    <div class="input-row" style="margin-bottom: 8px;">
+                        <input type="checkbox" id="transparentExport" style="width: 16px; height: 16px;">
+                        <label for="transparentExport"
+                            style="margin: 0; margin-left: 8px; color: var(--text-color);">导出透明背景 (去除白色)</label>
+                    </div>
                     <div class="input-row">
                         <button class="btn btn-primary btn-full" id="printBtn" disabled>开始打印</button>
                         <button class="btn btn-full" id="exportPngBtn" title="导出为 PNG 图片">🖼️ 导出</button>
@@ -426,7 +435,7 @@
                             <span>复制并放置</span><kbd>Ctrl+D</kbd>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                            <span>删除选中元素</span><kbd>Delete/BS</kbd>
+                            <span>删除选中元素</span><kbd>Del/BackSpace</kbd>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px;"><span>旋转
                                 90°</span><kbd>R</kbd></div>
@@ -440,7 +449,7 @@
                         图片编辑</h4>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                            <span>镜像翻转</span><kbd>V</kbd>
+                            <span>镜像翻转</span><kbd>Y</kbd>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px;">
                             <span>铺满纸张</span><kbd>F</kbd>
@@ -489,7 +498,7 @@
         </div>
     </div>
 
-<script src="js/script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 
 </html>
