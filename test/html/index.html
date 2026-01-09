@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="./printer.png" type="image/x-icon">
     <title>图片编辑与打印 V2</title>
-    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&family=ZCOOL+KuaiLe&family=Long+Cang&family=Pacifico&family=Bangers&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&family=ZCOOL+KuaiLe&family=Long+Cang&family=Pacifico&family=Bangers&display=swap"
+        rel="stylesheet">
     <script type="text/javascript" src="./browser-polyfill.min.js"></script>
     <script type="text/javascript" src="./lib/dtpweb.js"></script>
     <style>
@@ -34,13 +37,22 @@
             padding: 20px;
             text-align: center;
         }
+
         @media (max-width: 768px) {
             .mobile-warning {
                 display: flex;
             }
         }
-        .mobile-warning h2 { margin-bottom: 10px; color: var(--primary-color); }
-        .mobile-warning p { color: var(--text-muted); line-height: 1.6; }
+
+        .mobile-warning h2 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .mobile-warning p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
 
         * {
             box-sizing: border-box;
@@ -199,25 +211,29 @@
         }
 
         .layers-sidebar {
-            width: 280px;
+            width: 0;
             background: var(--panel-bg);
-            border-left: 1px solid var(--border-color);
+            border-left: none;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            padding: 20px;
+            overflow: hidden;
+            padding: 0;
             position: absolute;
             right: 0;
             top: 60px;
             bottom: 0;
             z-index: 150;
             transform: translateX(100%);
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
             box-shadow: -4px 0 12px rgba(0, 0, 0, 0.05);
         }
 
         .layers-sidebar.show {
+            width: 280px;
+            padding: 20px;
+            border-left: 1px solid var(--border-color);
             transform: translateX(0);
+            overflow-y: auto;
         }
 
         .layer-item {
@@ -396,8 +412,9 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden; /* Change to hidden */
-            background-image: 
+            overflow: hidden;
+            /* Change to hidden */
+            background-image:
                 linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
                 linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
                 linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
@@ -460,7 +477,9 @@
             margin-bottom: 4px;
         }
 
-        input[type="number"], input[type="text"], select {
+        input[type="number"],
+        input[type="text"],
+        select {
             width: 100%;
             padding: 8px 12px;
             border: 1px solid var(--border-color);
@@ -470,7 +489,8 @@
             transition: border-color 0.2s;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             border-color: var(--primary-color);
         }
 
@@ -530,7 +550,8 @@
             height: 100%;
         }
 
-        .image-overlay, .text-overlay {
+        .image-overlay,
+        .text-overlay {
             position: absolute;
             border: 1px dashed transparent;
             cursor: move;
@@ -538,11 +559,13 @@
             box-sizing: content-box;
         }
 
-        .image-overlay:hover, .text-overlay:hover {
+        .image-overlay:hover,
+        .text-overlay:hover {
             border-color: #cbd5e1;
         }
 
-        .image-overlay.selected, .text-overlay.selected {
+        .image-overlay.selected,
+        .text-overlay.selected {
             border-color: var(--primary-color);
         }
 
@@ -573,7 +596,7 @@
             justify-content: center;
             font-size: 12px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .selected .delete-handle {
@@ -602,7 +625,8 @@
             transition: all 0.2s;
         }
 
-        .drop-zone:hover, .drop-zone.drag-over {
+        .drop-zone:hover,
+        .drop-zone.drag-over {
             border-color: var(--primary-color);
             background: #eff6ff;
         }
@@ -611,8 +635,9 @@
         body.dark .drop-zone.drag-over {
             background: #1e293b;
         }
-        
+
         @media (prefers-color-scheme: dark) {
+
             body:not(.light) .drop-zone:hover,
             body:not(.light) .drop-zone.drag-over {
                 background: #1e293b;
@@ -782,7 +807,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0, 0, 0, 0.85);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -817,24 +842,27 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 3000;
             backdrop-filter: blur(4px);
         }
+
         .modal-content {
             background: var(--panel-bg);
             padding: 24px;
             border-radius: 12px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
         }
+
         .modal-content h3 {
             margin-bottom: 16px;
         }
+
         .modal-actions {
             display: flex;
             justify-content: flex-end;
@@ -868,12 +896,14 @@
             max-height: 85vh;
             overflow-y: auto;
         }
+
         .template-gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 16px;
             margin-top: 16px;
         }
+
         .template-item {
             background: var(--bg-color);
             border: 2px solid var(--border-color);
@@ -883,15 +913,18 @@
             transition: all 0.2s;
             position: relative;
         }
+
         .template-item:hover {
             border-color: var(--primary-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+
         .template-item.selected {
             border-color: var(--primary-color);
             background: rgba(var(--primary-rgb), 0.1);
         }
+
         .template-thumbnail {
             width: 100%;
             height: 150px;
@@ -904,15 +937,18 @@
             margin-bottom: 8px;
             overflow: hidden;
         }
+
         .template-thumbnail img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
         }
+
         .template-thumbnail canvas {
             max-width: 100%;
             max-height: 100%;
         }
+
         .template-name {
             font-size: 14px;
             font-weight: 600;
@@ -921,32 +957,38 @@
             text-align: center;
             word-break: break-word;
         }
+
         .template-info {
             font-size: 11px;
             color: var(--text-muted);
             text-align: center;
         }
+
         .template-actions {
             display: flex;
             gap: 8px;
             margin-top: 8px;
         }
+
         .template-actions button {
             flex: 1;
             padding: 6px;
             font-size: 12px;
         }
+
         .template-empty {
             text-align: center;
             padding: 40px;
             color: var(--text-muted);
         }
+
         .template-empty-icon {
             font-size: 48px;
             margin-bottom: 12px;
         }
     </style>
 </head>
+
 <body>
     <div class="mobile-warning">
         <h2>📱 暂不支持手机端</h2>
@@ -955,17 +997,23 @@
     <header class="app-header">
         <h1 style="font-size: 18px;">图片打印编辑工具 V2</h1>
         <div class="header-links">
-            <button class="btn" id="aiToolsBtn" title="AI 绘图助手" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">✨</button>
-            <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">🔍</button>
-            <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">🔳</button>
-            <button class="btn" id="removeBgBtn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">✂️</button>
+            <button class="btn" id="aiToolsBtn" title="AI 绘图助手"
+                style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">✨</button>
+            <button class="btn" id="searchLogoBtn" title="Logo 搜索"
+                style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">🔍</button>
+            <button class="btn" id="createQRBtn" title="二维码生成"
+                style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">🔳</button>
+            <button class="btn" id="removeBgBtn" title="去除背景"
+                style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px; border: none;">✂️</button>
             <div class="layer-toggle-btn" id="layerToggleBtn" title="图层管理">
                 📂
                 <div class="badge" id="layerCountBadge" style="display: none;">0</div>
             </div>
             <div class="info-btn" id="infoBtn" title="项目信息">
                 <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                    <path
+                        d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                    </path>
                 </svg>
             </div>
             <div id="printerStatus" style="display: none;"></div>
@@ -979,7 +1027,8 @@
                     <a href="https://weida.dothantech.com/#/editor" target="_blank" class="info-link">德佟云设计编辑器</a><br>
                     <a href="https://www.dothantech.com/xiazaizhongxin/" target="_blank" class="info-link">官方驱动下载中心</a>
                 </div>
-                <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                <div class="info-section"
+                    style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
                     <span class="info-title">🚀 Release Note (v2.3)</span>
                     <ul style="padding-left: 16px; margin-top: 4px; font-size: 11px; color: var(--text-muted);">
                         <li><b>移动端友好提示</b>：增加手机访问时的引导提示</li>
@@ -988,61 +1037,14 @@
                         <li><b>AI 工具阵营优化</b>：新增 Grok、千问、豆包(笨笨)</li>
                     </ul>
                 </div>
-                <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
-                    <span class="info-title">⌨️ 键盘快捷键</span>
-                    <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
-                        <div style="font-size: 11px; font-weight: 600; color: var(--text-color); margin-top: 4px;">通用快捷键</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>复制当前元素</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">Ctrl+C</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>复制并放置</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">Ctrl+D</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>删除元素</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">Delete</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>旋转 90°</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">R</kbd>
-                            </div>
-                        </div>
-                        <div style="font-size: 11px; font-weight: 600; color: var(--text-color); margin-top: 8px;">图片编辑</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>镜像翻转</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">V</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>铺满</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">F</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>裁剪</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">X</kbd>
-                            </div>
-                        </div>
-                        <div style="font-size: 11px; font-weight: 600; color: var(--text-color); margin-top: 8px;">文本编辑</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>增大/减小字体</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">↑↓</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>切换字体</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">←→</kbd>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
-                                <span>编辑文本</span>
-                                <kbd style="padding: 2px 6px; background: white; border: 1px solid var(--border-color); border-radius: 3px; font-size: 10px; font-family: monospace;">Enter</kbd>
-                            </div>
-                        </div>
-                    </div>
+                <div class="info-section"
+                    style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                    <span class="info-title">⌨️ 快捷键说明</span>
+                    <button class="btn btn-full" id="showShortcutsBtn"
+                        style="font-size: 11px; padding: 4px 8px;">查看详细快捷键 (K)</button>
                 </div>
-                <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                <div class="info-section"
+                    style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
                     <span class="info-title">👨‍💻 关于作者</span>
                     <p>Web 软件作者: <b>cornradio</b></p>
                     <a href="https://github.com/cornradio" target="_blank" class="info-link">GitHub: cornradio</a>
@@ -1054,19 +1056,28 @@
                 <h3>✨ AI 绘图助手</h3>
                 <div class="control-group">
                     <label>复制绘图话术：</label>
-                    <div class="input-row" style="background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; margin-bottom: 4px;" onclick="navigator.clipboard.writeText('处理成单色黑素描风格'); showStatus('已复制话术');">
+                    <div class="input-row"
+                        style="background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; margin-bottom: 4px;"
+                        onclick="navigator.clipboard.writeText('处理成单色黑素描风格'); showStatus('已复制话术');">
                         <code style="font-size: 13px; color: var(--primary-color);">处理成单色黑素描风格</code>
                         <span style="font-size: 12px; color: var(--text-muted);">📋</span>
                     </div>
-                    <div class="input-row" style="background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;" onclick="navigator.clipboard.writeText('处理成单色黑线稿'); showStatus('已复制话术');">
+                    <div class="input-row"
+                        style="background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer;"
+                        onclick="navigator.clipboard.writeText('处理成单色黑线稿'); showStatus('已复制话术');">
                         <code style="font-size: 13px; color: var(--primary-color);">处理成单色黑线稿</code>
                         <span style="font-size: 12px; color: var(--text-muted);">📋</span>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-                        <button class="btn btn-primary" onclick="window.open('https://gemini.google.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">Gemini</button>
-                        <button class="btn btn-primary" onclick="window.open('https://grok.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">Grok</button>
-                        <button class="btn btn-primary" onclick="window.open('https://www.doubao.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">豆包 (笨笨)</button>
-                        <button class="btn btn-primary" onclick="window.open('https://www.qianwen.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">千问</button>
+                        <button class="btn btn-primary"
+                            onclick="window.open('https://gemini.google.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">Gemini</button>
+                        <button class="btn btn-primary"
+                            onclick="window.open('https://grok.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">Grok</button>
+                        <button class="btn btn-primary"
+                            onclick="window.open('https://www.doubao.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">豆包
+                            (笨笨)</button>
+                        <button class="btn btn-primary"
+                            onclick="window.open('https://www.qianwen.com/', '_blank'); document.getElementById('aiModal').classList.remove('show');">千问</button>
                     </div>
                 </div>
             </div>
@@ -1087,7 +1098,8 @@
             <div id="qrModal" class="header-dropdown">
                 <h3>🔳 二维码创作</h3>
                 <div class="control-group">
-                    <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
+                    <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
                     <button class="btn btn-primary btn-full" id="confirmQR">生成图片并添加</button>
                 </div>
             </div>
@@ -1096,10 +1108,16 @@
             <div id="bgModal" class="header-dropdown">
                 <h3>✂️ 去除背景工具</h3>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.remove.bg/zh', '_blank'); document.getElementById('bgModal').classList.remove('show');">Remove.bg (推荐)</button>
-                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.adobe.com/express/feature/image/remove-background', '_blank'); document.getElementById('bgModal').classList.remove('show');">Adobe Express</button>
-                    <button class="btn btn-primary btn-full" onclick="window.open('https://pixian.ai/', '_blank'); document.getElementById('bgModal').classList.remove('show');">Pixian.AI</button>
-                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.photoroom.com/tools/background-remover', '_blank'); document.getElementById('bgModal').classList.remove('show');">PhotoRoom</button>
+                    <button class="btn btn-primary btn-full"
+                        onclick="window.open('https://www.remove.bg/zh', '_blank'); document.getElementById('bgModal').classList.remove('show');">Remove.bg
+                        (推荐)</button>
+                    <button class="btn btn-primary btn-full"
+                        onclick="window.open('https://www.adobe.com/express/feature/image/remove-background', '_blank'); document.getElementById('bgModal').classList.remove('show');">Adobe
+                        Express</button>
+                    <button class="btn btn-primary btn-full"
+                        onclick="window.open('https://pixian.ai/', '_blank'); document.getElementById('bgModal').classList.remove('show');">Pixian.AI</button>
+                    <button class="btn btn-primary btn-full"
+                        onclick="window.open('https://www.photoroom.com/tools/background-remover', '_blank'); document.getElementById('bgModal').classList.remove('show');">PhotoRoom</button>
                 </div>
             </div>
         </div>
@@ -1112,7 +1130,8 @@
                 <div class="section-title">📄 纸张设置</div>
                 <div class="control-group">
                     <div class="input-row">
-                        <input type="text" id="paperSizeInput" placeholder="宽度 x 高度 (mm)" title="格式: 40x30" style="flex: 1;">
+                        <input type="text" id="paperSizeInput" placeholder="宽度 x 高度 (mm)" title="格式: 40x30"
+                            style="flex: 1;">
                         <button class="btn" id="applyPaperSize" title="应用尺寸" style="padding: 8px 12px;">应用</button>
                     </div>
                     <div id="recentPaperSizes" style="display: flex; flex-wrap: wrap; gap: 6px;">
@@ -1150,7 +1169,8 @@
             <div class="section">
                 <div class="section-title">📝 文字内容</div>
                 <div class="control-group">
-                    <textarea id="textInput" placeholder="输入文字（支持多行）..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; resize: vertical; font-size: 14px; outline: none;"></textarea>
+                    <textarea id="textInput" placeholder="输入文字（支持多行）..." rows="3"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; resize: vertical; font-size: 14px; outline: none;"></textarea>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
                         <span style="font-size: 11px; color: var(--text-muted);">选中后按 ↑/↓ 调字号, Enter 修改</span>
                         <button class="btn" id="addTextBtn">添加</button>
@@ -1163,7 +1183,8 @@
                 <div class="section-title">🎨 文字样式</div>
                 <div class="control-group">
                     <div>
-                        <label>字体名称 <span style="font-size: 10px; color: var(--primary-color); opacity: 0.8;">(←/→ 切换)</span></label>
+                        <label>字体名称 <span style="font-size: 10px; color: var(--primary-color); opacity: 0.8;">(←/→
+                                切换)</span></label>
                         <div class="input-row">
                             <select id="fontFamilySelect" style="flex: 1;">
                                 <optgroup id="favoriteFontsGroup" label="⭐ 收藏字体" style="display: none;"></optgroup>
@@ -1179,19 +1200,25 @@
                                     <option value="'Bangers', system-ui">Bangers (漫画风)</option>
                                 </optgroup>
                             </select>
-                            <button class="btn" id="favoriteFontBtn" title="收藏当前字体" style="padding: 4px 8px;">收藏</button>
-                            <button class="btn" id="browseSystemFontsBtn" title="扫描系统已安装字体" style="padding: 4px 8px;">🔍 扫描</button>
+                            <button class="btn" id="favoriteFontBtn" title="收藏当前字体"
+                                style="padding: 4px 8px;">收藏</button>
+                            <button class="btn" id="browseSystemFontsBtn" title="扫描系统已安装字体" style="padding: 4px 8px;">🔍
+                                扫描</button>
                         </div>
 
                     </div>
                     <div>
                         <label>文字颜色</label>
                         <div style="display: flex; gap: 16px; padding: 4px 0;">
-                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
-                                <input type="radio" name="textColor" value="black" checked style="width: 16px; height: 16px;"> 黑色
+                            <label
+                                style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
+                                <input type="radio" name="textColor" value="black" checked
+                                    style="width: 16px; height: 16px;"> 黑色
                             </label>
-                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
-                                <input type="radio" name="textColor" value="white" style="width: 16px; height: 16px;"> 白色
+                            <label
+                                style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
+                                <input type="radio" name="textColor" value="white" style="width: 16px; height: 16px;">
+                                白色
                             </label>
                         </div>
                     </div>
@@ -1289,7 +1316,8 @@
                 <input type="range" id="zoomRange" min="0.1" max="3" step="0.01" value="1">
                 <button class="zoom-btn" id="zoomIncreaseBtn" title="放大">➕</button>
                 <span class="zoom-value" id="zoomValue">100%</span>
-                <button class="btn" id="zoom100Btn" style="padding: 2px 8px; font-size: 11px;" title="缩放到100%">默认</button>
+                <button class="btn" id="zoom100Btn" style="padding: 2px 8px; font-size: 11px;"
+                    title="缩放到100%">默认</button>
                 <div class="reality-scale-container">
                     <button class="btn" id="realityScaleBtn" style="padding: 2px 8px; font-size: 11px;">现实</button>
                     <div class="reality-scale-tooltip">
@@ -1328,7 +1356,8 @@
     <div id="textEditModal" class="modal-overlay">
         <div class="modal-content">
             <h3>📝 编辑文字内容</h3>
-            <textarea id="editTextarea" rows="6" style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; outline: none; resize: vertical; margin-bottom: 8px; font-family: inherit;"></textarea>
+            <textarea id="editTextarea" rows="6"
+                style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; outline: none; resize: vertical; margin-bottom: 8px; font-family: inherit;"></textarea>
             <div style="font-size: 11px; color: var(--text-muted); text-align: right;">按 Ctrl + Enter 快速保存</div>
             <div class="modal-actions">
                 <button class="btn" id="cancelTextEdit">取消</button>
@@ -1352,16 +1381,100 @@
         </div>
     </div>
 
+    <!-- Shortcut Modal -->
+    <div id="shortcutModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0;">⌨️ 键盘快捷键详情</h3>
+                <button class="btn" onclick="document.getElementById('shortcutModal').style.display = 'none'"
+                    style="padding: 4px 8px;">×</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div>
+                    <h4
+                        style="font-size: 14px; margin-bottom: 12px; color: var(--primary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+                        通用操作</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>复制当前元素</span><kbd>Ctrl+C</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>复制并放置</span><kbd>Ctrl+D</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>删除选中元素</span><kbd>Delete/BS</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;"><span>旋转
+                                90°</span><kbd>R</kbd></div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>显示快捷键</span><kbd>K</kbd>
+                        </div>
+                    </div>
+
+                    <h4
+                        style="font-size: 14px; margin: 16px 0 12px; color: var(--primary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+                        图片编辑</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>镜像翻转</span><kbd>V</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>铺满纸张</span><kbd>F</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>进入裁剪模式</span><kbd>X</kbd>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4
+                        style="font-size: 14px; margin-bottom: 12px; color: var(--primary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+                        文本编辑</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>增大字号</span><kbd>↑</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>减小字号</span><kbd>↓</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>快速切换字体</span><kbd>← / →</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>编辑文字内容</span><kbd>Enter</kbd>
+                        </div>
+                    </div>
+
+                    <h4
+                        style="font-size: 14px; margin: 16px 0 12px; color: var(--primary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+                        时间日期</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>插入当前日期</span><kbd>F5</kbd>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>插入实时时间</span><kbd>F6</kbd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 24px; text-align: right;">
+                <button class="btn btn-primary"
+                    onclick="document.getElementById('shortcutModal').style.display = 'none'">我知道了</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- Configuration & Constants ---
         const MM_TO_PX = 8; // 8 pixels per mm for preview (approx 203 DPI scale)
         const api = dtpweb.getInstance();
-        
+
         // --- State ---
         let state = {
-            paper: { 
-                width: parseInt(localStorage.getItem('dtp_paper_width')) || 40, 
-                height: parseInt(localStorage.getItem('dtp_paper_height')) || 30 
+            paper: {
+                width: parseInt(localStorage.getItem('dtp_paper_width')) || 40,
+                height: parseInt(localStorage.getItem('dtp_paper_height')) || 30
             },
             items: [], // Array of { type: 'image'|'text', id, ...props }
             selectedId: null,
@@ -1401,7 +1514,7 @@
             updatePaperUI();
             renderLayersList();
             renderRecentPaperSizes();
-            
+
             api.checkPlugin((resp) => {
                 if (resp.statusCode === 0) {
                     document.getElementById('printerStatus').innerText = '打印助手已就绪';
@@ -1422,7 +1535,7 @@
                 if (fonts && fonts.length > 0) {
                     // Get existing option values to avoid duplicates
                     const existingValues = Array.from(select.options).map(opt => opt.value);
-                    
+
                     // Add system fonts that don't already exist
                     fonts.forEach(font => {
                         if (!existingValues.includes(font)) {
@@ -1443,41 +1556,41 @@
         function updatePaperUI() {
             const container = document.getElementById('paperContainer');
             const canvas = document.getElementById('previewCanvas');
-            
+
             const wPx = state.paper.width * MM_TO_PX;
             const hPx = state.paper.height * MM_TO_PX;
-            
+
             container.style.width = wPx + 'px';
             container.style.height = hPx + 'px';
             canvas.width = wPx;
             canvas.height = hPx;
-            
+
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, wPx, hPx);
-            
+
             updateScale();
         }
 
         function updateScale() {
             const area = document.getElementById('previewArea');
             const container = document.getElementById('paperContainer');
-            
+
             const availableW = area.clientWidth - 80;
             const availableH = area.clientHeight - 80;
-            
+
             const scaleW = availableW / (state.paper.width * MM_TO_PX);
             const scaleH = availableH / (state.paper.height * MM_TO_PX);
             state.autoScale = Math.min(scaleW, scaleH, 2); // Max 2x base zoom
-            
+
             const finalScale = state.autoScale * state.zoom;
             container.style.transform = `scale(${finalScale})`;
-            
+
             // Update zoom UI - 精确到1%
             state.zoom = Math.round(state.zoom * 100) / 100; // 确保精确到0.01
             document.getElementById('zoomValue').innerText = Math.round(state.zoom * 100) + '%';
             document.getElementById('zoomRange').value = state.zoom;
-            
+
             // 更新现实比例按钮提示
             const realityScaleBtn = document.getElementById('realityScaleBtn');
             if (realityScaleBtn) {
@@ -1502,9 +1615,9 @@
             const container = document.getElementById('recentPaperSizes');
             if (!container) return;
             container.innerHTML = '';
-            
+
             const recents = JSON.parse(localStorage.getItem('dtp_recent_papers') || '["40x30", "40x40", "30x20", "50x30"]');
-            
+
             recents.forEach(size => {
                 const group = document.createElement('div');
                 group.style.display = 'flex';
@@ -1551,14 +1664,14 @@
         function addRecentPaperSize(w, h) {
             const size = `${w}x${h}`;
             let recents = JSON.parse(localStorage.getItem('dtp_recent_papers') || '["40x30", "40x40", "30x20", "50x30"]');
-            
+
             // Remove if exists and add to front
             recents = recents.filter(s => s !== size);
             recents.unshift(size);
-            
+
             // Keep only top 6
             recents = recents.slice(0, 6);
-            
+
             localStorage.setItem('dtp_recent_papers', JSON.stringify(recents));
             renderRecentPaperSizes();
         }
@@ -1569,7 +1682,7 @@
                 showStatus('请选择有效的图片文件');
                 return;
             }
-            
+
             showStatus('正在加载图片...');
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -1577,11 +1690,11 @@
                 img.onload = () => {
                     const id = 'img-' + Date.now();
                     const aspect = img.width / img.height;
-                    
+
                     // Default size: 50% of paper, centered
                     let w = state.paper.width * 0.5;
                     let h = w / aspect;
-                    
+
                     state.items.push({
                         type: 'image',
                         id: id,
@@ -1597,7 +1710,7 @@
                         invert: false,
                         isFlipped: false
                     });
-                    
+
                     state.selectedId = id;
                     renderAll();
                     document.getElementById('editControls').style.display = 'block';
@@ -1610,16 +1723,16 @@
         function resetImagePos() {
             const img = state.workingImg;
             const aspect = img.width / img.height;
-            
+
             // Default size: 80% of paper, centered
             let w = state.paper.width * 0.8;
             let h = w / aspect;
-            
+
             if (h > state.paper.height * 0.8) {
                 h = state.paper.height * 0.8;
                 w = h * aspect;
             }
-            
+
             state.imagePos = {
                 x: (state.paper.width - w) / 2,
                 y: (state.paper.height - h) / 2,
@@ -1644,7 +1757,7 @@
 
             updateControlPanel();
             renderLayersList();
-            
+
             // Update layer count badge
             const badge = document.getElementById('layerCountBadge');
             if (state.items.length > 0) {
@@ -1659,10 +1772,10 @@
             const list = document.getElementById('layersList');
             if (!list) return;
             list.innerHTML = '';
-            
+
             // Show layers in reverse order (top of array = top of list = top in preview)
             const reversedItems = [...state.items].reverse();
-            
+
             reversedItems.forEach((item, index) => {
                 const actualIndex = state.items.length - 1 - index;
                 const div = document.createElement('div');
@@ -1670,11 +1783,11 @@
                 div.draggable = true;
                 if (state.selectedId === item.id) div.classList.add('selected');
                 if (state.draggedId === item.id) div.classList.add('dragging');
-                
+
                 let name = item.type === 'image' ? '图片' : item.text.trim();
                 if (name.length > 15) name = name.substring(0, 15) + '...';
                 if (!name) name = '(空文字)';
-                
+
                 div.innerHTML = `
                     <div class="layer-thumb" id="thumb-${item.id}"></div>
                     <div class="layer-info">
@@ -1686,7 +1799,7 @@
                         <button class="layer-btn" id="delete-layer-${item.id}" title="删除">🗑️</button>
                     </div>
                 `;
-                
+
                 // Render thumbnail
                 setTimeout(() => renderLayerThumbnail(item), 0);
 
@@ -1748,7 +1861,7 @@
                     e.stopPropagation();
                     duplicateItem(item.id);
                 };
-                
+
                 list.appendChild(div);
             });
         }
@@ -1756,7 +1869,7 @@
         function renderLayerThumbnail(item) {
             const thumbContainer = document.getElementById(`thumb-${item.id}`);
             if (!thumbContainer) return;
-            
+
             if (item.type === 'image') {
                 const img = new Image();
                 img.src = item.workingImg.src;
@@ -1780,17 +1893,17 @@
         function moveLayerTo(draggedId, targetId, isAfter) {
             const draggedIdx = state.items.findIndex(i => i.id === draggedId);
             const targetIdx = state.items.findIndex(i => i.id === targetId);
-            
+
             if (draggedIdx === -1 || targetIdx === -1) return;
-            
+
             const item = state.items.splice(draggedIdx, 1)[0];
             const newTargetIdx = state.items.findIndex(i => i.id === targetId);
-            
+
             // In the UI list (reversed), moving to the "bottom half" (isAfter=true) 
             // means moving it towards the start of the state.items array.
             const finalIdx = isAfter ? newTargetIdx : newTargetIdx + 1;
             state.items.splice(finalIdx, 0, item);
-            
+
             renderAll();
         }
 
@@ -1799,20 +1912,20 @@
             div.className = 'image-overlay';
             div.id = item.id;
             if (state.selectedId === item.id) div.classList.add('selected');
-            
+
             const wPx = item.w * MM_TO_PX;
             const hPx = item.h * MM_TO_PX;
-            
+
             div.style.width = wPx + 'px';
             div.style.height = hPx + 'px';
             div.style.left = (item.x * MM_TO_PX) + 'px';
             div.style.top = (item.y * MM_TO_PX) + 'px';
-            
+
             const canvas = document.createElement('canvas');
             canvas.width = wPx;
             canvas.height = hPx;
             div.appendChild(canvas);
-            
+
             const handle = document.createElement('div');
             handle.className = 'resize-handle';
             handle.id = 'resize-' + item.id;
@@ -1821,9 +1934,9 @@
             const del = document.createElement('div');
             del.className = 'delete-handle';
             del.innerText = '×';
-            del.onmousedown = (e) => { 
-                deleteItem(item.id); 
-                e.stopPropagation(); 
+            del.onmousedown = (e) => {
+                deleteItem(item.id);
+                e.stopPropagation();
             };
             div.appendChild(del);
 
@@ -1843,13 +1956,13 @@
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = wPx; tempCanvas.height = hPx;
             const tempCtx = tempCanvas.getContext('2d');
-            
+
             if (item.isFlipped) {
                 tempCtx.translate(wPx, 0);
                 tempCtx.scale(-1, 1);
             }
             tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-            
+
             const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
             applyDitheringToItem(imageData, item);
             ctx.putImageData(imageData, 0, 0);
@@ -1860,21 +1973,21 @@
             div.className = 'text-overlay';
             div.id = item.id;
             if (state.selectedId === item.id) div.classList.add('selected');
-            
+
             const dpi = MM_TO_PX;
             const fontSize = item.size * dpi;
             const maxWidth = (item.w || 30) * dpi;
-            
+
             // Temporary canvas to measure and draw text exactly as it will be printed
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // First pass to get height
             const textHeight = drawWrappedText(ctx, item, dpi);
-            
+
             canvas.width = maxWidth;
             canvas.height = textHeight;
-            
+
             // Second pass to actually draw
             drawWrappedText(ctx, item, dpi);
 
@@ -1884,7 +1997,7 @@
             div.style.height = textHeight + 'px';
             div.style.transform = `rotate(${item.orientation || 0}deg)`;
             div.style.transformOrigin = '0 0';
-            
+
             // Add a handle for resizing width
             const resizeH = document.createElement('div');
             resizeH.className = 'resize-handle';
@@ -1907,9 +2020,9 @@
             const del = document.createElement('div');
             del.className = 'delete-handle';
             del.innerText = '×';
-            del.onmousedown = (e) => { 
-                deleteItem(item.id); 
-                e.stopPropagation(); 
+            del.onmousedown = (e) => {
+                deleteItem(item.id);
+                e.stopPropagation();
             };
             div.appendChild(del);
 
@@ -1942,7 +2055,7 @@
                 document.getElementById('thresholdRange').value = item.threshold;
                 document.getElementById('thresholdValue').innerText = item.threshold;
                 document.getElementById('invertColors').checked = item.invert;
-                document.getElementById('thresholdControl').style.display = 
+                document.getElementById('thresholdControl').style.display =
                     item.ditherMode === 'threshold' ? 'block' : 'none';
             } else if (item && item.type === 'text') {
                 imgControls.style.display = 'none';
@@ -1980,14 +2093,14 @@
         function drawWrappedText(ctx, item, dpi) {
             const fontSize = item.size * dpi;
             // Ensure font family is quoted if it contains spaces and isn't already quoted
-            const fontFamily = (item.fontFamily.includes(' ') && !item.fontFamily.includes("'") && !item.fontFamily.includes('"')) 
-                ? `"${item.fontFamily}"` 
+            const fontFamily = (item.fontFamily.includes(' ') && !item.fontFamily.includes("'") && !item.fontFamily.includes('"'))
+                ? `"${item.fontFamily}"`
                 : item.fontFamily;
-            
+
             ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px ${fontFamily}`;
             ctx.fillStyle = item.color || 'black';
             ctx.textBaseline = 'top';
-            
+
             const maxWidth = (item.w || 30) * dpi;
             const paragraphs = item.text.split('\n');
             const lines = [];
@@ -2012,25 +2125,25 @@
                 // Add a small 0.15 * fontSize padding to the top to prevent clipping
                 ctx.fillText(line, 0, (index * fontSize * 1.2) + (fontSize * 0.15));
             });
-            
+
             // Return total height with a bit more buffer (1.4 instead of 1.3)
-            return lines.length * fontSize * 1.2 + (fontSize * 0.3); 
+            return lines.length * fontSize * 1.2 + (fontSize * 0.3);
         }
 
         function duplicateItem(id) {
             const index = state.items.findIndex(i => i.id === id);
             if (index === -1) return;
-            
+
             const original = state.items[index];
             const newItem = { ...original };
-            
+
             // Generate new ID
             newItem.id = (original.type === 'image' ? 'img-' : 'text-') + Date.now() + '-' + Math.floor(Math.random() * 1000);
-            
+
             // Offset position slightly
             newItem.x += 2;
             newItem.y += 2;
-            
+
             // Insert after the original (on top in the preview)
             state.items.splice(index + 1, 0, newItem);
             state.selectedId = newItem.id;
@@ -2042,10 +2155,10 @@
         function copyItemToClipboard(id) {
             const item = state.items.find(i => i.id === id);
             if (!item) return;
-            
+
             // 深拷贝元素，包括图片对象
             const copiedItem = JSON.parse(JSON.stringify(item));
-            
+
             // 对于图片类型，需要重新创建Image对象
             if (item.type === 'image') {
                 // 将图片转换为dataURL以便后续恢复
@@ -2056,7 +2169,7 @@
                 ctx.drawImage(item.workingImg, 0, 0);
                 copiedItem.imageDataUrl = canvas.toDataURL('image/png');
             }
-            
+
             state.clipboardItem = copiedItem;
             showStatus('已复制到剪贴板');
         }
@@ -2066,18 +2179,18 @@
             const dpi = MM_TO_PX;
             const fontSize = item.size * dpi;
             const maxWidth = (item.w || 30) * dpi;
-            
+
             // 创建临时 canvas 来测量文字
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            const fontFamily = (item.fontFamily.includes(' ') && !item.fontFamily.includes("'") && !item.fontFamily.includes('"')) 
-                ? `"${item.fontFamily}"` 
+            const fontFamily = (item.fontFamily.includes(' ') && !item.fontFamily.includes("'") && !item.fontFamily.includes('"'))
+                ? `"${item.fontFamily}"`
                 : item.fontFamily;
             ctx.font = `${item.isBold ? 'bold' : ''} ${fontSize}px ${fontFamily}`;
-            
+
             const paragraphs = item.text.split('\n');
             const lines = [];
-            
+
             paragraphs.forEach(p => {
                 let currentLine = '';
                 for (let i = 0; i < p.length; i++) {
@@ -2093,7 +2206,7 @@
                 }
                 lines.push(currentLine);
             });
-            
+
             // 计算总高度（像素），然后转换为毫米
             const heightPx = lines.length * fontSize * 1.2 + (fontSize * 0.3);
             return heightPx / dpi; // 转换为毫米
@@ -2103,22 +2216,22 @@
         function duplicateItemBelow(id) {
             const index = state.items.findIndex(i => i.id === id);
             if (index === -1) return;
-            
+
             const original = state.items[index];
             const newItem = { ...original };
-            
+
             // Generate new ID
             newItem.id = (original.type === 'image' ? 'img-' : 'text-') + Date.now() + '-' + Math.floor(Math.random() * 1000);
-            
+
             if (original.type === 'text') {
                 // 针对文字的特殊处理
                 // 计算原文字的高度
                 const textHeight = calculateTextHeight(original);
-                
+
                 // 位置放在原文字下面，使用计算出的高度作为偏移
                 newItem.x = original.x;
                 newItem.y = original.y + textHeight + 1; // 加1mm间距，避免重叠
-                
+
                 // 确保不超出纸张范围，如果超出则放在纸张内部
                 const newTextHeight = calculateTextHeight(newItem);
                 if (newItem.y + newTextHeight > state.paper.height) {
@@ -2134,13 +2247,13 @@
                 // 针对图片的处理（保持原有逻辑）
                 newItem.x = original.x;
                 newItem.y = original.y + (original.h || 0); // 放在原图正下方
-                
+
                 // 确保不超出纸张范围
                 if (newItem.y + (newItem.h || 0) > state.paper.height) {
                     newItem.y = Math.max(0, state.paper.height - (newItem.h || 0));
                 }
             }
-            
+
             // Insert after the original (on top in the preview)
             state.items.splice(index + 1, 0, newItem);
             state.selectedId = newItem.id;
@@ -2156,8 +2269,8 @@
 
             const getGray = (i) => {
                 let r = Math.min(255, data[i] * exposureFactor);
-                let g = Math.min(255, data[i+1] * exposureFactor);
-                let b = Math.min(255, data[i+2] * exposureFactor);
+                let g = Math.min(255, data[i + 1] * exposureFactor);
+                let b = Math.min(255, data[i + 2] * exposureFactor);
                 let gray = 0.299 * r + 0.587 * g + 0.114 * b;
                 return item.invert ? 255 - gray : gray;
             };
@@ -2165,11 +2278,11 @@
             if (item.ditherMode === 'threshold') {
                 for (let i = 0; i < data.length; i += 4) {
                     const v = getGray(i) >= item.threshold ? 255 : 0;
-                    data[i] = data[i+1] = data[i+2] = v;
+                    data[i] = data[i + 1] = data[i + 2] = v;
                 }
             } else if (item.ditherMode === 'floyd-steinberg') {
                 const gray = new Float32Array(w * h);
-                for (let i = 0; i < data.length; i += 4) gray[i/4] = getGray(i);
+                for (let i = 0; i < data.length; i += 4) gray[i / 4] = getGray(i);
                 for (let y = 0; y < h; y++) {
                     for (let x = 0; x < w; x++) {
                         const idx = y * w + x;
@@ -2177,18 +2290,18 @@
                         const newPixel = oldPixel >= 128 ? 255 : 0;
                         const error = oldPixel - newPixel;
                         gray[idx] = newPixel;
-                        if (x + 1 < w) gray[idx + 1] += error * 7/16;
+                        if (x + 1 < w) gray[idx + 1] += error * 7 / 16;
                         if (y + 1 < h) {
-                            if (x > 0) gray[idx + w - 1] += error * 3/16;
-                            gray[idx + w] += error * 5/16;
-                            if (x + 1 < w) gray[idx + w + 1] += error * 1/16;
+                            if (x > 0) gray[idx + w - 1] += error * 3 / 16;
+                            gray[idx + w] += error * 5 / 16;
+                            if (x + 1 < w) gray[idx + w + 1] += error * 1 / 16;
                         }
                     }
                 }
-                for (let i = 0; i < gray.length; i++) data[i*4] = data[i*4+1] = data[i*4+2] = gray[i];
+                for (let i = 0; i < gray.length; i++) data[i * 4] = data[i * 4 + 1] = data[i * 4 + 2] = gray[i];
             } else if (item.ditherMode === 'atkinson') {
                 const gray = new Float32Array(w * h);
-                for (let i = 0; i < data.length; i += 4) gray[i/4] = getGray(i);
+                for (let i = 0; i < data.length; i += 4) gray[i / 4] = getGray(i);
                 for (let y = 0; y < h; y++) {
                     for (let x = 0; x < w; x++) {
                         const idx = y * w + x;
@@ -2206,7 +2319,7 @@
                         if (y + 2 < h) gray[idx + 2 * w] += err;
                     }
                 }
-                for (let i = 0; i < gray.length; i++) data[i*4] = data[i*4+1] = data[i*4+2] = gray[i];
+                for (let i = 0; i < gray.length; i++) data[i * 4] = data[i * 4 + 1] = data[i * 4 + 2] = gray[i];
             } else if (item.ditherMode === 'bayer') {
                 const bayer = [
                     [0, 32, 8, 40, 2, 34, 10, 42],
@@ -2223,7 +2336,7 @@
                         const i = (y * w + x) * 4;
                         const g = getGray(i);
                         const v = (g / 4) > bayer[y % 8][x % 8] ? 255 : 0;
-                        data[i] = data[i+1] = data[i+2] = v;
+                        data[i] = data[i + 1] = data[i + 2] = v;
                     }
                 }
             }
@@ -2234,15 +2347,15 @@
             const modal = document.getElementById('cropModal');
             const canvas = document.getElementById('cropCanvas');
             const ctx = canvas.getContext('2d');
-            
+
             canvas.width = item.workingImg.width;
             canvas.height = item.workingImg.height;
             ctx.drawImage(item.workingImg, 0, 0);
-            
+
             // Initial crop rect: locked to paper aspect ratio, 80% size
             const paperAspect = state.paper.width / state.paper.height;
             const imgAspect = item.workingImg.width / item.workingImg.height;
-            
+
             let w, h;
             if (imgAspect > paperAspect) {
                 h = item.workingImg.height * 0.8;
@@ -2251,7 +2364,7 @@
                 w = item.workingImg.width * 0.8;
                 h = w / paperAspect;
             }
-            
+
             state.crop.targetId = item.id;
             state.crop.rect = {
                 x: (item.workingImg.width - w) / 2,
@@ -2259,12 +2372,12 @@
                 w: w,
                 h: h
             };
-            
+
             state.crop.freeRatio = false;
             const freeRatioBtn = document.getElementById('freeRatioBtn');
             freeRatioBtn.classList.remove('btn-primary');
             freeRatioBtn.textContent = '自由比例';
-            
+
             state.crop.active = true;
             modal.style.display = 'flex';
             drawCropOverlay();
@@ -2275,10 +2388,10 @@
             const ctx = canvas.getContext('2d');
             const item = state.items.find(i => i.id === state.crop.targetId);
             const r = state.crop.rect;
-            
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(item.workingImg, 0, 0);
-            
+
             // Dim background
             ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
             ctx.beginPath();
@@ -2290,21 +2403,21 @@
             ctx.lineTo(r.x + r.w, r.y);
             ctx.closePath();
             ctx.fill();
-            
+
             // Stroke border
             ctx.strokeStyle = '#2563eb';
             ctx.lineWidth = 2 * (canvas.width / canvas.clientWidth); // Consistent screen width
             ctx.setLineDash([5, 5]);
             ctx.strokeRect(r.x, r.y, r.w, r.h);
             ctx.setLineDash([]);
-            
+
             // Draw handles
             const handleSize = 10 * (canvas.width / canvas.clientWidth);
             ctx.fillStyle = '#2563eb';
-            ctx.fillRect(r.x - handleSize/2, r.y - handleSize/2, handleSize, handleSize); // TL
-            ctx.fillRect(r.x + r.w - handleSize/2, r.y - handleSize/2, handleSize, handleSize); // TR
-            ctx.fillRect(r.x - handleSize/2, r.y + r.h - handleSize/2, handleSize, handleSize); // BL
-            ctx.fillRect(r.x + r.w - handleSize/2, r.y + r.h - handleSize/2, handleSize, handleSize); // BR
+            ctx.fillRect(r.x - handleSize / 2, r.y - handleSize / 2, handleSize, handleSize); // TL
+            ctx.fillRect(r.x + r.w - handleSize / 2, r.y - handleSize / 2, handleSize, handleSize); // TR
+            ctx.fillRect(r.x - handleSize / 2, r.y + r.h - handleSize / 2, handleSize, handleSize); // BL
+            ctx.fillRect(r.x + r.w - handleSize / 2, r.y + r.h - handleSize / 2, handleSize, handleSize); // BR
         }
 
         // --- Event Listeners ---
@@ -2313,7 +2426,7 @@
             document.getElementById('applyPaperSize').onclick = () => {
                 const input = document.getElementById('paperSizeInput').value.trim().toLowerCase();
                 const match = input.match(/^(\d+)[x\*](\d+)$/);
-                
+
                 if (!match) {
                     showStatus('尺寸格式错误 (例如: 40x30)', 'error');
                     return;
@@ -2321,7 +2434,7 @@
 
                 const w = parseInt(match[1]);
                 const h = parseInt(match[2]);
-                
+
                 if (w < 10 || w > 100 || h < 10 || h > 150) {
                     showStatus('尺寸超出范围 (宽10-100, 高10-150)', 'error');
                     return;
@@ -2329,14 +2442,14 @@
 
                 state.paper.width = w;
                 state.paper.height = h;
-                
+
                 // Save to localStorage
                 localStorage.setItem('dtp_paper_width', w);
                 localStorage.setItem('dtp_paper_height', h);
-                
+
                 // Save to recent sizes
                 addRecentPaperSize(w, h);
-                
+
                 updatePaperUI();
                 renderAll();
                 showStatus('纸张尺寸已应用');
@@ -2345,7 +2458,7 @@
             // File input
             document.getElementById('dropZone').onclick = () => document.getElementById('fileInput').click();
             document.getElementById('fileInput').onchange = (e) => handleFile(e.target.files[0]);
-            
+
             // Drag & Drop
             const dz = document.getElementById('dropZone');
             dz.ondragover = (e) => { e.preventDefault(); dz.classList.add('drag-over'); };
@@ -2367,7 +2480,7 @@
             document.addEventListener('paste', (e) => {
                 const data = e.clipboardData || window.clipboardData;
                 if (!data || !data.items) return;
-                
+
                 const items = data.items;
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
@@ -2391,16 +2504,16 @@
             document.getElementById('rotateBtn').onclick = () => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item || item.type !== 'image') return;
-                
+
                 const canvas = document.createElement('canvas');
                 canvas.width = item.workingImg.height;
                 canvas.height = item.workingImg.width;
                 const ctx = canvas.getContext('2d');
-                
+
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(Math.PI / 2);
                 ctx.drawImage(item.workingImg, -item.workingImg.width / 2, -item.workingImg.height / 2);
-                
+
                 const newImg = new Image();
                 newImg.onload = () => {
                     item.workingImg = newImg;
@@ -2415,10 +2528,10 @@
             document.getElementById('fitToPaperBtn').onclick = () => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item || item.type !== 'image') return;
-                
+
                 const aspect = item.workingImg.width / item.workingImg.height;
                 const paperAspect = state.paper.width / state.paper.height;
-                
+
                 if (aspect > paperAspect) {
                     item.w = state.paper.width;
                     item.h = state.paper.width / aspect;
@@ -2433,7 +2546,7 @@
             document.getElementById('resetImageBtn').onclick = () => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item || item.type !== 'image') return;
-                
+
                 item.workingImg = item.originalImg;
                 const aspect = item.workingImg.width / item.workingImg.height;
                 item.w = state.paper.width * 0.5;
@@ -2455,7 +2568,7 @@
                 item.ditherMode = e.target.value;
                 renderAll();
             };
-            
+
             document.getElementById('thresholdRange').oninput = (e) => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item || item.type !== 'image') return;
@@ -2495,7 +2608,7 @@
                         el.classList.remove('show');
                     }
                 });
-                
+
                 const infoBtn = document.getElementById('infoBtn');
                 if (id === 'infoTooltip' && document.getElementById('infoTooltip').classList.contains('show')) {
                     infoBtn.classList.add('active');
@@ -2521,7 +2634,7 @@
                 toggleDropdown('searchModal');
                 e.stopPropagation();
             };
-            
+
             document.getElementById('createQRBtn').onclick = (e) => {
                 toggleDropdown('qrModal');
                 e.stopPropagation();
@@ -2537,17 +2650,22 @@
                 e.stopPropagation();
             };
 
+            document.getElementById('showShortcutsBtn').onclick = () => {
+                document.getElementById('shortcutModal').style.display = 'flex';
+                toggleDropdown(null);
+            };
+
             // Global click to close dropdowns
             window.addEventListener('click', (e) => {
                 if (!e.target.closest('.header-dropdown') && !e.target.closest('.info-tooltip')) {
                     toggleDropdown(null);
                 }
-                
+
                 // Also close layers sidebar if clicking elsewhere (and not on the toggle button)
                 const sidebar = document.getElementById('layersSidebar');
                 const btn = document.getElementById('layerToggleBtn');
-                if (sidebar.classList.contains('show') && 
-                    !e.target.closest('#layersSidebar') && 
+                if (sidebar.classList.contains('show') &&
+                    !e.target.closest('#layersSidebar') &&
                     !e.target.closest('#layerToggleBtn')) {
                     sidebar.classList.remove('show');
                     btn.classList.remove('active');
@@ -2563,7 +2681,7 @@
                 const brand = document.getElementById('logoSearchInput').value.trim();
                 if (!brand) return;
                 const query = encodeURIComponent(brand + ' logo black and white');
-                const url = engine === 'google' 
+                const url = engine === 'google'
                     ? `https://www.google.com/search?q=${query}&tbm=isch`
                     : `https://www.bing.com/images/search?q=${query}`;
                 window.open(url, '_blank');
@@ -2575,10 +2693,10 @@
             document.getElementById('confirmQR').onclick = () => {
                 const text = document.getElementById('qrContentInput').value.trim();
                 if (!text) return;
-                
+
                 toggleDropdown(null);
                 showStatus('正在生成二维码...');
-                
+
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(text)}`;
                 const img = new Image();
                 img.crossOrigin = "anonymous";
@@ -2655,10 +2773,10 @@
             function renderFavoriteFonts() {
                 const select = document.getElementById('fontFamilySelect');
                 const favoriteGroup = document.getElementById('favoriteFontsGroup');
-                
+
                 // Clear existing favorite options
                 favoriteGroup.innerHTML = '';
-                
+
                 const favorites = getFavoriteFonts();
                 if (favorites.length > 0) {
                     favorites.forEach(fontFamily => {
@@ -2680,7 +2798,7 @@
 
             // Text Style Listeners
             const fontFamilySelect = document.getElementById('fontFamilySelect');
-            
+
             // Function to handle font change
             function handleFontChange(newValue) {
                 const item = state.items.find(i => i.id === state.selectedId);
@@ -2689,27 +2807,27 @@
                     renderAll();
                 }
             }
-            
+
             // Use addEventListener for better compatibility
             fontFamilySelect.addEventListener('change', (e) => {
                 handleFontChange(e.target.value);
             });
-            
+
             // Also listen to input event (for some browsers)
             fontFamilySelect.addEventListener('input', (e) => {
                 handleFontChange(e.target.value);
             });
-            
+
 
             document.getElementById('favoriteFontBtn').onclick = () => {
                 const select = document.getElementById('fontFamilySelect');
                 const currentFont = select.value;
-                
+
                 if (!currentFont) {
                     showStatus('请先选择字体');
                     return;
                 }
-                
+
                 // Toggle favorite: if already favorite, remove it; otherwise add it
                 if (isFavoriteFont(currentFont)) {
                     removeFavoriteFont(currentFont);
@@ -2730,14 +2848,14 @@
                     if (availableFonts.length > 0) {
                         // Extract unique family names
                         const fontFamilies = [...new Set(availableFonts.map(f => f.family))].sort();
-                        
+
                         const select = document.getElementById('fontFamilySelect');
                         // Add to current select if not already there
                         const existingValues = Array.from(select.options).map(opt => opt.value);
-                        
+
                         const group = document.createElement('optgroup');
                         group.label = '💻 系统已安装字体';
-                        
+
                         let addedCount = 0;
                         fontFamilies.forEach(family => {
                             if (!existingValues.includes(family)) {
@@ -2748,7 +2866,7 @@
                                 addedCount++;
                             }
                         });
-                        
+
                         if (addedCount > 0) {
                             select.appendChild(group);
                             showStatus(`成功加载 ${addedCount} 款系统字体`);
@@ -2814,7 +2932,7 @@
 
             // 现实比例按钮 - 保存/恢复缩放比例
             const realityScaleBtn = document.getElementById('realityScaleBtn');
-            
+
             function updateRealityScaleBtn() {
                 const savedScale = localStorage.getItem('dtp_reality_scale');
                 if (savedScale) {
@@ -2828,7 +2946,7 @@
                     realityScaleBtn.title = '点击设置当前缩放比例为现实比例';
                 }
             }
-            
+
             // 初始化按钮状态
             updateRealityScaleBtn();
 
@@ -2848,7 +2966,7 @@
                     showStatus(`已设置现实比例: ${Math.round(state.zoom * 100)}%`);
                 }
             };
-            
+
             // 右键点击清除现实比例设置
             realityScaleBtn.oncontextmenu = (e) => {
                 e.preventDefault();
@@ -2863,7 +2981,7 @@
                     showStatus('当前没有保存的现实比例');
                 }
             };
-            
+
 
 
             // Add Text
@@ -2897,6 +3015,27 @@
             window.addEventListener('keydown', (e) => {
                 // Don't trigger if user is typing in an input or textarea
                 if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                    return;
+                }
+
+                // K: 显示快捷键弹窗
+                if (e.key === 'k' || e.key === 'K') {
+                    document.getElementById('shortcutModal').style.display = 'flex';
+                    e.preventDefault();
+                    return;
+                }
+
+                // F5: 插入日期
+                if (e.key === 'F5') {
+                    addTimestamp('date');
+                    e.preventDefault();
+                    return;
+                }
+
+                // F6: 插入时间
+                if (e.key === 'F6') {
+                    addTimestamp('time');
+                    e.preventDefault();
                     return;
                 }
 
@@ -2944,11 +3083,11 @@
                         canvas.width = item.workingImg.height;
                         canvas.height = item.workingImg.width;
                         const ctx = canvas.getContext('2d');
-                        
+
                         ctx.translate(canvas.width / 2, canvas.height / 2);
                         ctx.rotate(Math.PI / 2);
                         ctx.drawImage(item.workingImg, -item.workingImg.width / 2, -item.workingImg.height / 2);
-                        
+
                         const newImg = new Image();
                         newImg.onload = () => {
                             item.workingImg = newImg;
@@ -2977,12 +3116,12 @@
                         e.preventDefault();
                         return;
                     }
-                    
+
                     // F key: Fit to paper
                     if (e.key === 'f' || e.key === 'F') {
                         const aspect = item.workingImg.width / item.workingImg.height;
                         const paperAspect = state.paper.width / state.paper.height;
-                        
+
                         if (aspect > paperAspect) {
                             item.w = state.paper.width;
                             item.h = state.paper.width / aspect;
@@ -2996,7 +3135,7 @@
                         e.preventDefault();
                         return;
                     }
-                    
+
                     // X key: Start crop
                     if (e.key === 'x' || e.key === 'X') {
                         startCrop(item);
@@ -3019,13 +3158,13 @@
                         const select = document.getElementById('fontFamilySelect');
                         const options = Array.from(select.options).filter(opt => opt.value);
                         let currentIndex = options.findIndex(opt => opt.value === item.fontFamily);
-                        
+
                         if (e.key === 'ArrowLeft') {
                             currentIndex = (currentIndex - 1 + options.length) % options.length;
                         } else {
                             currentIndex = (currentIndex + 1) % options.length;
                         }
-                        
+
                         item.fontFamily = options[currentIndex].value;
                         select.value = item.fontFamily;
                         renderAll();
@@ -3065,10 +3204,64 @@
                 setTimeout(() => textarea.focus(), 100);
             }
 
+            function formatDateTime(type) {
+                const now = new Date();
+                const Y = now.getFullYear();
+                const M = String(now.getMonth() + 1).padStart(2, '0');
+                const D = String(now.getDate()).padStart(2, '0');
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+
+                if (type === 'date') return `${Y}-${M}-${D}`;
+                if (type === 'time') return `${h}:${m}:${s}`;
+                return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+            }
+
+            function addTimestamp(type) {
+                const text = formatDateTime(type);
+                const id = 'text-' + Date.now();
+                state.items.push({
+                    type: 'text',
+                    id: id,
+                    text: text,
+                    isDynamic: type === 'time', // 时间允许动态更变
+                    dynamicType: type,
+                    x: 5,
+                    y: 5,
+                    w: 30,
+                    size: 4,
+                    fontFamily: document.getElementById('fontFamilySelect').value || '微软雅黑',
+                    color: document.querySelector('input[name="textColor"]:checked').value || 'black',
+                    isBold: false,
+                    orientation: 0
+                });
+                state.selectedId = id;
+                renderAll();
+                showStatus(`已添加当前${type === 'date' ? '日期' : '时间'}`);
+            }
+
             // Print button
             document.getElementById('printBtn').onclick = doPrint;
             document.getElementById('exportPngBtn').onclick = exportToPNG;
             document.getElementById('clearBtn').onclick = clearAllItems;
+
+            // 定时更新动态字段 (如时间)
+            setInterval(() => {
+                let changed = false;
+                state.items.forEach(item => {
+                    if (item.type === 'text' && item.isDynamic) {
+                        const newText = formatDateTime(item.dynamicType);
+                        if (item.text !== newText) {
+                            item.text = newText;
+                            changed = true;
+                        }
+                    }
+                });
+                if (changed) {
+                    renderAll();
+                }
+            }, 1000);
 
             // Overlay dragging
             const overlay = document.getElementById('imageOverlay');
@@ -3087,13 +3280,13 @@
 
             window.onmousemove = (e) => {
                 if (!state.isDragging && !state.isResizing && !state.isResizingWidth && !state.crop.isDragging) return;
-                
+
                 const dx = e.clientX - state.lastMousePos.x;
                 const dy = e.clientY - state.lastMousePos.y;
-                
+
                 const container = document.getElementById('paperContainer');
                 const scale = container.getBoundingClientRect().width / (state.paper.width * MM_TO_PX);
-                
+
                 if (state.isDragging) {
                     const item = state.items.find(i => i.id === state.selectedId);
                     if (item) {
@@ -3134,7 +3327,7 @@
                 const scale = e.target.width / rect.width;
                 const x = (e.clientX - rect.left) * scale;
                 const y = (e.clientY - rect.top) * scale;
-                
+
                 const r = state.crop.rect;
                 const hSize = 20 * scale; // Area to catch handle
 
@@ -3144,7 +3337,7 @@
                 else if (Math.abs(x - r.x) < hSize && Math.abs(y - (r.y + r.h)) < hSize) state.crop.handle = 'bl';
                 else if (Math.abs(x - (r.x + r.w)) < hSize && Math.abs(y - (r.y + r.h)) < hSize) state.crop.handle = 'br';
                 else if (x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h) state.crop.handle = 'move';
-                
+
                 if (state.crop.handle) {
                     state.crop.isDragging = true;
                     state.lastMousePos = { x: e.clientX, y: e.clientY };
@@ -3176,7 +3369,7 @@
                 canvas.height = r.h;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(item.workingImg, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
-                
+
                 const newImg = new Image();
                 newImg.onload = () => {
                     item.workingImg = newImg;
@@ -3186,7 +3379,7 @@
                     item.h = item.w / aspect;
                     item.x = (state.paper.width - item.w) / 2;
                     item.y = (state.paper.height - item.h) / 2;
-                    
+
                     renderAll();
                     document.getElementById('cropModal').style.display = 'none';
                 };
@@ -3198,15 +3391,15 @@
             const canvas = document.getElementById('cropCanvas');
             const rect = canvas.getBoundingClientRect();
             const scale = canvas.width / rect.width;
-            
+
             const mx = (e.clientX - rect.left) * scale;
             const my = (e.clientY - rect.top) * scale;
-            
+
             const r = state.crop.rect;
             const h = state.crop.handle;
             const freeRatio = state.crop.freeRatio;
             const paperAspect = state.paper.width / state.paper.height;
-            
+
             if (h === 'move') {
                 const dx = (e.clientX - state.lastMousePos.x) * scale;
                 const dy = (e.clientY - state.lastMousePos.y) * scale;
@@ -3224,13 +3417,13 @@
                     } else {
                         newW = anchorX - mx;
                     }
-                    
+
                     if (h === 'bl' || h === 'br') {
                         newH = my - anchorY;
                     } else {
                         newH = anchorY - my;
                     }
-                    
+
                     // Bounds check and clamp
                     if (anchorX + (h === 'br' || h === 'tr' ? newW : -newW) < 0) {
                         newW = anchorX;
@@ -3279,7 +3472,7 @@
                 r.x = (h === 'tl' || h === 'bl') ? anchorX - r.w : anchorX;
                 r.y = (h === 'tl' || h === 'tr') ? anchorY - r.h : anchorY;
             }
-            
+
             state.lastMousePos = { x: e.clientX, y: e.clientY };
             drawCropOverlay();
         }
@@ -3289,7 +3482,7 @@
             const list = api.getPrinters({ onlyLocal: false });
             const select = document.getElementById('printerSelect');
             select.innerHTML = '';
-            
+
             if (list.length === 0) {
                 select.innerHTML = '<option value="">无可用打印机</option>';
                 document.getElementById('printBtn').disabled = true;
@@ -3302,7 +3495,7 @@
                 opt.text = (p.deviceName || p.name) + (p.ip ? ` (${p.ip})` : '');
                 select.appendChild(opt);
             });
-            
+
             state.printers = list;
             document.getElementById('printBtn').disabled = false;
         }
@@ -3328,26 +3521,26 @@
                 const canvas = document.createElement('canvas');
                 const paperWidth = tplData.paper.width;
                 const paperHeight = tplData.paper.height;
-                
+
                 // Calculate thumbnail size maintaining aspect ratio
                 const aspectRatio = paperWidth / paperHeight;
                 let thumbWidth = maxWidth;
                 let thumbHeight = maxHeight;
-                
+
                 if (aspectRatio > 1) {
                     thumbHeight = thumbWidth / aspectRatio;
                 } else {
                     thumbWidth = thumbHeight * aspectRatio;
                 }
-                
+
                 canvas.width = Math.round(paperWidth * dpi);
                 canvas.height = Math.round(paperHeight * dpi);
                 const ctx = canvas.getContext('2d');
-                
+
                 // White background
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
+
                 // Load and render items
                 const loadPromises = tplData.items.map(item => {
                     return new Promise((itemResolve) => {
@@ -3379,7 +3572,7 @@
                         }
                     });
                 });
-                
+
                 Promise.all(loadPromises).then(() => {
                     // Create thumbnail canvas
                     const thumbCanvas = document.createElement('canvas');
@@ -3398,13 +3591,13 @@
             const grid = document.getElementById('templateGalleryGrid');
             const loadBtn = document.getElementById('loadTemplateFromGallery');
             const deleteBtn = document.getElementById('deleteTemplateFromGallery');
-            
+
             modal.style.display = 'flex';
             grid.innerHTML = '';
-            
+
             const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
             const templateNames = Object.keys(tpls);
-            
+
             if (templateNames.length === 0) {
                 grid.innerHTML = `
                     <div class="template-empty" style="grid-column: 1 / -1;">
@@ -3417,19 +3610,19 @@
                 deleteBtn.style.display = 'none';
                 return;
             }
-            
+
             let selectedTemplate = null;
-            
+
             // Load thumbnails
             for (const name of templateNames) {
                 const tpl = tpls[name];
                 const item = document.createElement('div');
                 item.className = 'template-item';
                 item.dataset.templateName = name;
-                
+
                 const thumbDiv = document.createElement('div');
                 thumbDiv.className = 'template-thumbnail';
-                
+
                 // Try to load existing thumbnail or generate new one
                 if (tpl.thumbnail) {
                     const img = document.createElement('img');
@@ -3441,33 +3634,33 @@
                     loadingDiv.style.cssText = 'color: var(--text-muted); font-size: 12px;';
                     loadingDiv.textContent = '生成中...';
                     thumbDiv.appendChild(loadingDiv);
-                    
+
                     generateTemplateThumbnail(tpl).then(thumbData => {
                         loadingDiv.remove();
                         const img = document.createElement('img');
                         img.src = thumbData;
                         thumbDiv.appendChild(img);
-                        
+
                         // Save thumbnail for future use
                         tpl.thumbnail = thumbData;
                         tpls[name] = tpl;
                         localStorage.setItem('dtp_templates', JSON.stringify(tpls));
                     });
                 }
-                
+
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'template-name';
                 nameDiv.textContent = name;
-                
+
                 const infoDiv = document.createElement('div');
                 infoDiv.className = 'template-info';
                 const itemCount = tpl.items ? tpl.items.length : 0;
                 infoDiv.textContent = `${tpl.paper.width}×${tpl.paper.height}mm · ${itemCount}个元素`;
-                
+
                 item.appendChild(thumbDiv);
                 item.appendChild(nameDiv);
                 item.appendChild(infoDiv);
-                
+
                 item.onclick = () => {
                     // Toggle selection
                     document.querySelectorAll('.template-item').forEach(el => {
@@ -3478,10 +3671,10 @@
                     loadBtn.style.display = 'inline-block';
                     deleteBtn.style.display = 'inline-block';
                 };
-                
+
                 grid.appendChild(item);
             }
-            
+
             // Load button handler
             loadBtn.onclick = () => {
                 if (selectedTemplate) {
@@ -3489,7 +3682,7 @@
                     modal.style.display = 'none';
                 }
             };
-            
+
             // Delete button handler
             deleteBtn.onclick = () => {
                 if (selectedTemplate && confirm(`确定要删除模板 "${selectedTemplate}" 吗？`)) {
@@ -3499,12 +3692,12 @@
                     showTemplateGallery(); // Refresh
                 }
             };
-            
+
             // Close button handler
             document.getElementById('closeTemplateGallery').onclick = () => {
                 modal.style.display = 'none';
             };
-            
+
             // Close on overlay click
             modal.onclick = (e) => {
                 if (e.target === modal) {
@@ -3562,7 +3755,7 @@
             }
 
             showStatus('正在保存模板...');
-            
+
             // Serialize items (handle images to Base64)
             const serializedItems = await Promise.all(state.items.map(async item => {
                 const base = { ...item };
@@ -3596,7 +3789,7 @@
             const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
             tpls[name] = tplData;
             localStorage.setItem('dtp_templates', JSON.stringify(tpls));
-            
+
             document.getElementById('tplNameInput').value = '';
             refreshTplList();
             showStatus('模板 "' + name + '" 已保存');
@@ -3664,14 +3857,14 @@
             }
 
             showStatus('正在生成图片...');
-            
+
             // Use 10 dots/mm for high resolution export
             const dpi = 10;
             const exportCanvas = document.createElement('canvas');
             exportCanvas.width = Math.round(state.paper.width * dpi);
             exportCanvas.height = Math.round(state.paper.height * dpi);
             const ctx = exportCanvas.getContext('2d');
-            
+
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
 
@@ -3688,13 +3881,13 @@
                     const tempCanvas = document.createElement('canvas');
                     tempCanvas.width = wPx; tempCanvas.height = hPx;
                     const tempCtx = tempCanvas.getContext('2d');
-                    
+
                     if (item.isFlipped) {
                         tempCtx.translate(wPx, 0);
                         tempCtx.scale(-1, 1);
                     }
                     tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                    
+
                     const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
                     applyDitheringToItem(imageData, item);
                     tempCtx.putImageData(imageData, 0, 0);
@@ -3732,7 +3925,7 @@
                 printCanvas.width = Math.round(state.paper.width * dpi);
                 printCanvas.height = Math.round(state.paper.height * dpi);
                 const ctx = printCanvas.getContext('2d');
-                
+
                 // Background is white (no ink)
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, printCanvas.width, printCanvas.height);
@@ -3756,7 +3949,7 @@
                             tempCtx.scale(-1, 1);
                         }
                         tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                        
+
                         const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
                         applyDitheringToItem(imageData, item);
                         tempCtx.putImageData(imageData, 0, 0);
@@ -3779,7 +3972,7 @@
                     x: 0, y: 0,
                     drawWidth: state.paper.width,
                     drawHeight: state.paper.height,
-                    threshold: 257 
+                    threshold: 257
                 });
 
                 api.commitJob((result) => {
@@ -3791,7 +3984,5 @@
         }
     </script>
 </body>
+
 </html>
-
-
-
