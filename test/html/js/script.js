@@ -36,6 +36,16 @@ window.onload = () => {
 };
 
 function initApp() {
+    // Initialize Theme
+    const savedTheme = localStorage.getItem('dtp_theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        document.getElementById('themeToggleBtn').innerText = '🌙';
+    } else {
+        document.body.classList.remove('dark');
+        document.getElementById('themeToggleBtn').innerText = '☀️';
+    }
+
     // Restore UI values from state
     document.getElementById('paperSizeInput').value = `${state.paper.width}x${state.paper.height}`;
 
@@ -152,12 +162,7 @@ function renderRecentPaperSizes() {
 
     recents.forEach(size => {
         const group = document.createElement('div');
-        group.style.display = 'flex';
-        group.style.alignItems = 'center';
-        group.style.background = '#f1f5f9';
-        group.style.borderRadius = '4px';
-        group.style.overflow = 'hidden';
-        group.style.border = '1px solid var(--border-color)';
+        group.className = 'paper-size-tag';
 
         const btn = document.createElement('button');
         btn.className = 'btn';
@@ -184,7 +189,10 @@ function renderRecentPaperSizes() {
             localStorage.setItem('dtp_recent_papers', JSON.stringify(newRecents));
             renderRecentPaperSizes();
         };
-        del.onmouseover = () => del.style.background = '#fee2e2';
+        del.onmouseover = () => {
+            const isDark = document.body.classList.contains('dark');
+            del.style.background = isDark ? '#450a0a' : '#fee2e2';
+        };
         del.onmouseleave = () => del.style.background = 'transparent';
 
         group.appendChild(btn);
@@ -1205,6 +1213,14 @@ function setupEventListeners() {
     document.getElementById('infoBtn').onclick = (e) => {
         toggleDropdown('infoTooltip');
         e.stopPropagation();
+    };
+
+    document.getElementById('themeToggleBtn').onclick = () => {
+        const body = document.body;
+        body.classList.toggle('dark');
+        const isDark = body.classList.contains('dark');
+        localStorage.setItem('dtp_theme', isDark ? 'dark' : 'light');
+        document.getElementById('themeToggleBtn').innerText = isDark ? '🌙' : '☀️';
     };
 
     document.getElementById('showShortcutsBtn').onclick = () => {

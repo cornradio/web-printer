@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -374,8 +375,9 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden; /* Change to hidden */
-            background-image: 
+            overflow: hidden;
+            /* Change to hidden */
+            background-image:
                 linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
                 linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
                 linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
@@ -432,7 +434,9 @@
             margin-bottom: 4px;
         }
 
-        input[type="number"], input[type="text"], select {
+        input[type="number"],
+        input[type="text"],
+        select {
             width: 100%;
             padding: 8px 12px;
             border: 1px solid var(--border-color);
@@ -442,7 +446,8 @@
             transition: border-color 0.2s;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             border-color: var(--primary-color);
         }
 
@@ -502,7 +507,8 @@
             height: 100%;
         }
 
-        .image-overlay, .text-overlay {
+        .image-overlay,
+        .text-overlay {
             position: absolute;
             border: 1px dashed transparent;
             cursor: move;
@@ -510,11 +516,13 @@
             box-sizing: content-box;
         }
 
-        .image-overlay:hover, .text-overlay:hover {
+        .image-overlay:hover,
+        .text-overlay:hover {
             border-color: #cbd5e1;
         }
 
-        .image-overlay.selected, .text-overlay.selected {
+        .image-overlay.selected,
+        .text-overlay.selected {
             border-color: var(--primary-color);
         }
 
@@ -545,7 +553,7 @@
             justify-content: center;
             font-size: 12px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .selected .delete-handle {
@@ -574,7 +582,8 @@
             transition: all 0.2s;
         }
 
-        .drop-zone:hover, .drop-zone.drag-over {
+        .drop-zone:hover,
+        .drop-zone.drag-over {
             border-color: var(--primary-color);
             background: #eff6ff;
         }
@@ -639,7 +648,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0, 0, 0, 0.85);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -687,20 +696,26 @@
         }
     </style>
 </head>
+
 <body>
     <header class="app-header">
         <h1 style="font-size: 18px;">图片打印编辑工具 V2</h1>
         <div class="header-links">
-            <button class="btn" id="searchLogoBtn" title="Logo 搜索" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔍</button>
-            <button class="btn" id="createQRBtn" title="二维码生成" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔳</button>
-            <button class="btn" id="removeBgBtn" title="去除背景" style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✂️</button>
+            <button class="btn" id="searchLogoBtn" title="Logo 搜索"
+                style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔍</button>
+            <button class="btn" id="createQRBtn" title="二维码生成"
+                style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">🔳</button>
+            <button class="btn" id="removeBgBtn" title="去除背景"
+                style="padding: 4px 8px; font-size: 18px; height: 32px; border-radius: 6px;">✂️</button>
             <div class="layer-toggle-btn" id="layerToggleBtn" title="图层管理">
                 📂
                 <div class="badge" id="layerCountBadge" style="display: none;">0</div>
             </div>
             <div class="info-btn" id="infoBtn" title="项目信息">
                 <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                    <path
+                        d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                    </path>
                 </svg>
             </div>
             <div id="printerStatus" style="display: none;"></div>
@@ -714,7 +729,8 @@
                     <a href="https://weida.dothantech.com/#/editor" target="_blank" class="info-link">德佟云设计编辑器</a><br>
                     <a href="https://www.dothantech.com/xiazaizhongxin/" target="_blank" class="info-link">官方驱动下载中心</a>
                 </div>
-                <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                <div class="info-section"
+                    style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
                     <span class="info-title">🚀 Release Note (v1.1)</span>
                     <ul style="padding-left: 16px; margin-top: 4px; font-size: 11px; color: var(--text-muted);">
                         <li><b>图层管理 (Drag & Drop)</b>：支持鼠标自由拖拽排序及实时指示线</li>
@@ -725,7 +741,8 @@
                         <li><b>反白打印优化</b>：支持文字黑白切换，自动修复打印白边</li>
                     </ul>
                 </div>
-                <div class="info-section" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+                <div class="info-section"
+                    style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
                     <span class="info-title">👨‍💻 关于作者</span>
                     <p>Web 软件作者: <b>cornradio</b></p>
                     <a href="https://github.com/cornradio" target="_blank" class="info-link">GitHub: cornradio</a>
@@ -748,7 +765,8 @@
             <div id="qrModal" class="header-dropdown">
                 <h3>🔳 二维码创作</h3>
                 <div class="control-group">
-                    <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
+                    <textarea id="qrContentInput" placeholder="输入二维码内容 (文本或链接)..." rows="3"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; font-size: 14px; outline: none;"></textarea>
                     <button class="btn btn-primary btn-full" id="confirmQR">生成图片并添加</button>
                 </div>
             </div>
@@ -757,10 +775,16 @@
             <div id="bgModal" class="header-dropdown">
                 <h3>✂️ 去除背景工具</h3>
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.remove.bg/zh', '_blank'); document.getElementById('bgModal').classList.remove('show');">Remove.bg (推荐)</button>
-                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.adobe.com/express/feature/image/remove-background', '_blank'); document.getElementById('bgModal').classList.remove('show');">Adobe Express</button>
-                    <button class="btn btn-primary btn-full" onclick="window.open('https://pixian.ai/', '_blank'); document.getElementById('bgModal').classList.remove('show');">Pixian.AI</button>
-                    <button class="btn btn-primary btn-full" onclick="window.open('https://www.photoroom.com/tools/background-remover', '_blank'); document.getElementById('bgModal').classList.remove('show');">PhotoRoom</button>
+                    <button class="btn btn-primary btn-full"
+                        onclick="window.open('https://www.remove.bg/zh', '_blank'); document.getElementById('bgModal').classList.remove('show');">Remove.bg
+                        (推荐)</button>
+                    <button class="btn btn-primary btn-full"
+                        onclick="window.open('https://www.adobe.com/express/feature/image/remove-background', '_blank'); document.getElementById('bgModal').classList.remove('show');">Adobe
+                        Express</button>
+                    <button class="btn btn-primary btn-full"
+                        onclick="window.open('https://pixian.ai/', '_blank'); document.getElementById('bgModal').classList.remove('show');">Pixian.AI</button>
+                    <button class="btn btn-primary btn-full"
+                        onclick="window.open('https://www.photoroom.com/tools/background-remover', '_blank'); document.getElementById('bgModal').classList.remove('show');">PhotoRoom</button>
                 </div>
             </div>
         </div>
@@ -788,7 +812,7 @@
 
             <!-- 2. Image Import -->
             <div class="section">
-                <div class="section-title">🖼️ 导入图片</div>
+                <div class="section-title">🏞️ 导入图片</div>
                 <div class="drop-zone" id="dropZone">
                     <div class="drop-zone-text">点击或拖放图片至此</div>
                     <input type="file" id="fileInput" accept="image/*" style="display: none;">
@@ -810,9 +834,10 @@
 
             <!-- 4. Text Content -->
             <div class="section">
-                <div class="section-title">📝 文字内容</div>
+                <div class="section-title">𝓐 文字内容</div>
                 <div class="control-group">
-                    <textarea id="textInput" placeholder="输入文字（支持多行）..." rows="3" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; resize: vertical; font-size: 14px; outline: none;"></textarea>
+                    <textarea id="textInput" placeholder="输入文字（支持多行）..." rows="3"
+                        style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; resize: vertical; font-size: 14px; outline: none;"></textarea>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
                         <span style="font-size: 11px; color: var(--text-muted);">选中后按 ↑/↓ 调字号, Enter 修改</span>
                         <button class="btn" id="addTextBtn">添加</button>
@@ -835,11 +860,15 @@
                     <div>
                         <label>文字颜色</label>
                         <div style="display: flex; gap: 16px; padding: 4px 0;">
-                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
-                                <input type="radio" name="textColor" value="black" checked style="width: 16px; height: 16px;"> 黑色
+                            <label
+                                style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
+                                <input type="radio" name="textColor" value="black" checked
+                                    style="width: 16px; height: 16px;"> 黑色
                             </label>
-                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
-                                <input type="radio" name="textColor" value="white" style="width: 16px; height: 16px;"> 白色
+                            <label
+                                style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-color); font-size: 14px;">
+                                <input type="radio" name="textColor" value="white" style="width: 16px; height: 16px;">
+                                白色
                             </label>
                         </div>
                     </div>
@@ -964,12 +993,12 @@
         // --- Configuration & Constants ---
         const MM_TO_PX = 8; // 8 pixels per mm for preview (approx 203 DPI scale)
         const api = dtpweb.getInstance();
-        
+
         // --- State ---
         let state = {
-            paper: { 
-                width: parseInt(localStorage.getItem('dtp_paper_width')) || 40, 
-                height: parseInt(localStorage.getItem('dtp_paper_height')) || 30 
+            paper: {
+                width: parseInt(localStorage.getItem('dtp_paper_width')) || 40,
+                height: parseInt(localStorage.getItem('dtp_paper_height')) || 30
             },
             items: [], // Array of { type: 'image'|'text', id, ...props }
             selectedId: null,
@@ -1002,7 +1031,7 @@
 
             updatePaperUI();
             renderLayersList();
-            
+
             api.checkPlugin((resp) => {
                 if (resp.statusCode === 0) {
                     document.getElementById('printerStatus').innerText = '打印助手已就绪';
@@ -1039,36 +1068,36 @@
         function updatePaperUI() {
             const container = document.getElementById('paperContainer');
             const canvas = document.getElementById('previewCanvas');
-            
+
             const wPx = state.paper.width * MM_TO_PX;
             const hPx = state.paper.height * MM_TO_PX;
-            
+
             container.style.width = wPx + 'px';
             container.style.height = hPx + 'px';
             canvas.width = wPx;
             canvas.height = hPx;
-            
+
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, wPx, hPx);
-            
+
             updateScale();
         }
 
         function updateScale() {
             const area = document.getElementById('previewArea');
             const container = document.getElementById('paperContainer');
-            
+
             const availableW = area.clientWidth - 80;
             const availableH = area.clientHeight - 80;
-            
+
             const scaleW = availableW / (state.paper.width * MM_TO_PX);
             const scaleH = availableH / (state.paper.height * MM_TO_PX);
             state.autoScale = Math.min(scaleW, scaleH, 2); // Max 2x base zoom
-            
+
             const finalScale = state.autoScale * state.zoom;
             container.style.transform = `scale(${finalScale})`;
-            
+
             // Update zoom UI
             document.getElementById('zoomValue').innerText = Math.round(state.zoom * 100) + '%';
             document.getElementById('zoomRange').value = state.zoom;
@@ -1087,7 +1116,7 @@
                 showStatus('请选择有效的图片文件');
                 return;
             }
-            
+
             showStatus('正在加载图片...');
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -1095,11 +1124,11 @@
                 img.onload = () => {
                     const id = 'img-' + Date.now();
                     const aspect = img.width / img.height;
-                    
+
                     // Default size: 50% of paper, centered
                     let w = state.paper.width * 0.5;
                     let h = w / aspect;
-                    
+
                     state.items.push({
                         type: 'image',
                         id: id,
@@ -1114,7 +1143,7 @@
                         exposure: 0,
                         invert: false
                     });
-                    
+
                     state.selectedId = id;
                     renderAll();
                     document.getElementById('editControls').style.display = 'block';
@@ -1127,16 +1156,16 @@
         function resetImagePos() {
             const img = state.workingImg;
             const aspect = img.width / img.height;
-            
+
             // Default size: 80% of paper, centered
             let w = state.paper.width * 0.8;
             let h = w / aspect;
-            
+
             if (h > state.paper.height * 0.8) {
                 h = state.paper.height * 0.8;
                 w = h * aspect;
             }
-            
+
             state.imagePos = {
                 x: (state.paper.width - w) / 2,
                 y: (state.paper.height - h) / 2,
@@ -1161,7 +1190,7 @@
 
             updateControlPanel();
             renderLayersList();
-            
+
             // Update layer count badge
             const badge = document.getElementById('layerCountBadge');
             if (state.items.length > 0) {
@@ -1176,10 +1205,10 @@
             const list = document.getElementById('layersList');
             if (!list) return;
             list.innerHTML = '';
-            
+
             // Show layers in reverse order (top of array = top of list = top in preview)
             const reversedItems = [...state.items].reverse();
-            
+
             reversedItems.forEach((item, index) => {
                 const actualIndex = state.items.length - 1 - index;
                 const div = document.createElement('div');
@@ -1187,11 +1216,11 @@
                 div.draggable = true;
                 if (state.selectedId === item.id) div.classList.add('selected');
                 if (state.draggedId === item.id) div.classList.add('dragging');
-                
+
                 let name = item.type === 'image' ? '图片' : item.text.trim();
                 if (name.length > 15) name = name.substring(0, 15) + '...';
                 if (!name) name = '(空文字)';
-                
+
                 div.innerHTML = `
                     <div class="layer-thumb" id="thumb-${item.id}"></div>
                     <div class="layer-info">
@@ -1202,7 +1231,7 @@
                         <button class="layer-btn" id="delete-layer-${item.id}" title="删除">🗑️</button>
                     </div>
                 `;
-                
+
                 // Render thumbnail
                 setTimeout(() => renderLayerThumbnail(item), 0);
 
@@ -1259,7 +1288,7 @@
                     e.stopPropagation();
                     deleteItem(item.id);
                 };
-                
+
                 list.appendChild(div);
             });
         }
@@ -1267,7 +1296,7 @@
         function renderLayerThumbnail(item) {
             const thumbContainer = document.getElementById(`thumb-${item.id}`);
             if (!thumbContainer) return;
-            
+
             if (item.type === 'image') {
                 const img = new Image();
                 img.src = item.workingImg.src;
@@ -1291,17 +1320,17 @@
         function moveLayerTo(draggedId, targetId, isAfter) {
             const draggedIdx = state.items.findIndex(i => i.id === draggedId);
             const targetIdx = state.items.findIndex(i => i.id === targetId);
-            
+
             if (draggedIdx === -1 || targetIdx === -1) return;
-            
+
             const item = state.items.splice(draggedIdx, 1)[0];
             const newTargetIdx = state.items.findIndex(i => i.id === targetId);
-            
+
             // In the UI list (reversed), moving to the "bottom half" (isAfter=true) 
             // means moving it towards the start of the state.items array.
             const finalIdx = isAfter ? newTargetIdx : newTargetIdx + 1;
             state.items.splice(finalIdx, 0, item);
-            
+
             renderAll();
         }
 
@@ -1310,20 +1339,20 @@
             div.className = 'image-overlay';
             div.id = item.id;
             if (state.selectedId === item.id) div.classList.add('selected');
-            
+
             const wPx = item.w * MM_TO_PX;
             const hPx = item.h * MM_TO_PX;
-            
+
             div.style.width = wPx + 'px';
             div.style.height = hPx + 'px';
             div.style.left = (item.x * MM_TO_PX) + 'px';
             div.style.top = (item.y * MM_TO_PX) + 'px';
-            
+
             const canvas = document.createElement('canvas');
             canvas.width = wPx;
             canvas.height = hPx;
             div.appendChild(canvas);
-            
+
             const handle = document.createElement('div');
             handle.className = 'resize-handle';
             handle.id = 'resize-' + item.id;
@@ -1332,9 +1361,9 @@
             const del = document.createElement('div');
             del.className = 'delete-handle';
             del.innerText = '×';
-            del.onmousedown = (e) => { 
-                deleteItem(item.id); 
-                e.stopPropagation(); 
+            del.onmousedown = (e) => {
+                deleteItem(item.id);
+                e.stopPropagation();
             };
             div.appendChild(del);
 
@@ -1355,7 +1384,7 @@
             tempCanvas.width = wPx; tempCanvas.height = hPx;
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-            
+
             const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
             applyDitheringToItem(imageData, item);
             ctx.putImageData(imageData, 0, 0);
@@ -1366,7 +1395,7 @@
             div.className = 'text-overlay';
             div.id = item.id;
             if (state.selectedId === item.id) div.classList.add('selected');
-            
+
             div.style.left = (item.x * MM_TO_PX) + 'px';
             div.style.top = (item.y * MM_TO_PX) + 'px';
             div.style.fontSize = (item.size * MM_TO_PX) + 'px';
@@ -1378,15 +1407,15 @@
             }
             div.style.transform = `rotate(${item.orientation || 0}deg)`;
             div.style.transformOrigin = '0 0'; // Top-left origin like the printer
-            
+
             div.innerHTML = `<div class="text-content">${item.text}</div>`;
-            
+
             const del = document.createElement('div');
             del.className = 'delete-handle';
             del.innerText = '×';
-            del.onmousedown = (e) => { 
-                deleteItem(item.id); 
-                e.stopPropagation(); 
+            del.onmousedown = (e) => {
+                deleteItem(item.id);
+                e.stopPropagation();
             };
             div.appendChild(del);
 
@@ -1418,7 +1447,7 @@
                 document.getElementById('thresholdRange').value = item.threshold;
                 document.getElementById('thresholdValue').innerText = item.threshold;
                 document.getElementById('invertColors').checked = item.invert;
-                document.getElementById('thresholdControl').style.display = 
+                document.getElementById('thresholdControl').style.display =
                     item.ditherMode === 'threshold' ? 'block' : 'none';
             } else if (item && item.type === 'text') {
                 imgControls.style.display = 'none';
@@ -1452,8 +1481,8 @@
 
             const getGray = (i) => {
                 let r = Math.min(255, data[i] * exposureFactor);
-                let g = Math.min(255, data[i+1] * exposureFactor);
-                let b = Math.min(255, data[i+2] * exposureFactor);
+                let g = Math.min(255, data[i + 1] * exposureFactor);
+                let b = Math.min(255, data[i + 2] * exposureFactor);
                 let gray = 0.299 * r + 0.587 * g + 0.114 * b;
                 return item.invert ? 255 - gray : gray;
             };
@@ -1461,11 +1490,11 @@
             if (item.ditherMode === 'threshold') {
                 for (let i = 0; i < data.length; i += 4) {
                     const v = getGray(i) >= item.threshold ? 255 : 0;
-                    data[i] = data[i+1] = data[i+2] = v;
+                    data[i] = data[i + 1] = data[i + 2] = v;
                 }
             } else if (item.ditherMode === 'floyd-steinberg') {
                 const gray = new Float32Array(w * h);
-                for (let i = 0; i < data.length; i += 4) gray[i/4] = getGray(i);
+                for (let i = 0; i < data.length; i += 4) gray[i / 4] = getGray(i);
                 for (let y = 0; y < h; y++) {
                     for (let x = 0; x < w; x++) {
                         const idx = y * w + x;
@@ -1473,18 +1502,18 @@
                         const newPixel = oldPixel >= 128 ? 255 : 0;
                         const error = oldPixel - newPixel;
                         gray[idx] = newPixel;
-                        if (x + 1 < w) gray[idx + 1] += error * 7/16;
+                        if (x + 1 < w) gray[idx + 1] += error * 7 / 16;
                         if (y + 1 < h) {
-                            if (x > 0) gray[idx + w - 1] += error * 3/16;
-                            gray[idx + w] += error * 5/16;
-                            if (x + 1 < w) gray[idx + w + 1] += error * 1/16;
+                            if (x > 0) gray[idx + w - 1] += error * 3 / 16;
+                            gray[idx + w] += error * 5 / 16;
+                            if (x + 1 < w) gray[idx + w + 1] += error * 1 / 16;
                         }
                     }
                 }
-                for (let i = 0; i < gray.length; i++) data[i*4] = data[i*4+1] = data[i*4+2] = gray[i];
+                for (let i = 0; i < gray.length; i++) data[i * 4] = data[i * 4 + 1] = data[i * 4 + 2] = gray[i];
             } else if (item.ditherMode === 'atkinson') {
                 const gray = new Float32Array(w * h);
-                for (let i = 0; i < data.length; i += 4) gray[i/4] = getGray(i);
+                for (let i = 0; i < data.length; i += 4) gray[i / 4] = getGray(i);
                 for (let y = 0; y < h; y++) {
                     for (let x = 0; x < w; x++) {
                         const idx = y * w + x;
@@ -1502,7 +1531,7 @@
                         if (y + 2 < h) gray[idx + 2 * w] += err;
                     }
                 }
-                for (let i = 0; i < gray.length; i++) data[i*4] = data[i*4+1] = data[i*4+2] = gray[i];
+                for (let i = 0; i < gray.length; i++) data[i * 4] = data[i * 4 + 1] = data[i * 4 + 2] = gray[i];
             } else if (item.ditherMode === 'bayer') {
                 const bayer = [
                     [0, 32, 8, 40, 2, 34, 10, 42],
@@ -1519,7 +1548,7 @@
                         const i = (y * w + x) * 4;
                         const g = getGray(i);
                         const v = (g / 4) > bayer[y % 8][x % 8] ? 255 : 0;
-                        data[i] = data[i+1] = data[i+2] = v;
+                        data[i] = data[i + 1] = data[i + 2] = v;
                     }
                 }
             }
@@ -1530,15 +1559,15 @@
             const modal = document.getElementById('cropModal');
             const canvas = document.getElementById('cropCanvas');
             const ctx = canvas.getContext('2d');
-            
+
             canvas.width = item.workingImg.width;
             canvas.height = item.workingImg.height;
             ctx.drawImage(item.workingImg, 0, 0);
-            
+
             // Initial crop rect: locked to paper aspect ratio, 80% size
             const paperAspect = state.paper.width / state.paper.height;
             const imgAspect = item.workingImg.width / item.workingImg.height;
-            
+
             let w, h;
             if (imgAspect > paperAspect) {
                 h = item.workingImg.height * 0.8;
@@ -1547,7 +1576,7 @@
                 w = item.workingImg.width * 0.8;
                 h = w / paperAspect;
             }
-            
+
             state.crop.targetId = item.id;
             state.crop.rect = {
                 x: (item.workingImg.width - w) / 2,
@@ -1555,7 +1584,7 @@
                 w: w,
                 h: h
             };
-            
+
             state.crop.active = true;
             modal.style.display = 'flex';
             drawCropOverlay();
@@ -1566,10 +1595,10 @@
             const ctx = canvas.getContext('2d');
             const item = state.items.find(i => i.id === state.crop.targetId);
             const r = state.crop.rect;
-            
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(item.workingImg, 0, 0);
-            
+
             // Dim background
             ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
             ctx.beginPath();
@@ -1581,21 +1610,21 @@
             ctx.lineTo(r.x + r.w, r.y);
             ctx.closePath();
             ctx.fill();
-            
+
             // Stroke border
             ctx.strokeStyle = '#2563eb';
             ctx.lineWidth = 2 * (canvas.width / canvas.clientWidth); // Consistent screen width
             ctx.setLineDash([5, 5]);
             ctx.strokeRect(r.x, r.y, r.w, r.h);
             ctx.setLineDash([]);
-            
+
             // Draw handles
             const handleSize = 10 * (canvas.width / canvas.clientWidth);
             ctx.fillStyle = '#2563eb';
-            ctx.fillRect(r.x - handleSize/2, r.y - handleSize/2, handleSize, handleSize); // TL
-            ctx.fillRect(r.x + r.w - handleSize/2, r.y - handleSize/2, handleSize, handleSize); // TR
-            ctx.fillRect(r.x - handleSize/2, r.y + r.h - handleSize/2, handleSize, handleSize); // BL
-            ctx.fillRect(r.x + r.w - handleSize/2, r.y + r.h - handleSize/2, handleSize, handleSize); // BR
+            ctx.fillRect(r.x - handleSize / 2, r.y - handleSize / 2, handleSize, handleSize); // TL
+            ctx.fillRect(r.x + r.w - handleSize / 2, r.y - handleSize / 2, handleSize, handleSize); // TR
+            ctx.fillRect(r.x - handleSize / 2, r.y + r.h - handleSize / 2, handleSize, handleSize); // BL
+            ctx.fillRect(r.x + r.w - handleSize / 2, r.y + r.h - handleSize / 2, handleSize, handleSize); // BR
         }
 
         // --- Event Listeners ---
@@ -1604,14 +1633,14 @@
             document.getElementById('applyPaperSize').onclick = () => {
                 const w = parseInt(document.getElementById('paperWidth').value);
                 const h = parseInt(document.getElementById('paperHeight').value);
-                
+
                 state.paper.width = w;
                 state.paper.height = h;
-                
+
                 // Save to localStorage
                 localStorage.setItem('dtp_paper_width', w);
                 localStorage.setItem('dtp_paper_height', h);
-                
+
                 updatePaperUI();
                 if (state.workingImg) {
                     resetImagePos();
@@ -1623,7 +1652,7 @@
             // File input
             document.getElementById('dropZone').onclick = () => document.getElementById('fileInput').click();
             document.getElementById('fileInput').onchange = (e) => handleFile(e.target.files[0]);
-            
+
             // Drag & Drop
             const dz = document.getElementById('dropZone');
             dz.ondragover = (e) => { e.preventDefault(); dz.classList.add('drag-over'); };
@@ -1645,7 +1674,7 @@
             document.addEventListener('paste', (e) => {
                 const data = e.clipboardData || window.clipboardData;
                 if (!data || !data.items) return;
-                
+
                 const items = data.items;
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
@@ -1669,16 +1698,16 @@
             document.getElementById('rotateBtn').onclick = () => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item || item.type !== 'image') return;
-                
+
                 const canvas = document.createElement('canvas');
                 canvas.width = item.workingImg.height;
                 canvas.height = item.workingImg.width;
                 const ctx = canvas.getContext('2d');
-                
+
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(Math.PI / 2);
                 ctx.drawImage(item.workingImg, -item.workingImg.width / 2, -item.workingImg.height / 2);
-                
+
                 const newImg = new Image();
                 newImg.onload = () => {
                     item.workingImg = newImg;
@@ -1693,10 +1722,10 @@
             document.getElementById('fitToPaperBtn').onclick = () => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item || item.type !== 'image') return;
-                
+
                 const aspect = item.workingImg.width / item.workingImg.height;
                 const paperAspect = state.paper.width / state.paper.height;
-                
+
                 if (aspect > paperAspect) {
                     item.w = state.paper.width;
                     item.h = state.paper.width / aspect;
@@ -1711,7 +1740,7 @@
             document.getElementById('resetImageBtn').onclick = () => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item || item.type !== 'image') return;
-                
+
                 item.workingImg = item.originalImg;
                 const aspect = item.workingImg.width / item.workingImg.height;
                 item.w = state.paper.width * 0.5;
@@ -1725,7 +1754,7 @@
                 item.ditherMode = e.target.value;
                 renderAll();
             };
-            
+
             document.getElementById('thresholdRange').oninput = (e) => {
                 const item = state.items.find(i => i.id === state.selectedId);
                 if (!item || item.type !== 'image') return;
@@ -1765,7 +1794,7 @@
                         el.classList.remove('show');
                     }
                 });
-                
+
                 const infoBtn = document.getElementById('infoBtn');
                 if (id === 'infoTooltip' && document.getElementById('infoTooltip').classList.contains('show')) {
                     infoBtn.classList.add('active');
@@ -1786,7 +1815,7 @@
                 toggleDropdown('searchModal');
                 e.stopPropagation();
             };
-            
+
             document.getElementById('createQRBtn').onclick = (e) => {
                 toggleDropdown('qrModal');
                 e.stopPropagation();
@@ -1807,12 +1836,12 @@
                 if (!e.target.closest('.header-dropdown') && !e.target.closest('.info-tooltip')) {
                     toggleDropdown(null);
                 }
-                
+
                 // Also close layers sidebar if clicking elsewhere (and not on the toggle button)
                 const sidebar = document.getElementById('layersSidebar');
                 const btn = document.getElementById('layerToggleBtn');
-                if (sidebar.classList.contains('show') && 
-                    !e.target.closest('#layersSidebar') && 
+                if (sidebar.classList.contains('show') &&
+                    !e.target.closest('#layersSidebar') &&
                     !e.target.closest('#layerToggleBtn')) {
                     sidebar.classList.remove('show');
                     btn.classList.remove('active');
@@ -1828,7 +1857,7 @@
                 const brand = document.getElementById('logoSearchInput').value.trim();
                 if (!brand) return;
                 const query = encodeURIComponent(brand + ' logo black and white');
-                const url = engine === 'google' 
+                const url = engine === 'google'
                     ? `https://www.google.com/search?q=${query}&tbm=isch`
                     : `https://www.bing.com/images/search?q=${query}`;
                 window.open(url, '_blank');
@@ -1840,10 +1869,10 @@
             document.getElementById('confirmQR').onclick = () => {
                 const text = document.getElementById('qrContentInput').value.trim();
                 if (!text) return;
-                
+
                 toggleDropdown(null);
                 showStatus('正在生成二维码...');
-                
+
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(text)}`;
                 const img = new Image();
                 img.crossOrigin = "anonymous";
@@ -1950,7 +1979,7 @@
             // Keyboard support for font size, editing, and deletion
             window.addEventListener('keydown', (e) => {
                 if (!state.selectedId) return;
-                
+
                 // Don't trigger if user is typing in an input or textarea
                 if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
                     return;
@@ -2007,13 +2036,13 @@
 
             window.onmousemove = (e) => {
                 if (!state.isDragging && !state.isResizing && !state.crop.isDragging) return;
-                
+
                 const dx = e.clientX - state.lastMousePos.x;
                 const dy = e.clientY - state.lastMousePos.y;
-                
+
                 const container = document.getElementById('paperContainer');
                 const scale = container.getBoundingClientRect().width / (state.paper.width * MM_TO_PX);
-                
+
                 if (state.isDragging) {
                     const item = state.items.find(i => i.id === state.selectedId);
                     if (item) {
@@ -2047,7 +2076,7 @@
                 const scale = e.target.width / rect.width;
                 const x = (e.clientX - rect.left) * scale;
                 const y = (e.clientY - rect.top) * scale;
-                
+
                 const r = state.crop.rect;
                 const hSize = 20 * scale; // Area to catch handle
 
@@ -2057,7 +2086,7 @@
                 else if (Math.abs(x - r.x) < hSize && Math.abs(y - (r.y + r.h)) < hSize) state.crop.handle = 'bl';
                 else if (Math.abs(x - (r.x + r.w)) < hSize && Math.abs(y - (r.y + r.h)) < hSize) state.crop.handle = 'br';
                 else if (x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h) state.crop.handle = 'move';
-                
+
                 if (state.crop.handle) {
                     state.crop.isDragging = true;
                     state.lastMousePos = { x: e.clientX, y: e.clientY };
@@ -2077,7 +2106,7 @@
                 canvas.height = r.h;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(item.workingImg, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
-                
+
                 const newImg = new Image();
                 newImg.onload = () => {
                     item.workingImg = newImg;
@@ -2087,7 +2116,7 @@
                     item.h = item.w / aspect;
                     item.x = (state.paper.width - item.w) / 2;
                     item.y = (state.paper.height - item.h) / 2;
-                    
+
                     renderAll();
                     document.getElementById('cropModal').style.display = 'none';
                 };
@@ -2099,14 +2128,14 @@
             const canvas = document.getElementById('cropCanvas');
             const rect = canvas.getBoundingClientRect();
             const scale = canvas.width / rect.width;
-            
+
             const mx = (e.clientX - rect.left) * scale;
             const my = (e.clientY - rect.top) * scale;
-            
+
             const r = state.crop.rect;
             const h = state.crop.handle;
             const paperAspect = state.paper.width / state.paper.height;
-            
+
             if (h === 'move') {
                 const dx = (e.clientX - state.lastMousePos.x) * scale;
                 const dy = (e.clientY - state.lastMousePos.y) * scale;
@@ -2149,7 +2178,7 @@
                 r.x = (h === 'tl' || h === 'bl') ? anchorX - r.w : anchorX;
                 r.y = (h === 'tl' || h === 'tr') ? anchorY - r.h : anchorY;
             }
-            
+
             state.lastMousePos = { x: e.clientX, y: e.clientY };
             drawCropOverlay();
         }
@@ -2159,7 +2188,7 @@
             const list = api.getPrinters({ onlyLocal: false });
             const select = document.getElementById('printerSelect');
             select.innerHTML = '';
-            
+
             if (list.length === 0) {
                 select.innerHTML = '<option value="">无可用打印机</option>';
                 document.getElementById('printBtn').disabled = true;
@@ -2172,7 +2201,7 @@
                 opt.text = (p.deviceName || p.name) + (p.ip ? ` (${p.ip})` : '');
                 select.appendChild(opt);
             });
-            
+
             state.printers = list;
             document.getElementById('printBtn').disabled = false;
         }
@@ -2188,7 +2217,7 @@
         function refreshTplList() {
             const select = document.getElementById('tplSelect');
             select.innerHTML = '<option value="">-- 选择已保存模板 --</option>';
-            
+
             const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
             Object.keys(tpls).forEach(name => {
                 const opt = document.createElement('option');
@@ -2206,7 +2235,7 @@
             }
 
             showStatus('正在保存模板...');
-            
+
             // Serialize items (handle images to Base64)
             const serializedItems = await Promise.all(state.items.map(async item => {
                 const base = { ...item };
@@ -2232,7 +2261,7 @@
             const tpls = JSON.parse(localStorage.getItem('dtp_templates') || '{}');
             tpls[name] = tplData;
             localStorage.setItem('dtp_templates', JSON.stringify(tpls));
-            
+
             document.getElementById('tplNameInput').value = '';
             refreshTplList();
             showStatus('模板 "' + name + '" 已保存');
@@ -2328,18 +2357,18 @@
                             canvas.width = wPx; canvas.height = hPx;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                            
+
                             const imageData = ctx.getImageData(0, 0, wPx, hPx);
                             applyDitheringToItem(imageData, item);
                             ctx.putImageData(imageData, 0, 0);
-                            
+
                             api.drawImageD({
                                 data: canvas.toDataURL('image/png'),
                                 x: item.x,
                                 y: item.y,
                                 drawWidth: item.w,
                                 drawHeight: item.h,
-                                threshold: 257 
+                                threshold: 257
                             });
                         } else if (item.type === 'text') {
                             api.drawText({
@@ -2362,7 +2391,7 @@
                     printCanvas.width = Math.round(state.paper.width * dpi);
                     printCanvas.height = Math.round(state.paper.height * dpi);
                     const ctx = printCanvas.getContext('2d');
-                    
+
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, printCanvas.width, printCanvas.height);
 
@@ -2380,7 +2409,7 @@
                             tempCanvas.width = wPx; tempCanvas.height = hPx;
                             const tempCtx = tempCanvas.getContext('2d');
                             tempCtx.drawImage(item.workingImg, 0, 0, wPx, hPx);
-                            
+
                             const imageData = tempCtx.getImageData(0, 0, wPx, hPx);
                             applyDitheringToItem(imageData, item);
                             tempCtx.putImageData(imageData, 0, 0);
@@ -2410,7 +2439,7 @@
                         x: 0, y: 0,
                         drawWidth: state.paper.width,
                         drawHeight: state.paper.height,
-                        threshold: 257 
+                        threshold: 257
                     });
                 }
 
@@ -2423,6 +2452,5 @@
         }
     </script>
 </body>
+
 </html>
-
-

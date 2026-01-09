@@ -1142,7 +1142,7 @@
 
             <!-- 2. Image Import -->
             <div class="section">
-                <div class="section-title">🖼️ 导入图片</div>
+                <div class="section-title">🏞️ 导入图片</div>
                 <div class="drop-zone" id="dropZone">
                     <div class="drop-zone-text">点击或拖放图片至此</div>
                     <input type="file" id="fileInput" accept="image/*" style="display: none;">
@@ -1167,7 +1167,7 @@
 
             <!-- 4. Text Content -->
             <div class="section">
-                <div class="section-title">📝 文字内容</div>
+                <div class="section-title">𝓐 文字内容</div>
                 <div class="control-group">
                     <textarea id="textInput" placeholder="输入文字（支持多行）..." rows="3"
                         style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; resize: vertical; font-size: 14px; outline: none;"></textarea>
@@ -1290,7 +1290,7 @@
                     </select>
                     <div class="input-row">
                         <button class="btn btn-primary btn-full" id="printBtn" disabled>开始打印</button>
-                        <button class="btn btn-full" id="exportPngBtn" title="导出为 PNG 图片">🖼️ 导出</button>
+                        <button class="btn btn-full" id="exportPngBtn" title="导出为 PNG 图片">🏞️ 导出</button>
                     </div>
                 </div>
             </div>
@@ -1355,7 +1355,7 @@
     <!-- Text Edit Modal -->
     <div id="textEditModal" class="modal-overlay">
         <div class="modal-content">
-            <h3>📝 编辑文字内容</h3>
+            <h3>𝓐 编辑文字内容</h3>
             <textarea id="editTextarea" rows="6"
                 style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; outline: none; resize: vertical; margin-bottom: 8px; font-family: inherit;"></textarea>
             <div style="font-size: 11px; color: var(--text-muted); text-align: right;">按 Ctrl + Enter 快速保存</div>
